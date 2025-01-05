@@ -1,3 +1,3 @@
 #!/bin/sh
 echo "这里做eslint等代码的检查"
-# pnpm run test
+pnpm run test
