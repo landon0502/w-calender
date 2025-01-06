@@ -1,5 +1,5 @@
 import { h } from 'preact';
-import { useEffect, useRef, useMemo } from 'preact/hooks';
+import { useEffect, useRef, useMemo, createElement, Children, cloneElement } from 'preact/compat';
 import { cls } from '@/utils/css';
 import { getAttrsTransformTranslate } from '@/utils/dom';
 import { getMoveDistance } from '@/utils/common';
@@ -28,6 +28,7 @@ export default function ScheduleCard({
   data,
   cellHeight = 0,
   interval = 1,
+  style,
   onMove,
   onMoveStart,
   onMoveEnd,
@@ -35,7 +36,6 @@ export default function ScheduleCard({
   onResizeStart,
   onResizeEnd,
   onTap,
-  style,
   onBeforeUpdate = () => true,
 }: GridBoxProps) {
   const gridBox = useRef<HTMLDivElement>(null);
@@ -58,6 +58,7 @@ export default function ScheduleCard({
       isAsyncFunction(onBeforeUpdate) || isFunction(onBeforeUpdate)
         ? await onBeforeUpdate()
         : false;
+
     if (isAllow) {
       setDragState(false);
     }
@@ -128,7 +129,12 @@ export default function ScheduleCard({
       ref={gridBox}
       onClick={() => {}}
     >
-      {children}
+      {Children.map(children, (child) => {
+        if (typeof child === 'function') {
+          return child({ touchState: editType }); // 调用子元素作为一个函数，并传递值
+        }
+        return child;
+      })}
     </div>
   );
 }

@@ -40,10 +40,6 @@ export interface ColumnProps {
   onResize?(event: any, data: CalenderItem, rect: Rect): void;
   onResizeEnd?(event: any, data: CalenderItem, rect: Rect): void;
   onTap?(event: any, data: CalenderItem, rect: Rect): void;
-  onBeforeUpdate?: (value?: {
-    target: CalenderItem;
-    data: CalenderItem[];
-  }) => boolean | Promise<boolean>;
   onChange?(event: { target: CalenderItem; data: CalenderItem[] }): void;
 }
 
@@ -58,7 +54,6 @@ export default function Column({
   bordered = true,
   split = true,
   onChange = () => {},
-  onBeforeUpdate = () => false,
 }: ColumnProps) {
   const layoutContainer = useRef<HTMLDivElement>(null);
   const timeList = useMemo(() => genTimeSlice(date, timeInterval), [date]);
@@ -199,14 +194,8 @@ export default function Column({
       data = [...data, target];
     }
     let result = { target: target, data };
-    let isAllow =
-      isAsyncFunction(onBeforeUpdate) || isFunction(onBeforeUpdate)
-        ? await onBeforeUpdate({ target: target, data })
-        : false;
-    if (isAllow) {
-      setCalenderData(data);
-      onChange(result);
-    }
+    // setCalenderData(data);
+    onChange(result);
   }
 
   const onTap = () => {};
@@ -336,6 +325,26 @@ export default function Column({
     },
   });
 
+  /**
+   * @zh 渲染模版
+   */
+  function RenderTemplate({
+    touchState,
+    config,
+  }: {
+    touchState?: OperateType;
+    config: CalenderItem;
+  }) {
+    return (
+      <div style={{ width: '100%', height: '100%', background: 'blue' }}>
+        {`${config.title}-${format(config.start, 'HH:mm')}~${format(config.end, 'HH:mm')}--${touchState}`}
+      </div>
+    );
+  }
+
+  /**
+   * @zh 日程布局
+   */
   function renderCalenderLayout() {
     if (isEmpty(layoutData)) {
       return null;
@@ -363,10 +372,9 @@ export default function Column({
           style={{ pointerEvents: isEmpty(dragConfig) ? 'auto' : 'none' }}
         >
           {/* 自定义日程卡片，需支持自定义 */}
-
-          <div
-            style={{ width: '100%', height: '100%', background: 'blue' }}
-          >{`${config.title}-${format(config.start, 'HH:mm')}~${format(config.end, 'HH:mm')}`}</div>
+          {({ touchState }: { touchState: OperateType }) => {
+            return <RenderTemplate config={config} touchState={touchState} />;
+          }}
         </EventLayoutItem>
       ))
     );

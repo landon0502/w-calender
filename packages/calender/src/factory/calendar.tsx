@@ -21,6 +21,10 @@ const defaultOptions: Required<Options> = {
   data: [],
   viewType: 'D',
   templates: {},
+  onChange() {},
+  onUpdate() {},
+  onMount() {},
+  onUnmount() {},
 };
 const views: Record<ViewType, FunctionComponent<any>> = {
   day: DayView,
@@ -51,7 +55,11 @@ function RenderContent(props: DayProps | WeekProps | MonthProps) {
   const Component = views[props.viewType];
   return (
     <StoreProvider store={store}>
-      <Component date={props.date} onChange={props.onChange} />
+      <Component
+        date={props.date}
+        onChange={props.onChange}
+        onBeforeUpdate={props.onBeforeUpdate}
+      />
     </StoreProvider>
   );
 }
@@ -94,6 +102,7 @@ class Calender extends CalendarCore {
   el: HTMLElement;
   options: Options = defaultOptions;
   data: CalenderItem[] = [];
+
   constructor(el: HTMLElement, options: Partial<Options>) {
     super();
     this.el = el;
@@ -105,20 +114,24 @@ class Calender extends CalendarCore {
   private formatData(data: ScheduleData) {
     this.data = getData(data);
   }
-  // 加载数据
-  loadData(data: ScheduleData) {
-    this.options.data = data;
-    this.formatData(data);
-  }
+
   // 设置配置
   setOptions(options: Partial<Options>) {
     this.options = { ...defaultOptions, ...options };
     this.formatData(this.options.data);
   }
 
+  /**
+   * @zh 更新数据 将store中的数据同时更新 这里需要在store中抛出操作方法
+   */
+
+  setData(data: ScheduleData) {
+    this.formatData(data);
+  }
+
   // 数据更新前触发
   async onBeforeUpdate() {
-    return true;
+    return false;
   }
 
   // 更新视图
@@ -131,12 +144,16 @@ class Calender extends CalendarCore {
    */
   onMount() {
     // 组件加载
+    this.options.onMount?.();
   }
   onUnmount() {
     // 组件卸载
+    this.options.onUnmount?.();
   }
-  onChange() {
+  onChange(event: { target: CalenderItem; data: CalenderItem[] }) {
     // 数据更新
+    console.log(event);
+    this.options.onChange?.(event);
   }
 
   // 渲染组件
@@ -147,8 +164,7 @@ class Calender extends CalendarCore {
         data={this.data}
         date={getDate(this.options.date as Date)}
         onChange={(e) => {
-          console.log(e);
-          this.onChange();
+          this.onChange(e);
         }}
         onBeforeUpdate={this.onBeforeUpdate}
       />,

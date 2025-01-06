@@ -52,6 +52,7 @@ function DayView(props: DayViewProps) {
 
   // 数据更改
   async function onChange(event: { target: CalenderItem; data: CalenderItem[] }) {
+    console.log('onChange', event);
     let allow = true;
     if (isAsyncFunction(props.onBeforeUpdate) || isFunction(props.onBeforeUpdate)) {
       allow = await props.onBeforeUpdate(event);
@@ -74,13 +75,6 @@ function DayView(props: DayViewProps) {
               cellHeight={42}
               bordered={false}
               onChange={onChange}
-              onBeforeUpdate={() => {
-                return new Promise((resolve) => {
-                  setTimeout(() => {
-                    resolve(true);
-                  }, 3000);
-                });
-              }}
             />
             <TimeIndicateLine top={calculateDistance(dayjs().startOf('day'), dayjs(), colH)} />
           </div>

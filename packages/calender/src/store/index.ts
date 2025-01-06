@@ -64,6 +64,7 @@ export function createStore<State extends StateWithActions>() {
 
     return useMemo(() => storeCtx, [storeCtx]);
   };
+
   return {
     StoreProvider,
     useStore,
