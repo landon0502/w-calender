@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "npm -r --parallel -F 'w-calender' run test",
+    "test": "vitest --project w-calender  --run",
     "prepare": "husky",
     "commitlint": "npx commitlint --config .commitlintrc -e -V",
     "dev:components": "pnpm -r --parallel -F 'w-calender' run dev",
