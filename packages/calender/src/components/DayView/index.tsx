@@ -41,7 +41,7 @@ function DayView(props: DayViewProps) {
     return (
       data.current?.filter(
         (item: { end: string; start: string; type: string }) =>
-          !isContainTimeRange([item.start, item.end], props.date)
+          !isContainTimeRange([item.start, item.end], props.date, 'minute', '[)')
       ) ?? []
     );
   }, [data]);

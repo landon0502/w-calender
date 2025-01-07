@@ -116,8 +116,9 @@ export default function useColumnLayout({
   const layoutData = useMemo(() => {
     let renderData = isUndef(timeRange)
       ? calenderData
-      : (calenderData?.filter((item) => isContainTimeRange([item.start, item.end], timeRange)) ??
-        []);
+      : (calenderData?.filter((item) =>
+          isContainTimeRange([item.start, item.end], timeRange, 'minute', '[)')
+        ) ?? []);
     return handleGridCols(renderData);
   }, [calenderData]);
 

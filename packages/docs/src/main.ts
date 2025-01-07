@@ -7,7 +7,6 @@ function main() {
   const options: Options = {
     data: [
       {
-        type: 'time',
         start: dayjs().format('YYYY-MM-DD 00:00'),
         end: dayjs().format('YYYY-MM-DD 4:00'),
         title: '这里是测试1',

@@ -1,4 +1,4 @@
-import { isUndef } from '@/utils/is';
+import { isEmpty, isUndef } from '@/utils/is';
 export type EventCallback = (...e: any) => void;
 
 export interface BusInterface {
@@ -6,7 +6,7 @@ export interface BusInterface {
   $on(evt: symbol, callback: EventCallback, autoTrigger: boolean): void;
   $once(evt: symbol, callback: EventCallback, autoTrigger: boolean): void;
   $off: (evt: symbol, callback: EventCallback) => void;
-  clear(): void;
+  $clear(): void;
 }
 
 /**
@@ -19,7 +19,6 @@ export class Bus implements BusInterface {
   private taskCallBackCache: {
     [propname: symbol]: any;
   } = {};
-  constructor() {}
   /**
    * 绑定监听函数
    * evt: 事件
@@ -48,32 +47,42 @@ export class Bus implements BusInterface {
     return this;
   }
   // 删除订阅
-  $off(evt: symbol, callback: EventCallback) {
+  $off(evt?: symbol, callback?: EventCallback) {
     if (isUndef(evt)) {
-      this.clear();
-    } else if (typeof evt === 'string') {
+      this.$clear();
+    } else if (typeof evt === 'symbol') {
       if (typeof callback === 'function' && Array.isArray(this.events[evt])) {
         this.events[evt] = this.events[evt].filter((cb) => cb !== callback);
       } else {
-        delete this.events[evt];
+        Reflect.deleteProperty(this.events, evt);
         this.taskCallBackCache[evt] = null;
       }
     }
     return this;
   }
   // 只进行一次的事件订阅
-  $once(evt: symbol, callback: EventCallback, ctx: any) {
+  $once(evt: symbol, callback: EventCallback) {
     const proxyCallback: EventCallback = (...payload: any) => {
-      callback.apply(ctx, payload);
+      callback.apply(this, payload);
       // 回调函数执行完成之后就删除事件订阅
       this.$off(evt, proxyCallback);
     };
 
     this.$on(evt, proxyCallback);
   }
-
+  // 判断某一个事件是否还存着
+  $has(evt: symbol, callback?: EventCallback) {
+    if (isEmpty(this.events)) {
+      return false;
+    }
+    if (isUndef(callback)) {
+      return !isEmpty(this.events[evt]);
+    }
+    let events = this.events[evt];
+    return events.some((item) => item === callback);
+  }
   // 清除所有事件
-  clear() {
+  $clear() {
     this.events = {};
     this.taskCallBackCache = {};
   }
