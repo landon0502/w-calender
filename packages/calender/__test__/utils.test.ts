@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { isEmpty, isUndef } from '@/utils';
+import { isEmpty, isUndef } from '../src/utils';
 
 test('test isEmpty utils', () => {
   let res1 = isEmpty({});

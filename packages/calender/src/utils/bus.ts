@@ -1,4 +1,4 @@
-import { isEmpty, isUndef } from '@/utils/is';
+import { isEmpty, isUndef } from './is';
 export type EventCallback = (...e: any) => void;
 
 export interface BusInterface {

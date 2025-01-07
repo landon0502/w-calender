@@ -8,7 +8,7 @@ import {
   isContainTimeRange,
   isReturnTime,
   format,
-} from '@/utils';
+} from '../src/utils';
 import dayjs from 'dayjs';
 
 test('test getReturnTime timeUtils', () => {
