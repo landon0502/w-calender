@@ -11,7 +11,9 @@ export default defineConfig({
       'react-dom': 'preact/compat', // 必须放在 test-utils 下面
       'react/jsx-runtime': 'preact/jsx-runtime',
     },
-    environment: 'happy-dom',
+    environment: 'jsdom',
     exclude: [...configDefaults.exclude, 'packages/dist/*', 'node_modules', './types/*'],
+    setupFiles: '../../testSetup.ts',
+    globals: true,
   },
 });

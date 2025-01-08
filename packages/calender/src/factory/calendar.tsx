@@ -13,7 +13,7 @@ import type { DayViewProps } from '@/types/components';
 import type { Options, CalenderItem } from '@/types/options';
 import type { Date } from '@/types/common';
 import type { ViewType } from '@/types/options';
-import type { ScheduleData, ScheduleItem, DateRange, timeType } from '@/types/schedule';
+import type { ScheduleData, ScheduleItem, DateRange } from '@/types/schedule';
 import CalendarCore from './core';
 
 const defaultOptions: Required<Options> = {
@@ -67,14 +67,14 @@ function RenderContent(props: DayProps | WeekProps | MonthProps) {
 /**
  * @zh 处理时间
  */
-function getDate(date: Date, type?: timeType): DateRange {
+function getDate(date: Date, unit: UnitType): DateRange {
   if (isArray(date)) {
     let [start, end] = date;
     let startTime = getReturnTime(start);
     let endTime = getReturnTime(end);
     return [startTime, endTime];
   }
-  return getTimeStartAndEnd(date, { day: 'D', time: 'h' }[type ?? 'day'] as UnitType);
+  return getTimeStartAndEnd(date, unit);
 }
 
 /**
@@ -162,7 +162,7 @@ class Calender extends CalendarCore {
       <RenderContent
         viewType={this.options.viewType}
         data={this.data}
-        date={getDate(this.options.date as Date)}
+        date={getDate(this.options.date as Date, 'D')}
         onChange={(e) => {
           this.onChange(e);
         }}
@@ -173,7 +173,7 @@ class Calender extends CalendarCore {
   }
   testRender() {
     render(
-      <Column data={this.data} date={getDate(this.options.date as Date)} cellHeight={42} />,
+      <Column data={this.data} date={getDate(this.options.date as Date, 'D')} cellHeight={42} />,
       document.querySelector('#calender-column') as Element
     );
   }

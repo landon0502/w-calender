@@ -37,7 +37,8 @@
     "build": "w-calender-cli calender-build",
     "build:types": "tsc -p ./tsconfig.declaration.json",
     "test": "vitest --config ./vitest.config.ts --run",
-    "coverage": "vitest run --coverage"
+    "coverage": "vitest run --coverage",
+    "test-ui": "vitest --config ./vitest.config.ts --ui"
   },
   "keywords": [
     "calender",

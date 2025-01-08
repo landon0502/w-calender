@@ -9,6 +9,7 @@ export default defineWorkspace([
       // 在使用内联配置的时候，建议定义一个名称
       name: 'w-calender-test',
       environment: 'node',
+      setupFiles: './testSetup.ts',
     },
   },
 ]);

@@ -2,7 +2,6 @@ import { VNode } from 'preact';
 import { ScheduleData, ScheduleItem } from './schedule';
 import { Date } from './common';
 import { ReturnTimeValue } from '@wcalender/types/time';
-import { timeType } from '@/types/schedule';
 export type ViewType = 'day' | 'week' | 'month' | 'D' | 'W' | 'M';
 
 export type Template = string | VNode;
@@ -27,7 +26,6 @@ export interface CalenderItem {
   title: string;
   start: ReturnTimeValue;
   end: ReturnTimeValue;
-  type: timeType;
   _key: string;
   _raw?: ScheduleItem;
 }
