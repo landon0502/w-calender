@@ -1,21 +1,25 @@
 import { isUndef } from '@/utils';
 
-// import { createStore } from './';
-export class Store<T> {
-  state: T | Record<string, any> = {};
-
-  constructor(initialState: T | undefined) {
-    if (!isUndef(initialState)) {
-      this.state = initialState;
+export default class Store<T> {
+  private state: T;
+  private mutations?: Record<string, Function>;
+  private actions?: Record<string, Function>;
+  constructor(initialState: T, options?: { mutations?: Record<string, Function> }) {
+    this.state = initialState;
+    if (!isUndef(options)) {
+      this.mutations = options.mutations;
     }
   }
-  getState() {}
-  setState() {}
+  getState() {
+    return this.state;
+  }
+  setState(state: T) {
+    this.state = state;
+  }
+
   removeState() {}
   clear() {}
-}
 
-export function createStore<State>(initialState: State) {
-  let store = new Store(initialState);
-  return store;
+  commit() {}
+  dispatch() {}
 }
