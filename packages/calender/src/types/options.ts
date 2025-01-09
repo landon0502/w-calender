@@ -1,7 +1,8 @@
 import { VNode } from 'preact';
 import { ScheduleData, ScheduleItem } from './schedule';
 import { Date } from './common';
-import { ReturnTimeValue } from '@wcalender/types/time';
+import { ReturnTimeValue } from '@/types/time';
+import { OnBeforeUpdate } from './events';
 export type ViewType = 'day' | 'week' | 'month' | 'D' | 'W' | 'M';
 
 export type Template = string | VNode;
@@ -20,6 +21,7 @@ export interface Options extends CalenderEvents {
   date?: Date;
   viewType: ViewType;
   templates?: Partial<Record<ViewType, Partial<Record<'drag' | 'add', Template>>>>; // 自定义模版
+  onBeforeUpdate?: OnBeforeUpdate;
 }
 
 export interface CalenderItem {

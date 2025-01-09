@@ -63,10 +63,13 @@ function main() {
     ],
     date: dayjs(),
     viewType: 'D',
+    async onBeforeUpdate() {
+      return true;
+    },
   };
 
   let context = new ChCalender(document.getElementById('calender-container')!, options);
-  context.testRender();
+
   // 渲染数据
   function renderData() {}
 }

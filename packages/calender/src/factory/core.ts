@@ -4,4 +4,7 @@ export default abstract class CalendarCore {
     target: CalenderItem;
     data: CalenderItem[];
   }): Promise<boolean> | boolean;
+
+  abstract onMount(): void;
+  abstract onUnmount(): void;
 }

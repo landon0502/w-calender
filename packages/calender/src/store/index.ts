@@ -1,26 +1,42 @@
 import { PropsWithChildren } from '@/types/common';
 import { StateWithActions } from '@/types/store';
 import { createContext, createElement, useRef } from 'preact/compat';
-import { useContext, useEffect, useLayoutEffect, useMemo } from 'preact/hooks';
+import { useCallback, useContext, useEffect, useLayoutEffect, useMemo } from 'preact/hooks';
+import { useXState } from '@/hooks';
 import { isUndef } from '@/utils/is';
 import Store from './Store';
+import { deepClone } from '@/utils';
 const isSSR = isUndef(window) || !window.navigator;
 const useIsomorphicLayoutEffect = isSSR ? useEffect : useLayoutEffect;
 /**
  * @zh 数据共享
  */
-export function createStore<State extends StateWithActions>(initialState?: State) {
+export function createStore<State extends StateWithActions>(initialState: State) {
   const store = new Store(initialState);
+
   const StoreContext = createContext<State | undefined>(initialState);
 
   // 共享顶级组件
-  function StoreProvider({ children, store }: PropsWithChildren<{ store?: State }>) {
-    return createElement(StoreContext.Provider, { value: store, children });
+  function StoreProvider({ children }: PropsWithChildren) {
+    const [state, setProviderState, getProvderState] = useXState<State | undefined>(
+      store.getState()
+    );
+    let ob = useCallback((newState: State) => {
+      setProviderState(deepClone(newState));
+    }, []);
+    store.observe(ob);
+
+    return createElement(StoreContext.Provider, { value: state, children });
   }
 
   // 设置数据
-  function setStore(store: State) {
-    store.setState(store);
+  function setStore(data: State) {
+    store.setState(data);
+  }
+
+  // 获取store
+  function getStore() {
+    return store.getState();
   }
 
   // hooks
@@ -30,7 +46,7 @@ export function createStore<State extends StateWithActions>(initialState?: State
 
     useIsomorphicLayoutEffect(() => {
       state.current = storeCtx;
-    });
+    }, [storeCtx]);
     // store 操作
     function getState(key: string) {
       if (state.current) {
@@ -51,6 +67,7 @@ export function createStore<State extends StateWithActions>(initialState?: State
       setState,
       clear,
       removeItem,
+      store: storeCtx,
     };
   }
 
@@ -73,5 +90,6 @@ export function createStore<State extends StateWithActions>(initialState?: State
     useStore,
     useInternalStore,
     setStore,
+    getStore,
   };
 }

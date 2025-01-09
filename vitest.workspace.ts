@@ -1,4 +1,7 @@
 import { defineWorkspace } from 'vitest/config';
+import path from 'path';
+
+const root = process.cwd();
 export default defineWorkspace([
   'packages/calender',
   {
@@ -10,6 +13,13 @@ export default defineWorkspace([
       name: 'w-calender-test',
       environment: 'node',
       setupFiles: './testSetup.ts',
+      alias: {
+        '@': path.resolve(root, './packages/calender/src'),
+        react: 'preact/compat',
+        'react-dom/test-utils': 'preact/test-utils',
+        'react-dom': 'preact/compat', // 必须放在 test-utils 下面
+        'react/jsx-runtime': 'preact/jsx-runtime',
+      },
     },
   },
 ]);

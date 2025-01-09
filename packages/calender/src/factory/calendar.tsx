@@ -1,13 +1,10 @@
-import { render, FunctionComponent, useEffect } from 'preact/compat';
+import { render, FunctionComponent } from 'preact/compat';
 import { DayView, WeekView, MonthView } from '@/components';
 import Column from '../components/Column';
 
 import { getReturnTime, getTimeStartAndEnd } from '@/utils/time';
 import { createUniqueId } from '@/utils/common';
-import { isArray } from '@/utils/is';
-import { StoreProvider } from '../contexts/calenderStore';
-import { useXState } from '@/hooks';
-
+import { isArray, isAsyncFunction, isFunction } from '@/utils/is';
 import type { UnitType } from 'dayjs';
 import type { DayViewProps } from '@/types/components';
 import type { Options, CalenderItem } from '@/types/options';
@@ -15,6 +12,8 @@ import type { Date } from '@/types/common';
 import type { ViewType } from '@/types/options';
 import type { ScheduleData, ScheduleItem, DateRange } from '@/types/schedule';
 import CalendarCore from './core';
+
+import { setStore, StoreProvider } from '@/contexts/calenderStore';
 
 const defaultOptions: Required<Options> = {
   date: '',
@@ -25,6 +24,9 @@ const defaultOptions: Required<Options> = {
   onUpdate() {},
   onMount() {},
   onUnmount() {},
+  onBeforeUpdate() {
+    return false;
+  },
 };
 const views: Record<ViewType, FunctionComponent<any>> = {
   day: DayView,
@@ -48,13 +50,9 @@ interface MonthProps extends DayViewProps {
 }
 
 function RenderContent(props: DayProps | WeekProps | MonthProps) {
-  const [store, setStore, getStore] = useXState({ data: props.data });
-  useEffect(() => {
-    setStore({ ...store, data: props.data });
-  }, [props.data]);
   const Component = views[props.viewType];
   return (
-    <StoreProvider store={store}>
+    <StoreProvider>
       <Component
         date={props.date}
         onChange={props.onChange}
@@ -113,6 +111,12 @@ class Calender extends CalendarCore {
   // 处理数据格式
   private formatData(data: ScheduleData) {
     this.data = getData(data);
+    this.initStore();
+  }
+
+  // 初始化store
+  initStore() {
+    setStore({ data: this.data });
   }
 
   // 设置配置
@@ -130,9 +134,12 @@ class Calender extends CalendarCore {
   }
 
   // 数据更新前触发
-  async onBeforeUpdate() {
+  onBeforeUpdate = async (event?: { target: CalenderItem; data: CalenderItem[] }) => {
+    if (isFunction(this.options?.onBeforeUpdate) || isAsyncFunction(this.options?.onBeforeUpdate)) {
+      return await this.options?.onBeforeUpdate(event);
+    }
     return false;
-  }
+  };
 
   // 更新视图
   update() {
@@ -150,11 +157,11 @@ class Calender extends CalendarCore {
     // 组件卸载
     this.options.onUnmount?.();
   }
-  onChange(event: { target: CalenderItem; data: CalenderItem[] }) {
+  onChange = (event: { target: CalenderItem; data: CalenderItem[] }) => {
     // 数据更新
-    console.log(event);
     this.options.onChange?.(event);
-  }
+    setStore({ data: event.data });
+  };
 
   // 渲染组件
   render() {
@@ -169,12 +176,6 @@ class Calender extends CalendarCore {
         onBeforeUpdate={this.onBeforeUpdate}
       />,
       this.el
-    );
-  }
-  testRender() {
-    render(
-      <Column data={this.data} date={getDate(this.options.date as Date, 'D')} cellHeight={42} />,
-      document.querySelector('#calender-column') as Element
     );
   }
 }

@@ -1,5 +1,7 @@
 import { RefObject } from 'preact';
 import { isUndef, isRef } from './is';
+import { isReturnTime } from './time';
+import dayjs from 'dayjs';
 /**
  * @zh 添加单位
  */
@@ -26,7 +28,12 @@ export function createUniqueId(n?: number) {
  * @param { Object, Array<Object> } target 目标数据
  */
 export function deepClone<T>(target: T): T {
-  if (isUndef(target) || typeof target !== 'object') {
+  if (
+    isUndef(target) ||
+    typeof target !== 'object' ||
+    isReturnTime(target) ||
+    dayjs.isDayjs(target)
+  ) {
     return target; // 基本类型直接返回
   }
 

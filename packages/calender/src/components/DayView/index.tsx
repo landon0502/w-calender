@@ -15,7 +15,7 @@ import { genTimeSlice } from '../_utils';
 import { isContainTimeRange } from '@/utils/time';
 import type { DayViewProps } from '@/types/components';
 import type { CalenderItem } from '@/types/options';
-
+import { ReturnTimeValue } from '@/types/time';
 const colH = 42;
 const interval = 30;
 const gap = 8;
@@ -32,15 +32,19 @@ function DayView(props: DayViewProps) {
   const layoutContainer = useRef<HTMLDivElement>(null);
   const [timeList, setTimeList] = useXState<TimeList>([]);
 
-  const { getState } = useStore();
+  const { getState, store } = useStore();
 
   // 这里的数据需统一使用store存储
-  const data = useRef(getState('data'));
+  // const data = useRef(getState('data'));
+  const data = useMemo(() => {
+    return store?.data ?? [];
+  }, [store]);
   // 头部列表渲染
   const todayData = useMemo(() => {
+    console.log(data);
     return (
-      data.current?.filter(
-        (item: { end: string; start: string; type: string }) =>
+      data?.filter(
+        (item: { end: ReturnTimeValue; start: ReturnTimeValue }) =>
           !isContainTimeRange([item.start, item.end], props.date, 'minute', '[)')
       ) ?? []
     );
@@ -51,8 +55,7 @@ function DayView(props: DayViewProps) {
   }, [props.date]);
 
   // 数据更改
-  async function onChange(event: { target: CalenderItem; data: CalenderItem[] }) {
-    console.log('onChange', event);
+  async function onDataChange(event: { target: CalenderItem; data: CalenderItem[] }) {
     let allow = true;
     if (isAsyncFunction(props.onBeforeUpdate) || isFunction(props.onBeforeUpdate)) {
       allow = await props.onBeforeUpdate(event);
@@ -70,11 +73,11 @@ function DayView(props: DayViewProps) {
           <TimeLine data={timeList} />
           <div className={cls('day-grid-layout')} ref={layoutContainer}>
             <Column
-              data={data.current}
+              data={data}
               date={props.date}
               cellHeight={42}
               bordered={false}
-              onChange={onChange}
+              onChange={onDataChange}
             />
             <TimeIndicateLine top={calculateDistance(dayjs().startOf('day'), dayjs(), colH)} />
           </div>
