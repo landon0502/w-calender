@@ -12,8 +12,6 @@ import {
   cls,
   isEmpty,
   isUndef,
-  isFunction,
-  isAsyncFunction,
 } from '@/utils';
 import { genTimeSlice, calculateRect, offsetToTimeValue, genStyles } from '../_utils';
 import type { CalenderItem } from '@/types/options';
@@ -260,7 +258,6 @@ export default function Column({
             )
           ),
           _key: createUniqueId(),
-          type: 'time',
         },
         type: 'add',
       });
@@ -310,7 +307,6 @@ export default function Column({
               start,
               end,
               _key: createUniqueId(),
-              type: 'time',
             },
             type: 'add',
           });

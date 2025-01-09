@@ -1,22 +1,18 @@
 import './style/index.scss';
-import { useEffect, useRef, useMemo } from 'preact/compat';
-import { TimeList } from '@/types/time';
+import { useRef, useMemo } from 'preact/compat';
 import Scrollbar from '../Scrollbar';
 import Header from './Header';
-import TimeLine from './TimeLine';
-import TimeIndicateLine from './TimeIndicateLine';
 import Column from '../Column';
-
-import { useXState } from '@/hooks';
+import { TimeIndicateBar, TimeIndicateLine } from '../TimeIndicateBar';
 import dayjs, { Dayjs } from 'dayjs';
 import { useStore } from '@/contexts/calenderStore';
 import { cls, isAsyncFunction, isFunction } from '@/utils';
-import { genTimeSlice } from '../_utils';
 import { isContainTimeRange } from '@/utils/time';
 import type { DayViewProps } from '@/types/components';
 import type { CalenderItem } from '@/types/options';
 import { ReturnTimeValue } from '@/types/time';
-const colH = 42;
+
+const cellHeight = 42;
 const interval = 30;
 const gap = 8;
 
@@ -30,9 +26,8 @@ function calculateDistance(start: Dayjs, end: Dayjs, colHeight: number) {
 
 function DayView(props: DayViewProps) {
   const layoutContainer = useRef<HTMLDivElement>(null);
-  const [timeList, setTimeList] = useXState<TimeList>([]);
 
-  const { getState, store } = useStore();
+  const { store } = useStore();
 
   // 这里的数据需统一使用store存储
   // const data = useRef(getState('data'));
@@ -41,7 +36,6 @@ function DayView(props: DayViewProps) {
   }, [store]);
   // 头部列表渲染
   const todayData = useMemo(() => {
-    console.log(data);
     return (
       data?.filter(
         (item: { end: ReturnTimeValue; start: ReturnTimeValue }) =>
@@ -49,10 +43,6 @@ function DayView(props: DayViewProps) {
       ) ?? []
     );
   }, [data]);
-
-  useEffect(() => {
-    setTimeList(genTimeSlice(props.date, interval));
-  }, [props.date]);
 
   // 数据更改
   async function onDataChange(event: { target: CalenderItem; data: CalenderItem[] }) {
@@ -69,17 +59,24 @@ function DayView(props: DayViewProps) {
     <div className={cls('day')}>
       <Header data={todayData} />
       <Scrollbar hideBar className={cls('grid-scrollbar')}>
-        <div className={cls('day-grid')} style={{ '--col-h': colH + 'px' }}>
-          <TimeLine data={timeList} />
+        <div className={cls('day-grid')} style={{ '--col-h': cellHeight + 'px' }}>
+          <TimeIndicateBar
+            range={props.date}
+            interval={interval}
+            cellHeight={cellHeight}
+            cellWidth={72}
+          />
           <div className={cls('day-grid-layout')} ref={layoutContainer}>
             <Column
               data={data}
               date={props.date}
-              cellHeight={42}
+              cellHeight={cellHeight}
               bordered={false}
               onChange={onDataChange}
             />
-            <TimeIndicateLine top={calculateDistance(dayjs().startOf('day'), dayjs(), colH)} />
+            <TimeIndicateLine
+              top={calculateDistance(dayjs().startOf('day'), dayjs(), cellHeight)}
+            />
           </div>
         </div>
       </Scrollbar>
