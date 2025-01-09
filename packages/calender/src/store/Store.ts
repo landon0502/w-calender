@@ -1,5 +1,5 @@
-import { isFunction, isUndef } from '@/utils';
-import { produce, isDraft } from 'immer';
+import { isFunction, isUndef } from '../utils';
+import { produce } from 'immer';
 
 export type Commit<T> = (state: T, ...args: any[]) => void;
 export type Dispatch<T> = (event: {

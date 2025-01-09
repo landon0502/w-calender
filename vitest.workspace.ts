@@ -6,13 +6,7 @@ export default defineWorkspace([
   'packages/calender',
   {
     extends: './packages/calender/vitest.config.ts',
-    test: {
-      // ...
-      // include: ['tests/**/*.{browser}.test.{ts,js}'],
-      // 在使用内联配置的时候，建议定义一个名称
-      name: 'w-calender-test',
-      environment: 'node',
-      setupFiles: './testSetup.ts',
+    resolve: {
       alias: {
         '@': path.resolve(root, './packages/calender/src'),
         react: 'preact/compat',
@@ -20,6 +14,14 @@ export default defineWorkspace([
         'react-dom': 'preact/compat', // 必须放在 test-utils 下面
         'react/jsx-runtime': 'preact/jsx-runtime',
       },
+    },
+    test: {
+      // ...
+      // include: ['tests/**/*.{browser}.test.{ts,js}'],
+      // 在使用内联配置的时候，建议定义一个名称
+      name: 'w-calender-test',
+      environment: 'node',
+      setupFiles: './testSetup.ts',
     },
   },
 ]);
