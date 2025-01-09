@@ -1,7 +1,5 @@
 import { render, FunctionComponent } from 'preact/compat';
 import { DayView, WeekView, MonthView } from '@/components';
-import Column from '../components/Column';
-
 import { getReturnTime, getTimeStartAndEnd } from '@/utils/time';
 import { createUniqueId } from '@/utils/common';
 import { isArray, isAsyncFunction, isFunction } from '@/utils/is';
@@ -87,7 +85,6 @@ function getData(data: ScheduleData): Array<CalenderItem> {
       title: item.title,
       start: start,
       end: end,
-      type: item.type,
       _key: createUniqueId(),
       _raw: item,
     };

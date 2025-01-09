@@ -1,7 +1,16 @@
 import { createStore } from '@/store';
 import { CalenderItem } from '@/types/options';
-const { StoreProvider, useStore, setStore, getStore } = createStore<{ data: CalenderItem[] }>({
-  data: [],
-});
+
+export const COMMIT_KEY = {};
+export const ACTION_KEY = {};
+const { StoreProvider, useStore, setStore, getStore } = createStore<{ data: CalenderItem[] }>(
+  {
+    data: [],
+  },
+  {
+    mutations: {},
+    actions: {},
+  }
+);
 
 export { StoreProvider, useStore, setStore, getStore };

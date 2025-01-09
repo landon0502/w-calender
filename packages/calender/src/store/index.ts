@@ -1,18 +1,21 @@
 import { PropsWithChildren } from '@/types/common';
-import { StateWithActions } from '@/types/store';
 import { createContext, createElement, useRef } from 'preact/compat';
 import { useCallback, useContext, useEffect, useLayoutEffect, useMemo } from 'preact/hooks';
 import { useXState } from '@/hooks';
 import { isUndef } from '@/utils/is';
-import Store from './Store';
+import Store, { StoreOptions } from './Store';
 import { deepClone } from '@/utils';
+
 const isSSR = isUndef(window) || !window.navigator;
 const useIsomorphicLayoutEffect = isSSR ? useEffect : useLayoutEffect;
 /**
  * @zh 数据共享
  */
-export function createStore<State extends StateWithActions>(initialState: State) {
-  const store = new Store(initialState);
+export function createStore<State extends Record<string, any>>(
+  initialState: State,
+  options?: StoreOptions<State>
+) {
+  const store = Store.create(initialState, options);
 
   const StoreContext = createContext<State | undefined>(initialState);
 
@@ -54,9 +57,9 @@ export function createStore<State extends StateWithActions>(initialState: State)
       }
       return null;
     }
-    function setState(key: keyof State, data: any) {
+    function setState(name: string, data: any) {
       if (!isUndef(state.current) && typeof state.current === 'object') {
-        state.current[key] = data;
+        store.commit(name, data);
       }
     }
     function clear() {}

@@ -1,47 +1,60 @@
-import { deepClone, isFunction, isUndef } from '@/utils';
+import { isFunction, isUndef } from '@/utils';
+import { produce, isDraft } from 'immer';
 
-export default class Store<T> {
+export type Commit<T> = (state: T, ...args: any[]) => void;
+export type Dispatch<T> = (event: {
+  commit: Commit<T>;
+  dispath: Dispatch<T>;
+}) => Promise<void> | void;
+export type StoreOptions<State> = {
+  mutations?: Record<string, Commit<State>>;
+  immediate?: boolean;
+  actions?: Record<string, Dispatch<State>>;
+};
+
+export default class Store<T extends Record<string, any>> {
   state?: T;
   private mutations?: Record<string, Function>;
   private actions?: Record<string, Function>;
   private listener: Set<Function> = new Set();
-  constructor(
-    initialState: T,
-    options?: { mutations?: Record<string, Function>; immediate: boolean }
-  ) {
-    if (!options?.immediate) {
-      this.state = initialState;
-    } else {
-      this.setState(initialState);
-    }
+  constructor(initialState: T, options?: StoreOptions<T>) {
+    this.setState(initialState, options?.immediate);
     if (!isUndef(options)) {
       this.mutations = options.mutations;
+      this.actions = options.actions;
     }
   }
 
   getState() {
     return this.state;
   }
-  setState(state: T) {
-    console.log('setState');
-    let old = deepClone(this.state);
-    this.state = state;
-    this.onUpdate(state, old);
-  }
 
-  setItem() {}
-  getItem() {}
+  setState(state: T, isUpdate: boolean = true) {
+    let prevState = this.state;
+    let newState = produce(state, () => {});
+    this.state = newState;
+    if (isUpdate) {
+      this.onUpdate(newState, prevState);
+    }
+  }
 
   destory() {
     this.state = this.mutations = this.actions = void 0;
     this.listener.clear();
   }
-
   commit(name: string, ...args: any[]) {
-    this.mutations;
+    if (isUndef(this.mutations)) {
+      return;
+    }
+
+    this.mutations[name](this.state, ...args);
   }
-  dispatch(name: string, ...args: any[]) {
-    this.actions;
+  async dispatch(name: string, ...args: any[]) {
+    if (isUndef(this.actions)) {
+      return;
+    }
+    let action = this.actions[name];
+    await action({ commit: this.commit, dispatch: this.dispatch }, ...args);
   }
 
   /**
@@ -61,5 +74,12 @@ export default class Store<T> {
         ob(nextState, prevState);
       }
     });
+  }
+
+  /**
+   * 创建实例
+   */
+  static create<T extends Record<string, any>>(initialState: T, options?: StoreOptions<T>) {
+    return new Store(initialState, options);
   }
 }

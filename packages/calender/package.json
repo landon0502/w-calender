@@ -48,6 +48,7 @@
   "license": "ISC",
   "dependencies": {
     "dayjs": "^1.11.13",
+    "immer": "^10.1.1",
     "interactjs": "^1.10.27",
     "preact": "^10.23.2"
   },
