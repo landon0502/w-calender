@@ -1,11 +1,16 @@
 import { isFunction, isUndef } from '../utils';
-import { produce } from 'immer';
+import { produce, setAutoFreeze, Draft } from 'immer';
 
-export type Commit<T> = (state: T, ...args: any[]) => void;
-export type Dispatch<T> = (event: {
-  commit: Commit<T>;
-  dispath: Dispatch<T>;
-}) => Promise<void> | void;
+export type Commit<T> = (state: T | Draft<T>, ...args: any[]) => void;
+export type Dispatch<T> = (
+  event: {
+    commit: (name: string, ...args: any[]) => void;
+    dispatch: (name: string, ...args: any[]) => void;
+    state: T;
+  },
+  ...args: any[]
+) => Promise<void> | void;
+
 export type StoreOptions<State> = {
   mutations?: Record<string, Commit<State>>;
   immediate?: boolean;
@@ -13,11 +18,14 @@ export type StoreOptions<State> = {
 };
 
 export default class Store<T extends Record<string, any>> {
-  state?: T;
-  private mutations?: Record<string, Function>;
-  private actions?: Record<string, Function>;
+  state: T = {} as T;
+  private mutations?: Record<string, Commit<T>>;
+  private actions?: Record<string, Dispatch<T>>;
   private listener: Set<Function> = new Set();
+
   constructor(initialState: T, options?: StoreOptions<T>) {
+    setAutoFreeze(true);
+
     this.setState(initialState, options?.immediate);
     if (!isUndef(options)) {
       this.mutations = options.mutations;
@@ -29,9 +37,8 @@ export default class Store<T extends Record<string, any>> {
     return this.state;
   }
 
-  setState(state: T, isUpdate: boolean = true) {
+  setState(newState: T, isUpdate: boolean = true) {
     let prevState = this.state;
-    let newState = produce(state, () => {});
     this.state = newState;
     if (isUpdate) {
       this.onUpdate(newState, prevState);
@@ -39,22 +46,26 @@ export default class Store<T extends Record<string, any>> {
   }
 
   destory() {
-    this.state = this.mutations = this.actions = void 0;
+    this.mutations = this.actions = void 0;
+    this.setState({} as T, false);
     this.listener.clear();
   }
-  commit(name: string, ...args: any[]) {
-    if (isUndef(this.mutations)) {
-      return;
-    }
 
-    this.mutations[name](this.state, ...args);
+  commit(name: string, ...args: any[]) {
+    let that = this;
+    let newState = produce(that.state, (draftState) => {
+      if (!isUndef(that.mutations)) {
+        that.mutations[name](draftState, ...args);
+      }
+    });
+    this.setState(newState);
   }
+
   async dispatch(name: string, ...args: any[]) {
-    if (isUndef(this.actions)) {
-      return;
+    if (!isUndef(this.actions)) {
+      let action = this.actions[name];
+      await action({ commit: this.commit, dispatch: this.dispatch, state: this.state }, ...args);
     }
-    let action = this.actions[name];
-    await action({ commit: this.commit, dispatch: this.dispatch }, ...args);
   }
 
   /**

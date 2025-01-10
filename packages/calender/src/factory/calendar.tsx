@@ -97,12 +97,12 @@ class Calender extends CalendarCore {
   el: HTMLElement;
   options: Options = defaultOptions;
   data: CalenderItem[] = [];
-
+  viewType: ViewType = 'D';
   constructor(el: HTMLElement, options: Partial<Options>) {
     super();
     this.el = el;
     this.setOptions(options);
-    this.render();
+    this.changeView(this.viewType);
   }
 
   // 处理数据格式
@@ -119,15 +119,16 @@ class Calender extends CalendarCore {
   // 设置配置
   setOptions(options: Partial<Options>) {
     this.options = { ...defaultOptions, ...options };
+    if (options.viewType) {
+      this.viewType = options.viewType;
+    }
+
     this.formatData(this.options.data);
   }
 
-  /**
-   * @zh 更新数据 将store中的数据同时更新 这里需要在store中抛出操作方法
-   */
-
-  setData(data: ScheduleData) {
-    this.formatData(data);
+  // 更改视图
+  changeView(type: ViewType) {
+    this.render(type);
   }
 
   // 数据更新前触发
@@ -137,11 +138,6 @@ class Calender extends CalendarCore {
     }
     return false;
   };
-
-  // 更新视图
-  update() {
-    this.render();
-  }
 
   /**
    * 组件类钩子函数
@@ -161,10 +157,10 @@ class Calender extends CalendarCore {
   };
 
   // 渲染组件
-  render() {
+  render(type: ViewType) {
     render(
       <RenderContent
-        viewType={this.options.viewType}
+        viewType={type}
         data={this.data}
         date={getDate(this.options.date as Date, 'D')}
         onChange={(e) => {

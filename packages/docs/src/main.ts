@@ -70,7 +70,9 @@ function main() {
 
   let context = new ChCalender(document.getElementById('calender-container')!, options);
 
-  // 渲染数据
-  function renderData() {}
+  const viewType = document.getElementById('pet-select') as HTMLSelectElement;
+  viewType?.addEventListener('change', (e) => {
+    context.changeView(viewType.value);
+  });
 }
 main();
