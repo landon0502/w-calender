@@ -51,15 +51,14 @@ export default class Store<T extends Record<string, any>> {
     this.listener.clear();
   }
 
-  commit(name: string, ...args: any[]) {
-    let that = this;
-    let newState = produce(that.state, (draftState) => {
-      if (!isUndef(that.mutations)) {
-        that.mutations[name](draftState, ...args);
+  commit = (name: string, ...args: any[]) => {
+    let newState = produce(this.state, (draftState) => {
+      if (!isUndef(this.mutations)) {
+        this.mutations[name](draftState, ...args);
       }
     });
     this.setState(newState);
-  }
+  };
 
   async dispatch(name: string, ...args: any[]) {
     if (!isUndef(this.actions)) {
