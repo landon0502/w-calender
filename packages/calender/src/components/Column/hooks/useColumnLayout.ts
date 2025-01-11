@@ -51,9 +51,9 @@ function getDataColIdx(
 /**
  * @zh 处理数据
  */
-function handleGridCols(data: Array<CalenderItem>) {
+function handleGridCols(layoutData: Array<CalenderItem>) {
   // 按时间进行排序
-  data = data.sort((a, b) => {
+  let data = layoutData.sort((a, b) => {
     return dayjs(a.start.time).isBefore(b.start.time) ? -1 : 1;
   });
   let groups: Array<{
@@ -99,6 +99,7 @@ function handleGridCols(data: Array<CalenderItem>) {
       }
     }
   });
+  // debugger;
   return groups;
 }
 
@@ -119,7 +120,8 @@ export default function useColumnLayout({
       : (calenderData?.filter((item) =>
           isContainTimeRange([item.start, item.end], timeRange, 'minute', '[)')
         ) ?? []);
-    return handleGridCols(renderData);
+    let config = handleGridCols(renderData);
+    return config;
   }, [calenderData]);
 
   useEffect(() => {

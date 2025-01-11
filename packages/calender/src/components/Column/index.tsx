@@ -21,9 +21,7 @@ import type { Rect, OperateType } from '@/types/components';
 import type { PropsWithElAttrs } from '@/types/common';
 import useColumnLayout from './hooks/useColumnLayout';
 import { useElementBounding, useXState, usePointerMoveEvent } from '@/hooks';
-
 import EventLayoutItem from '@/components/Event/EventLayoutItem';
-import dayjs from 'dayjs';
 
 export interface ColumnEvent {
   onMoveStart?(event: any, data: CalenderItem, rect: Rect): void;
@@ -76,9 +74,9 @@ export default function Column({
 
   const [dragConfig, setDragConf, getDragState] = useXState<DragConfig>(null);
   const { rect: containerRect, getRect } = useElementBounding(layoutContainer);
-  // 这里的数据需统一使用store存储
+
   const { layoutData, getCalenderData } = useColumnLayout({
-    data: data,
+    data,
     timeRange: date,
   });
 
@@ -100,9 +98,9 @@ export default function Column({
    * @zh 开始移动
    */
   function onMoveStart(event: any, data: CalenderItem, rect: Rect) {
-    setDragConf({ rect: { ...dragPosition }, data, type: 'move' });
     dragPosition.y = rect.y;
     dragPosition.h = rect.h;
+    setDragConf({ rect: { ...dragPosition }, data, type: 'move' });
   }
 
   /**

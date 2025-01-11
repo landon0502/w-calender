@@ -1,5 +1,4 @@
-import { h } from 'preact';
-import { useEffect, useRef, useMemo, createElement, Children, cloneElement } from 'preact/compat';
+import { useRef, Children } from 'preact/compat';
 import { cls } from '@/utils/css';
 import { getAttrsTransformTranslate } from '@/utils/dom';
 import { getMoveDistance } from '@/utils/common';
@@ -19,7 +18,7 @@ function getEleLayout(el: HTMLElement) {
 }
 const getDy = getMoveDistance();
 const getDx = getMoveDistance();
-export default function ScheduleCard({
+export default function EventLayoutItem({
   w,
   h,
   x,
@@ -40,11 +39,6 @@ export default function ScheduleCard({
 }: GridBoxProps) {
   const gridBox = useRef<HTMLDivElement>(null);
   const [editType, setDragState] = useXState<OperateType | false>(false);
-  const [styleConfig, setStyleConfig] = useXState<h.JSX.CSSProperties | null>(null);
-
-  useEffect(() => {
-    setStyleConfig(() => genStyles({ x, y, h: h, w: w }));
-  }, [w, h, x, y]);
 
   /**
    * 重置状态
@@ -73,7 +67,8 @@ export default function ScheduleCard({
             setDragState('move');
           },
           move(event) {
-            const rect = getBoundingClientRect(event.target);
+            // get rect of column container element
+            const rect = getBoundingClientRect(event.target.parentElement);
 
             let dx = getDx(event.dx, rect?.width ?? 1);
             let dy = getDy(event.dy, touchTriggerDistance.y);
@@ -131,7 +126,7 @@ export default function ScheduleCard({
     <div
       className={`${className ?? ''} ${cls(['grid-box', 'grid-content'])}`}
       style={{
-        ...styleConfig,
+        ...genStyles({ x, y, h: h, w: w }),
         ...style,
         opacity: editType ? { resize: 0, move: 0.7, add: 0 }[editType as OperateType] : 1,
       }}

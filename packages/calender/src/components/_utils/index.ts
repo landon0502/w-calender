@@ -45,7 +45,6 @@ export function calculateRect(
   let y = calculateDistance(start.time.startOf('day'), start.time, colHeight);
   let w = containerWidth / totalColumn;
   let h = calculateDistance(start.time, end.time, colHeight);
-
   return { x, y, w, h };
 }
 
