@@ -23,6 +23,14 @@ export function getElement(el: string | HTMLElement): HTMLElement | Element | nu
 }
 
 /**
+ * 获取元素尺寸
+ */
+export function getBoundingClientRect(el: string | HTMLElement) {
+  const target = getElement(el);
+  return target?.getBoundingClientRect();
+}
+
+/**
  * @desc 设置元素属性setAttribute
  */
 export function setAttributes(el: HTMLElement, attrs: { [prop: string]: string }) {

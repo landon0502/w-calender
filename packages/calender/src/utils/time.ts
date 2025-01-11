@@ -152,3 +152,16 @@ export function isTimeBetween(
     d
   );
 }
+
+// 获取当前星期
+export function getWeekDays(time: TimeValue | ReturnTimeValue, dayStartOfWeek = 0) {
+  const current = getReturnTime(time);
+  const flatRows = [];
+  for (let i = 0; i < 7; i++) {
+    const date = getReturnTime(current.time.startOf('week').add(i + dayStartOfWeek, 'day'));
+    flatRows.push({
+      ...date,
+    });
+  }
+  return flatRows;
+}

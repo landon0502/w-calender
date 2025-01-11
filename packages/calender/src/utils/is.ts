@@ -79,3 +79,10 @@ export function isAsyncFunction(val: any): val is Function {
 export function isDate(val: any): val is Date {
   return val instanceof Date;
 }
+
+/**
+ * @zh 判断为number
+ */
+export function isNumber(val: any): val is number {
+  return typeof val === 'number';
+}

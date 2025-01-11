@@ -1,7 +1,7 @@
 import { h } from 'preact';
 import type { Rect } from '@wcalender/types/components';
 import type { DateRange } from '@/types/schedule';
-import { getTransform, numToPx, getTimes } from '@/utils';
+import { getTransform, numToPx, getTimes, getReturnTime } from '@/utils';
 import type { CalenderItem } from '@wcalender/types/options';
 import { Dayjs } from 'dayjs';
 /**
@@ -24,8 +24,8 @@ export function genTimeSlice(date: DateRange, interval: number) {
     return [];
   }
   const [start, end] = date;
-  const startTime = start.time.startOf('day'),
-    endTime = end.time.endOf('day');
+  const startTime = getReturnTime(start).time.startOf('day'),
+    endTime = getReturnTime(end).time.endOf('day');
   return getTimes(startTime, endTime, interval, 'minute');
 }
 
@@ -45,6 +45,7 @@ export function calculateRect(
   let y = calculateDistance(start.time.startOf('day'), start.time, colHeight);
   let w = containerWidth / totalColumn;
   let h = calculateDistance(start.time, end.time, colHeight);
+
   return { x, y, w, h };
 }
 

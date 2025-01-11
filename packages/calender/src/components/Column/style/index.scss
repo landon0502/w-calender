@@ -5,7 +5,6 @@ $border: 1px solid $color-border-2;
 
 @include cls('column') {
   width: 100%;
-  position: relative;
   &-split {
     @include backgroundSplitLine($color-border-2, $col-height);
   }

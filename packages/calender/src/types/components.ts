@@ -7,6 +7,10 @@ export interface DayViewProps extends EventsProps {
   date: DateRange;
 }
 
+export interface WeekViewProps extends EventsProps {
+  data: CalenderItem[];
+}
+
 export interface HeaderProps {
   data: Array<CalenderItem>;
 }
@@ -29,9 +33,8 @@ export interface GridBoxProps extends Rect {
   className?: string;
   children?: ComponentChildren;
   data: CalenderItem;
-  cellHeight?: number;
-  interval?: number;
   style?: h.JSX.CSSProperties;
+  touchTriggerDistance?: { x: number; y: number };
   onMoveStart?(event: any, data: CalenderItem, rect: Rect): void;
   onMove?(event: any, data: CalenderItem, rect: Rect): void;
   onMoveEnd?(event: any, data: CalenderItem, rect: Rect): void;

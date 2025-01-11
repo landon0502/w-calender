@@ -1,0 +1,11 @@
+@use '@/style/mixins/mixins' as *;
+@use 'sass:math' as *;
+
+@include cls('week-view') {
+  display: flex;
+  @include cls('column-border') {
+    &:not(:nth-last-of-type(1)) {
+      border-right: 0;
+    }
+  }
+}

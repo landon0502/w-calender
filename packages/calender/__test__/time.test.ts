@@ -8,6 +8,7 @@ import {
   isContainTimeRange,
   isReturnTime,
   format,
+  getWeekDays,
 } from '../src/utils';
 import dayjs from 'dayjs';
 
@@ -69,4 +70,11 @@ test('test isReturnTime timeUtils', () => {
 
 test('test format timeUtils', () => {
   expect(format(getReturnTime('2024-12-12 12:12'), 'YYYY-MM-DD')).toBe('2024-12-12');
+});
+
+test('test getWeekDays timeUtils', () => {
+  let cur = dayjs();
+  let curWeek = getWeekDays(cur, 1);
+  expect(curWeek[0].time.format('YYYY-MM-DD')).toBe('2025-01-06');
+  expect(curWeek[6].time.format('YYYY-MM-DD')).toBe('2025-01-12');
 });

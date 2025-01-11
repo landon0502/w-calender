@@ -12,25 +12,20 @@ import {
   cls,
   isEmpty,
   isUndef,
+  isNumber,
 } from '@/utils';
 import { genTimeSlice, calculateRect, offsetToTimeValue, genStyles } from '../_utils';
 import type { CalenderItem } from '@/types/options';
 import type { DateRange } from '@/types/schedule';
 import type { Rect, OperateType } from '@/types/components';
+import type { PropsWithElAttrs } from '@/types/common';
 import useColumnLayout from './hooks/useColumnLayout';
 import { useElementBounding, useXState, usePointerMoveEvent } from '@/hooks';
 
 import EventLayoutItem from '@/components/Event/EventLayoutItem';
+import dayjs from 'dayjs';
 
-export interface ColumnProps {
-  data: CalenderItem[];
-  date: DateRange;
-  scrollTop?: number;
-  cellHeight?: number;
-  timeInterval?: number;
-  gap?: number;
-  bordered?: boolean;
-  split?: boolean;
+export interface ColumnEvent {
   onMoveStart?(event: any, data: CalenderItem, rect: Rect): void;
   onMove?(event: any, data: CalenderItem, rect: Rect): void;
   onMoveEnd?(event: any, data: CalenderItem, rect: Rect): void;
@@ -41,27 +36,48 @@ export interface ColumnProps {
   onChange?(event: { target: CalenderItem; data: CalenderItem[] }): void;
 }
 
+export interface ColumnProps extends ColumnEvent {
+  data: CalenderItem[];
+  date: DateRange;
+  multipleColumns?: Boolean;
+  columnIndex?: number;
+  columnCount?: number;
+  scrollTop?: number;
+  cellHeight?: number;
+  timeInterval?: number;
+  gap?: number;
+  bordered?: boolean;
+  split?: boolean;
+}
+
 type DragConfig = { rect: Rect; data: CalenderItem; type: OperateType } | null;
 const getDy = getMoveDistance();
+
 export default function Column({
   data,
   date,
   cellHeight = 42,
   timeInterval = 30,
   gap = 0,
+  columnIndex = 0,
+  columnCount = 1,
   bordered = true,
   split = true,
+  multipleColumns = false,
+  style = {},
   onChange = () => {},
-}: ColumnProps) {
+}: PropsWithElAttrs<ColumnProps>) {
   const layoutContainer = useRef<HTMLDivElement>(null);
   const timeList = useMemo(() => genTimeSlice(date, timeInterval), [date]);
   const columnHeight = useMemo(() => timeList.length * cellHeight, [timeList]);
 
   let dragPosition: Rect = { x: 0, y: 0, w: '100%', h: 0 };
+  let relativeIndex = 0;
+
   const [dragConfig, setDragConf, getDragState] = useXState<DragConfig>(null);
   const { rect: containerRect, getRect } = useElementBounding(layoutContainer);
   // 这里的数据需统一使用store存储
-  const { layoutData, setCalenderData, getCalenderData } = useColumnLayout({
+  const { layoutData, getCalenderData } = useColumnLayout({
     data: data,
     timeRange: date,
   });
@@ -93,16 +109,26 @@ export default function Column({
    * @zh 移动中
    */
   function onMove(event: any, data: CalenderItem, rect: Rect) {
-    dragPosition.y += event.dy;
+    if (isNumber(event.dy)) {
+      dragPosition.y += event.dy;
+    }
     if (dragPosition.y < 0) {
       dragPosition.y = 0;
     }
     let size = getRect();
-
     if (dragPosition.y + dragPosition.h >= size.height) {
       dragPosition.y = size.height - dragPosition.h;
     }
+
     let dragEl = document.querySelector(`.${cls('drag-block')}`);
+
+    if (isNumber(event.dx) && multipleColumns) {
+      let newIndex = relativeIndex + event.dx / getRect().width;
+      if (newIndex + columnIndex >= 0 && newIndex + columnIndex < columnCount) {
+        relativeIndex = newIndex;
+      }
+    }
+
     if (dragEl) {
       setElementStyle(
         dragEl as HTMLElement,
@@ -119,6 +145,7 @@ export default function Column({
 
   function onMoveEnd(event: any, data: CalenderItem) {
     let dragData = getDragState();
+    relativeIndex = 0;
     changeData(dragData?.data as CalenderItem);
   }
   /**
@@ -152,22 +179,29 @@ export default function Column({
    * @zh 处理数据
    */
   function handleUpdateData(event: any, data: CalenderItem, type: OperateType) {
-    let dragData = { ...data };
-    dragData.start = getReturnTime(
-      getReturnTime(date[0]).time.add(
-        offsetToTimeValue(dragPosition.y, timeInterval, cellHeight),
-        'second'
-      )
+    let currentDragData = { ...data };
+    currentDragData.start = getReturnTime(
+      getReturnTime(date[0])
+        .time.add(offsetToTimeValue(dragPosition.y, timeInterval, cellHeight), 'second')
+        .add(relativeIndex, 'day')
     );
-    dragData.end = getReturnTime(
-      getReturnTime(date[0]).time.add(
-        offsetToTimeValue(dragPosition.y + event.rect.height, timeInterval, cellHeight),
-        'second'
-      )
+
+    currentDragData.end = getReturnTime(
+      getReturnTime(date[0])
+        .time.add(
+          offsetToTimeValue(dragPosition.y + event.rect.height, timeInterval, cellHeight),
+          'second'
+        )
+        .add(relativeIndex, 'day')
     );
     setDragConf({
-      rect: { y: dragPosition.y, w: '100%', x: 0, h: event.rect.height },
-      data: dragData,
+      rect: {
+        y: dragPosition.y,
+        w: '100%',
+        x: `calc(${100 * relativeIndex}% + ${relativeIndex}px)`,
+        h: event.rect.height,
+      },
+      data: currentDragData,
       type: type,
     });
   }
@@ -192,7 +226,6 @@ export default function Column({
       data = [...data, target];
     }
     let result = { target: target, data };
-    // setCalenderData(data);
     onChange(result);
   }
 
@@ -332,7 +365,15 @@ export default function Column({
     config: CalenderItem;
   }) {
     return (
-      <div style={{ width: '100%', height: '100%', background: 'blue' }}>
+      <div
+        style={{
+          width: '100%',
+          height: '100%',
+          background: 'blue',
+          fontSize: '12px',
+          color: 'white',
+        }}
+      >
         {`${config.title}-${format(config.start, 'HH:mm')}~${format(config.end, 'HH:mm')}--${touchState}`}
       </div>
     );
@@ -356,8 +397,6 @@ export default function Column({
           )}
           key={config._key}
           data={config}
-          cellHeight={cellHeight}
-          interval={timeInterval}
           onMoveStart={onMoveStart}
           onMove={onMove}
           onMoveEnd={onMoveEnd}
@@ -366,6 +405,7 @@ export default function Column({
           onResize={onResize}
           onTap={onTap}
           style={{ pointerEvents: isEmpty(dragConfig) ? 'auto' : 'none' }}
+          touchTriggerDistance={{ y: dragStepNum, x: containerRect.width }}
         >
           {/* 自定义日程卡片，需支持自定义 */}
           {({ touchState }: { touchState: OperateType }) => {
@@ -381,7 +421,7 @@ export default function Column({
         <OperateTime layout={dragConfig.rect} type={dragConfig.type}>
           <div style="background: red; height: 100%">
             {/* 这里拖动时显示组件,需支持自定义 */}
-            {dragTime?.start + ':' + dragTime?.end}
+            {dragTime?.start}
           </div>
         </OperateTime>
       );
@@ -391,8 +431,17 @@ export default function Column({
 
   return (
     <div
-      style={{ '--col-h': cellHeight + 'px', width: '100%', height: numToPx(columnHeight) }}
-      class={cls(['column', bordered ? 'column-border' : void 0, split ? 'column-split' : void 0])}
+      style={{
+        '--col-h': cellHeight + 'px',
+        width: '100%',
+        height: numToPx(columnHeight),
+        ...style,
+      }}
+      className={cls([
+        'column',
+        bordered ? 'column-border' : void 0,
+        split ? 'column-split' : void 0,
+      ])}
       ref={layoutContainer}
     >
       {renderCalenderLayout()}

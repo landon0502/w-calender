@@ -28,7 +28,7 @@ export default function useElementBounding(
       ctx = elementResizeObserver(
         target,
         (res) => {
-          setRect(res);
+          setRect(() => res);
           callback?.(res);
         },
         { immediate: false, windowScroll: false, windowResize: false }

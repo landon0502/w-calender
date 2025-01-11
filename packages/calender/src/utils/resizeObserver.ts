@@ -1,4 +1,5 @@
 import { defaultWindow } from '../constant/_configurable';
+import { getBoundingClientRect } from './';
 export const isSupportedResizeObserver = defaultWindow && 'ResizeObserver' in defaultWindow;
 
 export type ElementRect = Record<
@@ -87,17 +88,19 @@ export function elementResizeObserver(
       }
       return;
     }
-    const elRect = el.getBoundingClientRect();
-    rect = {
-      bottom: elRect.bottom,
-      height: elRect.height,
-      left: elRect.left,
-      right: elRect.right,
-      top: elRect.top,
-      width: elRect.width,
-      x: elRect.x,
-      y: elRect.y,
-    };
+    const elRect = getBoundingClientRect(el);
+    if (elRect) {
+      rect = {
+        bottom: elRect.bottom,
+        height: elRect.height,
+        left: elRect.left,
+        right: elRect.right,
+        top: elRect.top,
+        width: elRect.width,
+        x: elRect.x,
+        y: elRect.y,
+      };
+    }
 
     callback(rect);
   };

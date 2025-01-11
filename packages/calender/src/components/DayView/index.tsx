@@ -6,11 +6,10 @@ import Column from '../Column';
 import { TimeIndicateBar, TimeIndicateLine } from '../TimeIndicateBar';
 import dayjs, { Dayjs } from 'dayjs';
 import { useStore } from '@/contexts/calenderStore';
-import { cls, isAsyncFunction, isFunction } from '@/utils';
-import { isContainTimeRange } from '@/utils/time';
+import { cls, isAsyncFunction, isFunction, isContainTimeRange } from '@/utils';
 import type { DayViewProps } from '@/types/components';
 import type { CalenderItem } from '@/types/options';
-import { ReturnTimeValue } from '@/types/time';
+import type { ReturnTimeValue } from '@/types/time';
 
 const cellHeight = 42;
 const interval = 30;
