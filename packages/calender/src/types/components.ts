@@ -9,6 +9,7 @@ export interface DayViewProps extends EventsProps {
 
 export interface WeekViewProps extends EventsProps {
   data: CalenderItem[];
+  date: DateRange;
 }
 
 export interface HeaderProps {
