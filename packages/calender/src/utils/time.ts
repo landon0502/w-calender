@@ -1,4 +1,4 @@
-import dayjs, { OpUnitType, UnitType } from 'dayjs';
+import dayjs, { Dayjs, OpUnitType, UnitType } from 'dayjs';
 import type { TimeValue, ReturnTimeValue, TimeList } from '@wcalender/types/time';
 import { isDate } from './is';
 
@@ -10,7 +10,7 @@ dayjs.extend(isSameOrAfter);
 dayjs.extend(isSameOrBefore);
 dayjs.extend(quarterOfYear);
 dayjs.extend(isBetween);
-
+type DType = '()' | '[]' | '[)' | '(]';
 export const RETURN_TIME_KEY = Symbol('returnTimeKey');
 /**
  * @zh 格式化时间格式
@@ -95,14 +95,27 @@ export function getTimeStartAndEnd(
 /**
  * @zh 判断两个时间段是否存在交叉
  */
+type DCode = '[' | ']' | '(' | ')';
 export function isCrossoverTime(
   o: [TimeValue, TimeValue],
   t: [TimeValue, TimeValue],
-  unit?: OpUnitType
+  unit: OpUnitType = 'second',
+  d: DType = '[)'
 ): boolean {
+  let [before, after] = d.split('') as [DCode, DCode];
+
+  let handAfter: Record<DCode, (time: Dayjs, value: Dayjs) => boolean> = {
+    '(': (time: Dayjs, value: Dayjs) => time.isSameOrBefore(value, unit),
+    '[': (time: Dayjs, value: Dayjs) => time.isBefore(value, unit),
+    ')': (time: Dayjs, value: Dayjs) => time.isSameOrAfter(value, unit),
+    ']': (time: Dayjs, value: Dayjs) => time.isAfter(value, unit),
+  };
+  let isAfter = handAfter[after];
+  let isBefore = handAfter[before];
+
   return !(
-    getReturnTime(o[0]).time.isAfter(getReturnTime(t[1]).time, unit) ||
-    getReturnTime(o[1]).time.isBefore(getReturnTime(t[0]).time, unit)
+    isAfter(getReturnTime(o[0]).time, getReturnTime(t[1]).time) ||
+    isBefore(getReturnTime(o[1]).time, getReturnTime(t[0]).time)
   );
 }
 
@@ -113,7 +126,7 @@ export function isContainTimeRange(
   o: [TimeValue, TimeValue],
   range: [TimeValue, TimeValue],
   c?: UnitType,
-  d?: '()' | '[]' | '[)' | '(]'
+  d?: DType
 ) {
   return isTimeBetween(o[0], range, c, d) && isTimeBetween(o[1], range, c, d);
 }

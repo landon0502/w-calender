@@ -75,6 +75,10 @@ test('test format timeUtils', () => {
 test('test getWeekDays timeUtils', () => {
   let cur = dayjs();
   let curWeek = getWeekDays(cur, 1);
-  expect(curWeek[0].time.format('YYYY-MM-DD')).toBe('2025-01-06');
-  expect(curWeek[6].time.format('YYYY-MM-DD')).toBe('2025-01-12');
+  expect(curWeek[0].time.format('YYYY-MM-DD')).toBe(
+    dayjs().startOf('week').add(1, 'day').format('YYYY-MM-DD')
+  );
+  expect(curWeek[6].time.format('YYYY-MM-DD')).toBe(
+    dayjs().endOf('week').add(1, 'day').format('YYYY-MM-DD')
+  );
 });

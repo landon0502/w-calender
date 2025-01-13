@@ -8,8 +8,8 @@ function main() {
   const options: Options = {
     data: [
       {
-        start: dayjs().subtract(2, 'day').format('YYYY-MM-DD 00:00'),
-        end: dayjs().subtract(2, 'day').format('YYYY-MM-DD 4:00'),
+        start: dayjs().add(2, 'day').format('YYYY-MM-DD 00:00'),
+        end: dayjs().add(2, 'day').format('YYYY-MM-DD 4:00'),
         title: '这里是测试1',
       },
       {
