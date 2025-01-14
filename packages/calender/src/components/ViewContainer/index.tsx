@@ -1,8 +1,8 @@
 import './style/index.scss';
 import { ComponentChildren, h } from 'preact';
 import { PropsWithChildren } from '@/types/common';
-import { ScrollbarProps } from '../Scrollbar';
-import { withScrollbar } from '@/hoc';
+import Scrollbar, { ScrollbarProps } from '../Scrollbar';
+
 import { cls } from '@/utils';
 
 export interface ViewContainerProps {
@@ -24,23 +24,16 @@ export default function ViewContainer(props: PropsWithChildren<ViewContainerProp
       <div className={cls('view-container-header')} style={props.headerStyle}>
         {props.header}
       </div>
-      {withScrollbar(
-        () => (
-          <div className={cls('view-container-grid')}>
-            {props.timeIndicateBar}
+      <Scrollbar className={cls('scroll-container')} {...props.scrollProps}>
+        <div className={cls('view-container-grid')}>
+          {props.timeIndicateBar}
 
-            <div className={cls('view-container-grid-layout')}>
-              {props.content}
-              {props.timeIndicateLine}
-            </div>
+          <div className={cls('view-container-grid-layout')}>
+            {props.content}
+            {props.timeIndicateLine}
           </div>
-        ),
-        {
-          className: cls('scroll-container'),
-          disabledScroll: false,
-          ...props.scrollProps,
-        }
-      )}
+        </div>
+      </Scrollbar>
     </div>
   );
 }
