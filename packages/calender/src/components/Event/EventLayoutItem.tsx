@@ -54,6 +54,7 @@ export default function EventLayoutItem({
     }
   }
 
+  let parentElRect: DOMRect | undefined | null;
   useInteract(
     gridBox,
     void 0,
@@ -65,10 +66,11 @@ export default function EventLayoutItem({
             let rect = getEleLayout(event.target);
             onMoveStart?.(event, data, rect);
             setDragState('move');
+            parentElRect = getBoundingClientRect(event.target.parentElement);
           },
           move(event) {
             // get rect of column container element
-            const rect = getBoundingClientRect(event.target.parentElement);
+            const rect = parentElRect;
 
             let dx = getDx(event.dx, rect?.width ?? 1);
             let dy = getDy(event.dy, touchTriggerDistance.y);
@@ -85,7 +87,9 @@ export default function EventLayoutItem({
           },
           end(event) {
             let rect = getEleLayout(event.target);
+            parentElRect = null;
             onMoveEnd?.(event, data, rect);
+
             resetEditType();
           },
         },

@@ -260,6 +260,7 @@ export default function Column({
    * @zh 鼠标移动事件处理
    */
   let originalLayoutConfig: Rect;
+
   usePointerMoveEvent(layoutContainer, {
     onDown({ event }) {
       let { offsetY } = event.originalEvent;
@@ -293,23 +294,29 @@ export default function Column({
         type: 'add',
       });
     },
+    /**
+     * 需要优化，是指针在指定数值倍数是触发事件 ，getDy需要改造
+     */
     onMove({ dy }) {
       let newConfig = getDragState();
 
       if (newConfig) {
         let distanceY = getDy(dy, dragStepNum);
+
         if (distanceY) {
           originalLayoutConfig.h = originalLayoutConfig.h + distanceY;
           let h = Math.abs(originalLayoutConfig.h);
           let y = 0;
           if (originalLayoutConfig.h > 0) {
             y = newConfig.rect.y;
-          } else if (originalLayoutConfig.h < -dragStepNum) {
+          } else if (originalLayoutConfig.h < 0) {
+            // 向上扩展
             y = originalLayoutConfig.y - h;
           } else {
-            y = originalLayoutConfig.y - dragStepNum;
+            y = originalLayoutConfig.y;
             h = dragStepNum;
           }
+          console.log(originalLayoutConfig, y, h);
           let rect = {
             ...newConfig.rect,
             y: y,
@@ -417,7 +424,7 @@ export default function Column({
     if (dragConfig) {
       return (
         <OperateTime layout={dragConfig.rect} type={dragConfig.type}>
-          <div style="background: red; height: 100%">
+          <div style="background: rgba(0,0,0,.3);border:1px solid black; height: 100%">
             {/* 这里拖动时显示组件,需支持自定义 */}
             {dragTime?.start}
           </div>
