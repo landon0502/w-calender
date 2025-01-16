@@ -84,7 +84,7 @@ export function unref<T>(target: T | RefObject<T>): T | null {
  * @zh 记录拖拽距离，大于threshold单位距离才触发事件
  * @returns
  */
-export function getMoveDistance(options?: { immediate?: boolean }) {
+export function getMoveDistance() {
   let historydistance = 0;
   let setInitial = (v: number) => {
     historydistance = v;
@@ -95,7 +95,8 @@ export function getMoveDistance(options?: { immediate?: boolean }) {
     historydistance += dy;
     if (Math.abs(historydistance) > threshold) {
       let returnDy = historydistance;
-      historydistance = 0;
+      historydistance = Math.abs(historydistance) - threshold;
+      if (returnDy < 0) historydistance = -historydistance;
       return returnDy > 0 ? threshold : -threshold;
     }
     return false;
