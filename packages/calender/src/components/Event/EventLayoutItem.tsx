@@ -1,7 +1,7 @@
 import { useRef, Children } from 'preact/compat';
 import { cls } from '@/utils/css';
 import { getAttrsTransformTranslate } from '@/utils/dom';
-import { getMoveDistance } from '@/utils/common';
+import { moveThreshold } from '@/utils/common';
 import type { GridBoxProps, OperateType } from '@wcalender/types/components';
 import useInteract from '@/hooks/useInteract';
 import { genStyles } from '../_utils';
@@ -16,8 +16,8 @@ function getEleLayout(el: HTMLElement) {
   let { width, height } = el.getBoundingClientRect();
   return { ...posi, w: width, h: height };
 }
-const getDy = getMoveDistance();
-const getDx = getMoveDistance();
+const getDy = moveThreshold();
+const getDx = moveThreshold();
 export default function EventLayoutItem({
   w,
   h,

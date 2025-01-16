@@ -11,6 +11,7 @@ export type PointerPosition = {
   offsetY: number;
 };
 export type ScrollParent = Element | RefObject<Element>;
+
 export type UsePointerMoveEventOptions = {
   scrollParent?: ScrollParent;
   limitCurrentTarget?: boolean;
@@ -31,7 +32,7 @@ export function usePointerMoveDistance() {
     dy = useRef(0),
     prevMoveX = useRef<number | null | undefined>(),
     dx = useRef(0);
-  function getMoveDistance(cur: number, prev: number | null | undefined) {
+  function moveThreshold(cur: number, prev: number | null | undefined) {
     if (!isUndef(prev)) {
       return cur - prev;
     }
@@ -39,8 +40,8 @@ export function usePointerMoveDistance() {
   }
   return {
     getDXY: (x: number, y: number) => {
-      dx.current = getMoveDistance(x, prevMoveX.current);
-      dy.current = getMoveDistance(y, prevMoveY.current);
+      dx.current = moveThreshold(x, prevMoveX.current);
+      dy.current = moveThreshold(y, prevMoveY.current);
       prevMoveY.current = y;
       prevMoveX.current = x;
 

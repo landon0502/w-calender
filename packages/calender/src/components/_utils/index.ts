@@ -67,3 +67,7 @@ export function calculateDistance(
 export function offsetToTimeValue(offset: number, interval: number, cellHeight: number) {
   return (interval / cellHeight) * 60 * offset;
 }
+
+/**
+ * 通过列colIndex, top: number, height, range: 当前时间范围，计算当前时间段
+ */

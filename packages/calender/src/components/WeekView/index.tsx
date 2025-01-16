@@ -1,5 +1,5 @@
 import './style/index.scss';
-import { useMemo } from 'preact/compat';
+import { useMemo, useRef } from 'preact/compat';
 import { getWeekDays, cls, getReturnTime, isAsyncFunction, isFunction } from '@/utils';
 import { useXState } from '@/hooks';
 import dayjs from 'dayjs';
@@ -12,11 +12,12 @@ import { TimeIndicateLine, TimeIndicateBar } from '../TimeIndicateBar';
 import ViewContainer from '../ViewContainer';
 import { calculateDistance } from '../_utils';
 import { cellHeight, interval, gap } from '@/constant/_configurable';
+import useDragoverBubble from '../Event/useDragoverBubble';
 
 const WeekView = (props: PropsWithElAttrs<WeekViewProps>) => {
   const { store } = useStore();
   const [weekDays] = useXState(getWeekDays(dayjs(), 1));
-
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const data = useMemo(() => {
     return store?.data ?? [];
   }, [store]);
@@ -31,13 +32,16 @@ const WeekView = (props: PropsWithElAttrs<WeekViewProps>) => {
       props.onChange?.(event);
     }
   }
+
+  const { component: DragMask } = useDragoverBubble();
+
   return (
     <ViewContainer
       className={cls('day')}
       scrollProps={{ hideBar: true }}
       header={<div style={{ textAlign: 'center' }}>header</div>}
       content={
-        <div className={cls(['week-view'])}>
+        <div className={cls(['week-view'])} ref={containerRef}>
           {weekDays.map((item, index) => {
             return (
               <Column

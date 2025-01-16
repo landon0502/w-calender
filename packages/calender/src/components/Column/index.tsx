@@ -3,7 +3,7 @@ import { ComponentChildren } from 'preact';
 import { useMemo, useRef, forwardRef } from 'preact/compat';
 import {
   createUniqueId,
-  getMoveDistance,
+  moveThreshold,
   setElementStyle,
   getTransform,
   numToPx,
@@ -49,7 +49,7 @@ export interface ColumnProps extends ColumnEvent {
 }
 
 type DragConfig = { rect: Rect; data: CalenderItem; type: OperateType } | null;
-const getDy = getMoveDistance();
+const getDy = moveThreshold();
 
 export default function Column({
   data,
@@ -294,9 +294,6 @@ export default function Column({
         type: 'add',
       });
     },
-    /**
-     * 需要优化，是指针在指定数值倍数是触发事件 ，getDy需要改造
-     */
     onMove({ dy }) {
       let newConfig = getDragState();
 
@@ -316,7 +313,6 @@ export default function Column({
             y = originalLayoutConfig.y;
             h = dragStepNum;
           }
-          console.log(originalLayoutConfig, y, h);
           let rect = {
             ...newConfig.rect,
             y: y,
