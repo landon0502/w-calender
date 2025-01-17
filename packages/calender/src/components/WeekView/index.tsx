@@ -8,16 +8,50 @@ import { useStore } from '@/contexts/calenderStore';
 import type { PropsWithElAttrs } from '@/types/common';
 import type { CalenderItem } from '@/types/options';
 import type { WeekViewProps } from '@/types/components';
+import type { ReturnTimeValue } from '@/types/time';
+
 import { TimeIndicateLine, TimeIndicateBar } from '../TimeIndicateBar';
 import ViewContainer from '../ViewContainer';
 import { calculateDistance } from '../_utils';
 import { cellHeight, interval, gap } from '@/constant/_configurable';
-import useDragoverBubble from '../Event/useDragoverBubble';
+import useDragoverBubble from '@/hooks/useDragoverBubble';
+
+const ViewContent = ({
+  weekDays,
+  data,
+  onChange,
+}: {
+  weekDays: ReturnTimeValue[];
+  data: CalenderItem[];
+  onChange: (event: { target: CalenderItem; data: CalenderItem[] }) => {};
+}) => {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const { component: Bubble } = useDragoverBubble(containerRef);
+  return (
+    <div className={cls(['week-view'])} ref={containerRef}>
+      {weekDays.map((item, index) => {
+        return (
+          <Column
+            multipleColumns
+            data={data}
+            cellHeight={42}
+            timeInterval={30}
+            date={[getReturnTime(item.time.startOf('D')), getReturnTime(item.time.endOf('D'))]}
+            onChange={onChange}
+            columnIndex={index}
+            columnCount={weekDays.length}
+          />
+        );
+      })}
+      <Bubble />
+    </div>
+  );
+};
 
 const WeekView = (props: PropsWithElAttrs<WeekViewProps>) => {
   const { store } = useStore();
   const [weekDays] = useXState(getWeekDays(dayjs(), 1));
-  const containerRef = useRef<HTMLDivElement | null>(null);
+
   const data = useMemo(() => {
     return store?.data ?? [];
   }, [store]);
@@ -33,31 +67,12 @@ const WeekView = (props: PropsWithElAttrs<WeekViewProps>) => {
     }
   }
 
-  const { component: DragMask } = useDragoverBubble();
-
   return (
     <ViewContainer
       className={cls('day')}
       scrollProps={{ hideBar: true }}
       header={<div style={{ textAlign: 'center' }}>header</div>}
-      content={
-        <div className={cls(['week-view'])} ref={containerRef}>
-          {weekDays.map((item, index) => {
-            return (
-              <Column
-                multipleColumns
-                data={data}
-                cellHeight={42}
-                timeInterval={30}
-                date={[getReturnTime(item.time.startOf('D')), getReturnTime(item.time.endOf('D'))]}
-                onChange={onDataChange}
-                columnIndex={index}
-                columnCount={weekDays.length}
-              />
-            );
-          })}
-        </div>
-      }
+      content={<ViewContent weekDays={weekDays} data={data} onChange={onDataChange} />}
       timeIndicateLine={
         <TimeIndicateLine
           top={calculateDistance(dayjs().startOf('day'), dayjs(), cellHeight, interval)}

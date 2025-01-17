@@ -1,4 +1,4 @@
-import { useEffect } from 'preact/compat';
+import { useEffect, RefObject, createElement } from 'preact/compat';
 import DragoverBubble from './DragoverBubble';
 import { Bus } from '@/utils/bus';
 import { useXState } from '@/hooks';
@@ -21,12 +21,11 @@ export type DragConfig = { rect: Rect; data: CalenderItem; type: OperateType } |
  * w: 宽度
  * h:高度
  */
-const eventBus = new Bus();
-export default function useDragMask() {
+export const eventBus = new Bus();
+
+export default function useDragoverBubble(contaienr: Element | RefObject<Element>) {
   const [drag, setDrag, getDrag] = useXState<DragConfig | null>(null);
-  const PlaceholderComponent = () => {
-    return drag && <DragoverBubble layout={drag.rect} />;
-  };
+
   function onStart(e: DragConfig) {
     setDrag(e);
   }
@@ -48,7 +47,7 @@ export default function useDragMask() {
     };
   }, []);
   return {
-    component: PlaceholderComponent,
+    component: () => createElement(DragoverBubble, { drag }),
     eventBus,
   };
 }
