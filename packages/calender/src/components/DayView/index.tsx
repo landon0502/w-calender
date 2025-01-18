@@ -12,6 +12,33 @@ import type { ReturnTimeValue } from '@/types/time';
 import ViewContainer from '../ViewContainer';
 import { calculateDistance } from '../_utils';
 import { cellHeight, interval, gap } from '@/constant/_configurable';
+import EventLayoutContainer from '../Event/EventLayoutContainer';
+
+const ViewContent = ({
+  data,
+  onChange,
+  cellHeight = 42,
+  interval = 30,
+  date,
+}: DayViewProps & { cellHeight?: number; interval?: number }) => {
+  return (
+    <EventLayoutContainer
+      className={cls(['week-view'])}
+      cellHeight={cellHeight}
+      interval={interval}
+    >
+      <div className={cls(['week-view-cols'])}>
+        <Column
+          data={data}
+          date={date}
+          cellHeight={cellHeight}
+          bordered={false}
+          onChange={onChange}
+        />
+      </div>
+    </EventLayoutContainer>
+  );
+};
 
 function DayView(props: DayViewProps) {
   const { store } = useStore();
@@ -47,11 +74,10 @@ function DayView(props: DayViewProps) {
       scrollProps={{ hideBar: true }}
       header={<Header data={todayData} />}
       content={
-        <Column
+        <ViewContent
           data={data}
           date={props.date}
           cellHeight={cellHeight}
-          bordered={false}
           onChange={onDataChange}
         />
       }
