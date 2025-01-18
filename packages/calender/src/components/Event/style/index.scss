@@ -1,0 +1,9 @@
+@use '@/style/mixins/mixins' as *;
+@use 'sass:math' as *;
+@include cls('operate-placelholder') {
+  pointer-events: none;
+  user-select: none;
+  position: absolute;
+  background-color: antiquewhite;
+  z-index: 99;
+}

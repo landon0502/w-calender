@@ -1,9 +1,10 @@
+import './style/index.scss';
 import { PropsWithChildren } from '@/types/common';
 import { forwardRef } from 'preact/compat';
 import type { Rect, OperateType } from '@/types/components';
 import { genStyles } from '@/components/_utils';
 import { cls } from '@/utils';
-import type { DragConfig } from './';
+import type { DragConfig } from '@/hooks/useDragoverBubble';
 /**
  * @zh 拖拽样式
  */
@@ -21,6 +22,6 @@ export function DragoverBubble(props: PropsWithChildren<{ layout: Rect }>) {
   return <OperateTime layout={props.layout}>{props.children}</OperateTime>;
 }
 
-export default ({ drag }: { drag: DragConfig }) => {
-  return drag && <DragoverBubble layout={drag.rect} />;
+export default ({ dragover, children }: PropsWithChildren<{ dragover: DragConfig }>) => {
+  return dragover && <DragoverBubble layout={dragover.rect}>{children}</DragoverBubble>;
 };

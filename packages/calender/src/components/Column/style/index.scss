@@ -22,8 +22,3 @@ $border: 1px solid $color-border-2;
     border-top: 0;
   }
 }
-
-@include cls('operate-placelholder') {
-  pointer-events: none;
-  user-select: none;
-}

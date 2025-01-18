@@ -1,7 +1,7 @@
 import './style/index.scss';
 import { useMemo, useRef } from 'preact/compat';
 import { getWeekDays, cls, getReturnTime, isAsyncFunction, isFunction } from '@/utils';
-import { useXState } from '@/hooks';
+import { useXState, usePointerMoveEvent } from '@/hooks';
 import dayjs from 'dayjs';
 import Column from '../Column';
 import { useStore } from '@/contexts/calenderStore';
@@ -14,43 +14,51 @@ import { TimeIndicateLine, TimeIndicateBar } from '../TimeIndicateBar';
 import ViewContainer from '../ViewContainer';
 import { calculateDistance } from '../_utils';
 import { cellHeight, interval, gap } from '@/constant/_configurable';
-import useDragoverBubble from '@/hooks/useDragoverBubble';
+import EventLayoutContainer from '../Event/EventLayoutContainer';
 
 const ViewContent = ({
   weekDays,
   data,
   onChange,
+  cellHeight = 42,
+  interval = 30,
 }: {
   weekDays: ReturnTimeValue[];
   data: CalenderItem[];
+  cellHeight?: number;
+  interval?: number;
   onChange: (event: { target: CalenderItem; data: CalenderItem[] }) => {};
 }) => {
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const { component: Bubble } = useDragoverBubble(containerRef);
   return (
-    <div className={cls(['week-view'])} ref={containerRef}>
-      {weekDays.map((item, index) => {
-        return (
-          <Column
-            multipleColumns
-            data={data}
-            cellHeight={42}
-            timeInterval={30}
-            date={[getReturnTime(item.time.startOf('D')), getReturnTime(item.time.endOf('D'))]}
-            onChange={onChange}
-            columnIndex={index}
-            columnCount={weekDays.length}
-          />
-        );
-      })}
-      <Bubble />
-    </div>
+    <EventLayoutContainer
+      className={cls(['week-view'])}
+      cellHeight={cellHeight}
+      interval={interval}
+    >
+      <div className={cls(['week-view-cols'])}>
+        {weekDays.map((item, index) => {
+          return (
+            <Column
+              multipleColumns
+              data={data}
+              cellHeight={42}
+              timeInterval={30}
+              date={[getReturnTime(item.time.startOf('D')), getReturnTime(item.time.endOf('D'))]}
+              onChange={onChange}
+              columnIndex={index}
+              columnCount={weekDays.length}
+            />
+          );
+        })}
+      </div>
+    </EventLayoutContainer>
   );
 };
 
 const WeekView = (props: PropsWithElAttrs<WeekViewProps>) => {
   const { store } = useStore();
   const [weekDays] = useXState(getWeekDays(dayjs(), 1));
+  const containerRef = useRef<any>(null);
 
   const data = useMemo(() => {
     return store?.data ?? [];

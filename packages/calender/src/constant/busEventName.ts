@@ -12,3 +12,4 @@ export const RESIZE_END = Symbol('resize_end');
 export const DRAG_MASK_START = Symbol('drag_mask_start');
 export const DRAG_MASK_MOVE = Symbol('drag_mask_move');
 export const DRAG_MASK_END = Symbol('drag_mask_end');
+export const SET_DRAG_BUBBLE_DATA = Symbol('set_drag_bubble_data');

@@ -5,6 +5,7 @@ import useInteract from './useInteract';
 import usePointerMoveEvent from './usePointerMoveEvent';
 import useEventListener from './useEventListener';
 import useScroll from './useScroll';
+import useDragoverBubble from './useDragoverBubble';
 export {
   useBusListener,
   useElementBounding,
@@ -13,4 +14,5 @@ export {
   usePointerMoveEvent,
   useEventListener,
   useScroll,
+  useDragoverBubble,
 };

@@ -11,7 +11,6 @@ import {
   format,
   cls,
   isEmpty,
-  isUndef,
   isNumber,
 } from '@/utils';
 import { genTimeSlice, calculateRect, offsetToTimeValue, genStyles } from '../_utils';
@@ -20,8 +19,9 @@ import type { DateRange } from '@/types/schedule';
 import type { Rect, OperateType } from '@/types/components';
 import type { PropsWithElAttrs } from '@/types/common';
 import useColumnLayout from './hooks/useColumnLayout';
-import { useElementBounding, useXState, usePointerMoveEvent } from '@/hooks';
+import { useElementBounding, usePointerMoveEvent, useBusListener } from '@/hooks';
 import EventLayoutItem from '@/components/Event/EventLayoutItem';
+import useDragoverBubble from '@/hooks/useDragoverBubble';
 
 export interface ColumnEvent {
   onMoveStart?(event: any, data: CalenderItem, rect: Rect): void;
@@ -68,12 +68,10 @@ export default function Column({
   const layoutContainer = useRef<HTMLDivElement>(null);
   const timeList = useMemo(() => genTimeSlice(date, timeInterval), [date]);
   const columnHeight = useMemo(() => timeList.length * cellHeight, [timeList]);
-
-  let dragPosition: Rect = { x: 0, y: 0, w: '100%', h: 0 };
+  const { setDragoverBubbleState, getDragoverState } = useDragoverBubble();
+  let dragPosition: Rect = { x: 0, y: 0, w: 0, h: 0 };
   let relativeIndex = 0;
-
-  const [dragConfig, setDragConf, getDragState] = useXState<DragConfig>(null);
-  const { rect: containerRect, getRect } = useElementBounding(layoutContainer);
+  const { rect: containerRect, getRect: getContainerRect } = useElementBounding(layoutContainer);
 
   const { layoutData, getCalenderData } = useColumnLayout({
     data,
@@ -85,22 +83,12 @@ export default function Column({
   }, [cellHeight, timeInterval]);
 
   /**
-   * 拖动时的时间
-   */
-  const dragTime = useMemo(() => {
-    if (isUndef(dragConfig)) return null;
-    let start = format(dragConfig.data.start, 'YYYY-MM-DD HH:mm');
-    let end = format(dragConfig.data.end, 'YYYY-MM-DD HH:mm');
-    return { start, end };
-  }, [dragConfig]);
-
-  /**
    * @zh 开始移动
    */
   function onMoveStart(event: any, data: CalenderItem, rect: Rect) {
     dragPosition.y = rect.y;
     dragPosition.h = rect.h;
-    setDragConf({ rect: { ...dragPosition }, data, type: 'move' });
+    setDragoverBubbleState({ rect: { ...dragPosition }, data, type: 'move' });
   }
 
   /**
@@ -113,7 +101,7 @@ export default function Column({
     if (dragPosition.y < 0) {
       dragPosition.y = 0;
     }
-    let size = getRect();
+    let size = getContainerRect();
     if (dragPosition.y + dragPosition.h >= size.height) {
       dragPosition.y = size.height - dragPosition.h;
     }
@@ -121,7 +109,7 @@ export default function Column({
     let dragEl = document.querySelector(`.${cls('drag-block')}`);
 
     if (isNumber(event.dx) && multipleColumns) {
-      let newIndex = relativeIndex + event.dx / getRect().width;
+      let newIndex = relativeIndex + event.dx / getContainerRect().width;
       if (newIndex + columnIndex >= 0 && newIndex + columnIndex < columnCount) {
         relativeIndex = newIndex;
       }
@@ -141,8 +129,8 @@ export default function Column({
     handleUpdateData(event, data, 'move');
   }
 
-  function onMoveEnd(event: any, data: CalenderItem) {
-    let dragData = getDragState();
+  function onMoveEnd() {
+    let dragData = getDragoverState();
     relativeIndex = 0;
     changeData(dragData?.data as CalenderItem);
   }
@@ -150,7 +138,7 @@ export default function Column({
    * @zh resize start
    */
   function onResizeStart(event: any, data: CalenderItem, rect: Rect) {
-    setDragConf({ rect, data, type: 'resize' });
+    setDragoverBubbleState({ rect, data, type: 'resize' });
     dragPosition = { ...rect };
   }
 
@@ -169,7 +157,7 @@ export default function Column({
    * @zh 容器大小变更事件
    */
   function onResizeEnd(event: any, data: CalenderItem) {
-    let dragData = getDragState();
+    let dragData = getDragoverState();
     changeData(dragData?.data as CalenderItem);
   }
 
@@ -192,11 +180,11 @@ export default function Column({
         )
         .add(relativeIndex, 'day')
     );
-    setDragConf({
+    setDragoverBubbleState({
       rect: {
         y: dragPosition.y,
-        w: '100%',
-        x: `calc(${100 * relativeIndex}% + ${relativeIndex}px)`,
+        w: getContainerRect().width,
+        x: `calc(${numToPx(getContainerRect().width * columnIndex)} + ${relativeIndex}px)`,
         h: event.rect.height,
       },
       data: currentDragData,
@@ -209,7 +197,7 @@ export default function Column({
    */
   async function changeData(data: CalenderItem) {
     await updateData(data);
-    setDragConf(null);
+    setDragoverBubbleState(null);
   }
 
   /**
@@ -267,13 +255,14 @@ export default function Column({
       let top = getMoveEvtDownY(offsetY);
 
       let rect = {
-        x: 0,
+        x: getContainerRect().width * columnIndex,
         y: top,
-        w: '100%',
+        w: getContainerRect().width,
         h: dragStepNum,
       };
       originalLayoutConfig = rect;
-      setDragConf({
+
+      let record: DragConfig = {
         rect,
         data: {
           title: '添加日程',
@@ -292,10 +281,11 @@ export default function Column({
           _key: createUniqueId(),
         },
         type: 'add',
-      });
+      };
+      setDragoverBubbleState(record);
     },
     onMove({ dy }) {
-      let newConfig = getDragState();
+      let newConfig = getDragoverState();
 
       if (newConfig) {
         let distanceY = getDy(dy, dragStepNum);
@@ -334,7 +324,7 @@ export default function Column({
           ].sort((a, b) => {
             return a.time.isAfter(b.time) ? 1 : -1;
           });
-          setDragConf({
+          setDragoverBubbleState({
             rect,
             data: {
               title: newConfig.data.title,
@@ -348,7 +338,7 @@ export default function Column({
       }
     },
     onUp() {
-      let newConfig = getDragState();
+      let newConfig = getDragoverState();
       if (newConfig) {
         changeData(newConfig.data);
       }
@@ -405,7 +395,6 @@ export default function Column({
           onResizeEnd={onResizeEnd}
           onResize={onResize}
           onTap={onTap}
-          style={{ pointerEvents: isEmpty(dragConfig) ? 'auto' : 'none' }}
           touchTriggerDistance={{ y: dragStepNum, x: containerRect.width }}
         >
           {/* 自定义日程卡片，需支持自定义 */}
@@ -415,19 +404,6 @@ export default function Column({
         </EventLayoutItem>
       ))
     );
-  }
-  function renderPlaceholder() {
-    if (dragConfig) {
-      return (
-        <OperateTime layout={dragConfig.rect} type={dragConfig.type}>
-          <div style="background: rgba(0,0,0,.3);border:1px solid black; height: 100%">
-            {/* 这里拖动时显示组件,需支持自定义 */}
-            {dragTime?.start}
-          </div>
-        </OperateTime>
-      );
-    }
-    return null;
   }
 
   return (
@@ -446,7 +422,6 @@ export default function Column({
       ref={layoutContainer}
     >
       {renderCalenderLayout()}
-      {renderPlaceholder()}
     </div>
   );
 }
