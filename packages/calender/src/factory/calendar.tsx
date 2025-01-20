@@ -7,17 +7,22 @@ import type { UnitType } from 'dayjs';
 import type { DayViewProps } from '@/types/components';
 import type { Options, CalenderItem } from '@/types/options';
 import type { Date } from '@/types/common';
-import type { ViewType } from '@/types/options';
+import type { ViewType, LayoutConfig } from '@/types/options';
 import type { ScheduleData, ScheduleItem, DateRange } from '@/types/schedule';
 import CalendarCore from './core';
-
-import { setStore, StoreProvider } from '@/contexts/calenderStore';
+import { commitKeys } from '@/contexts/calenderStore';
+import { setStore, StoreProvider, store } from '@/contexts/calenderStore';
 
 const defaultOptions: Required<Options> = {
   date: '',
   data: [],
   viewType: 'D',
   templates: {},
+  layoutConfig: {
+    cellHeight: 42,
+    interval: 30,
+    gap: 8,
+  },
   onChange() {},
   onUpdate() {},
   onMount() {},
@@ -98,22 +103,25 @@ class Calender extends CalendarCore {
   options: Options = defaultOptions;
   data: CalenderItem[] = [];
   viewType: ViewType = 'D';
+  cellHeight: number = 42;
+  interval: number = 30;
+  gap: number = 8;
+  layoutConfig: LayoutConfig = defaultOptions.layoutConfig;
+
   constructor(el: HTMLElement, options: Partial<Options>) {
     super();
     this.el = el;
     this.setOptions(options);
-    this.changeView(this.viewType);
   }
 
   // 处理数据格式
   private formatData(data: ScheduleData) {
     this.data = getData(data);
-    this.initStore();
   }
 
   // 初始化store
   initStore() {
-    setStore({ data: this.data });
+    setStore({ data: this.data, layoutConfig: this.layoutConfig, viewType: this.viewType });
   }
 
   // 设置配置
@@ -122,13 +130,40 @@ class Calender extends CalendarCore {
     if (options.viewType) {
       this.viewType = options.viewType;
     }
-
+    this.layoutConfig = options.layoutConfig ?? defaultOptions.layoutConfig;
+    this.changeView(this.viewType);
     this.formatData(this.options.data);
+    this.initStore();
   }
 
   // 更改视图
   changeView(type: ViewType) {
+    this.viewType = type;
+    this.options.viewType = type;
+
+    this.setLayoutConfig();
     this.render(type);
+  }
+
+  // 初始化columns配置
+  setLayoutConfig() {
+    let columnCount = {
+      day: 1,
+      D: 1,
+      week: 7,
+      W: 7,
+      month: 7,
+      M: 7,
+    };
+    let column = columnCount[this.viewType];
+    let columns = new Array(this.layoutConfig.column)
+      .fill({})
+      .map((_, index) => ({ columnIndex: index, width: 0 }));
+    this.layoutConfig = {
+      ...this.layoutConfig,
+      column,
+      columns,
+    };
   }
 
   // 数据更新前触发
@@ -153,7 +188,7 @@ class Calender extends CalendarCore {
   onChange = (event: { target: CalenderItem; data: CalenderItem[] }) => {
     // 数据更新
     this.options.onChange?.(event);
-    setStore({ data: event.data });
+    store.commit(commitKeys.SET_DATA, event.data);
   };
 
   // 渲染组件

@@ -4,7 +4,6 @@ import { useCallback, useContext, useEffect, useLayoutEffect, useMemo } from 'pr
 import { useXState } from '@/hooks';
 import { isUndef } from '@/utils/is';
 import Store, { StoreOptions } from './Store';
-import { deepClone } from '@/utils';
 
 const isSSR = isUndef(window) || !window.navigator;
 const useIsomorphicLayoutEffect = isSSR ? useEffect : useLayoutEffect;
@@ -16,16 +15,15 @@ export function createStore<State extends Record<string, any>>(
   options?: StoreOptions<State>
 ) {
   const store = Store.create(initialState, options);
-
   const StoreContext = createContext<State | undefined>(initialState);
 
   // 共享顶级组件
   function StoreProvider({ children }: PropsWithChildren) {
-    const [state, setProviderState, getProvderState] = useXState<State | undefined>(
+    const [state, setProviderState, getProvideState] = useXState<State | undefined>(
       store.getState()
     );
     let ob = useCallback((newState: State) => {
-      setProviderState(deepClone(newState));
+      setProviderState(() => newState);
     }, []);
     store.observe(ob);
 
@@ -45,20 +43,22 @@ export function createStore<State extends Record<string, any>>(
   // hooks
   function useStore() {
     const storeCtx = useContext(StoreContext);
-    const state = useRef<State | undefined>(storeCtx);
+    const [state, setRefState, getRefState] = useXState<State | undefined>(storeCtx);
 
     useIsomorphicLayoutEffect(() => {
-      state.current = storeCtx;
+      setRefState(storeCtx);
     }, [storeCtx]);
     // store 操作
     function getState(key: string) {
-      if (state.current) {
-        return state.current[key];
+      let state = getRefState();
+      if (state) {
+        return state[key];
       }
       return null;
     }
     function setState(name: string, data: any) {
-      if (!isUndef(state.current) && typeof state.current === 'object') {
+      let state = getRefState();
+      if (!isUndef(state) && typeof state === 'object') {
         store.commit(name, data);
       }
     }
@@ -70,7 +70,7 @@ export function createStore<State extends Record<string, any>>(
       setState,
       clear,
       removeItem,
-      store: storeCtx,
+      store: state,
     };
   }
 
@@ -94,5 +94,6 @@ export function createStore<State extends Record<string, any>>(
     useInternalStore,
     setStore,
     getStore,
+    store,
   };
 }

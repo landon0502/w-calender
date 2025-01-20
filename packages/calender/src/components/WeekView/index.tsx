@@ -22,11 +22,13 @@ const ViewContent = ({
   onChange,
   cellHeight = 42,
   interval = 30,
+  gap = 8,
 }: {
   weekDays: ReturnTimeValue[];
   data: CalenderItem[];
   cellHeight?: number;
   interval?: number;
+  gap?: number;
   onChange: (event: { target: CalenderItem; data: CalenderItem[] }) => {};
 }) => {
   return (
@@ -41,8 +43,8 @@ const ViewContent = ({
             <Column
               multipleColumns
               data={data}
-              cellHeight={42}
-              timeInterval={30}
+              cellHeight={cellHeight}
+              timeInterval={interval}
               date={[getReturnTime(item.time.startOf('D')), getReturnTime(item.time.endOf('D'))]}
               onChange={onChange}
               columnIndex={index}
@@ -56,11 +58,15 @@ const ViewContent = ({
 };
 
 const WeekView = (props: PropsWithElAttrs<WeekViewProps>) => {
-  const { store } = useStore();
+  const { store, getState } = useStore();
   const [weekDays] = useXState(getWeekDays(dayjs(), 1));
 
   const data = useMemo(() => {
-    return store?.data ?? [];
+    return getState('data') ?? [];
+  }, [store]);
+
+  const layoutConfig = useMemo(() => {
+    return getState('layoutConfig') ?? [];
   }, [store]);
 
   // 数据更改
@@ -79,7 +85,16 @@ const WeekView = (props: PropsWithElAttrs<WeekViewProps>) => {
       className={cls('day')}
       scrollProps={{ hideBar: true }}
       header={<div style={{ textAlign: 'center' }}>header</div>}
-      content={<ViewContent weekDays={weekDays} data={data} onChange={onDataChange} />}
+      content={
+        <ViewContent
+          weekDays={weekDays}
+          data={data}
+          onChange={onDataChange}
+          cellHeight={layoutConfig.cellHeight}
+          interval={layoutConfig.interval}
+          gap={layoutConfig.gap}
+        />
+      }
       timeIndicateLine={
         <TimeIndicateLine
           top={calculateDistance(dayjs().startOf('day'), dayjs(), cellHeight, interval)}

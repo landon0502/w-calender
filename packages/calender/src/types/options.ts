@@ -13,6 +13,18 @@ export interface CalenderEvents {
   onMount?(): void;
   onUnmount?(): void;
 }
+
+export interface LayoutConfig {
+  interval: number;
+  gap: number;
+  cellHeight: number;
+  column?: number;
+  columns?: Array<{ width: number; columnIndex: number }>;
+}
+
+export interface WeekLayoutConfig {}
+export interface MonthLayoutConfig {}
+
 /**
  * @zh WCalender类options配置项
  */
@@ -22,6 +34,7 @@ export interface Options extends CalenderEvents {
   viewType: ViewType;
   templates?: Partial<Record<ViewType, Partial<Record<'drag' | 'add', Template>>>>; // 自定义模版
   onBeforeUpdate?: OnBeforeUpdate;
+  layoutConfig: LayoutConfig;
 }
 
 export interface CalenderItem {

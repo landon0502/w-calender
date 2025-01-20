@@ -3,7 +3,7 @@ export default defineConfig({
   plugins: [],
   mode: 'development',
   server: {
-    port: 5000,
+    port: 5001,
     open: true,
     hmr: true,
   },

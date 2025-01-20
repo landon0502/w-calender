@@ -1,16 +1,42 @@
 import { createStore } from '@/store';
-import { CalenderItem } from '@/types/options';
+import type { CalenderItem, ViewType, LayoutConfig } from '@/types/options';
+export const commitKeys = {
+  SET_DATA: 'SET_DATA',
+  SET_LAYOUTCONFIG: 'SET_LAYOUTCONFIG',
+  SET_VIEWTYPE: 'SET_VIEWTYPE',
+};
+export const actionKeys = {};
 
-export const COMMIT_KEY = {};
-export const ACTION_KEY = {};
-const { StoreProvider, useStore, setStore, getStore } = createStore<{ data: CalenderItem[] }>(
+type CalenderStore = {
+  data: CalenderItem[];
+  layoutConfig: LayoutConfig;
+  viewType: ViewType;
+};
+const { StoreProvider, useStore, setStore, getStore, store } = createStore<CalenderStore>(
   {
     data: [],
+    layoutConfig: {
+      cellHeight: 42,
+      interval: 30,
+      gap: 8,
+    },
+    viewType: 'D',
   },
   {
-    mutations: {},
+    mutations: {
+      [commitKeys.SET_DATA](state: CalenderStore, value: CalenderItem[]) {
+        state.data = value;
+      },
+      [commitKeys.SET_LAYOUTCONFIG](state: CalenderStore, value: LayoutConfig) {
+        state.layoutConfig = value;
+      },
+
+      [commitKeys.SET_VIEWTYPE](state: CalenderStore, value: ViewType) {
+        state.viewType = value;
+      },
+    },
     actions: {},
   }
 );
 
-export { StoreProvider, useStore, setStore, getStore };
+export { StoreProvider, useStore, setStore, getStore, store };

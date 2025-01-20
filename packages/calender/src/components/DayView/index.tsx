@@ -20,7 +20,8 @@ const ViewContent = ({
   cellHeight = 42,
   interval = 30,
   date,
-}: DayViewProps & { cellHeight?: number; interval?: number }) => {
+  gap = 8,
+}: DayViewProps & { cellHeight?: number; interval?: number; gap?: number }) => {
   return (
     <EventLayoutContainer
       className={cls(['week-view'])}
@@ -41,12 +42,15 @@ const ViewContent = ({
 };
 
 function DayView(props: DayViewProps) {
-  const { store } = useStore();
+  const { store, getState } = useStore();
 
   // 这里的数据需统一使用store存储
   // const data = useRef(getState('data'));
   const data = useMemo(() => {
     return store?.data ?? [];
+  }, [store]);
+  const layoutConfig = useMemo(() => {
+    return getState('layoutConfig') ?? [];
   }, [store]);
   // 头部列表渲染
   const todayData = useMemo(() => {
@@ -77,20 +81,26 @@ function DayView(props: DayViewProps) {
         <ViewContent
           data={data}
           date={props.date}
-          cellHeight={cellHeight}
+          cellHeight={layoutConfig.cellHeight}
+          gap={layoutConfig.gap}
           onChange={onDataChange}
         />
       }
       timeIndicateLine={
         <TimeIndicateLine
-          top={calculateDistance(dayjs().startOf('day'), dayjs(), cellHeight, interval)}
+          top={calculateDistance(
+            dayjs().startOf('day'),
+            dayjs(),
+            layoutConfig.cellHeight,
+            interval
+          )}
         />
       }
       timeIndicateBar={
         <TimeIndicateBar
           range={props.date}
           interval={interval}
-          cellHeight={cellHeight}
+          cellHeight={layoutConfig.cellHeight}
           cellWidth={72}
         />
       }
