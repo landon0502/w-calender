@@ -27,6 +27,15 @@ const ViewContent = ({
       className={cls(['week-view'])}
       cellHeight={cellHeight}
       interval={interval}
+      onStart={(e) => {
+        console.log(e);
+      }}
+      onMove={(e) => {
+        console.log(e);
+      }}
+      onEnd={(e) => {
+        console.log(e);
+      }}
     >
       <div className={cls(['week-view-cols'])}>
         <Column

@@ -51,6 +51,31 @@ export interface ColumnProps extends ColumnEvent {
 type DragConfig = { rect: Rect; data: CalenderItem; type: OperateType } | null;
 const getDy = moveThreshold();
 
+/**
+ * @zh 渲染模版
+ */
+function RenderTemplate({
+  touchState,
+  config,
+}: {
+  touchState?: OperateType;
+  config: CalenderItem;
+}) {
+  return (
+    <div
+      style={{
+        width: '100%',
+        height: '100%',
+        background: 'blue',
+        fontSize: '12px',
+        color: 'white',
+      }}
+    >
+      {`${config.title}-${format(config.start, 'HH:mm')}~${format(config.end, 'HH:mm')}--${touchState}`}
+    </div>
+  );
+}
+
 export default function Column({
   data,
   date,
@@ -249,126 +274,101 @@ export default function Column({
    */
   let originalLayoutConfig: Rect;
 
-  usePointerMoveEvent(layoutContainer, {
-    onDown({ event }) {
-      let { offsetY } = event.originalEvent;
-      let top = getMoveEvtDownY(offsetY);
+  // usePointerMoveEvent(layoutContainer, {
+  //   onDown({ event }) {
+  //     let { offsetY } = event.originalEvent;
+  //     let top = getMoveEvtDownY(offsetY);
 
-      let rect = {
-        x: getContainerRect().width * columnIndex,
-        y: top,
-        w: getContainerRect().width,
-        h: dragStepNum,
-      };
-      originalLayoutConfig = rect;
+  //     let rect = {
+  //       x: getContainerRect().width * columnIndex,
+  //       y: top,
+  //       w: getContainerRect().width,
+  //       h: dragStepNum,
+  //     };
+  //     originalLayoutConfig = rect;
 
-      let record: DragConfig = {
-        rect,
-        data: {
-          title: '添加日程',
-          start: getReturnTime(
-            getReturnTime(date[0]).time.add(
-              offsetToTimeValue(top, timeInterval, cellHeight),
-              'second'
-            )
-          ),
-          end: getReturnTime(
-            getReturnTime(date[0]).time.add(
-              offsetToTimeValue(top + dragStepNum, timeInterval, cellHeight),
-              'second'
-            )
-          ),
-          _key: createUniqueId(),
-        },
-        type: 'add',
-      };
-      setDragoverBubbleState(record);
-    },
-    onMove({ dy }) {
-      let newConfig = getDragoverState();
+  //     let record: DragConfig = {
+  //       rect,
+  //       data: {
+  //         title: '添加日程',
+  //         start: getReturnTime(
+  //           getReturnTime(date[0]).time.add(
+  //             offsetToTimeValue(top, timeInterval, cellHeight),
+  //             'second'
+  //           )
+  //         ),
+  //         end: getReturnTime(
+  //           getReturnTime(date[0]).time.add(
+  //             offsetToTimeValue(top + dragStepNum, timeInterval, cellHeight),
+  //             'second'
+  //           )
+  //         ),
+  //         _key: createUniqueId(),
+  //       },
+  //       type: 'add',
+  //     };
+  //     setDragoverBubbleState(record);
+  //   },
+  //   onMove({ dy }) {
+  //     let newConfig = getDragoverState();
 
-      if (newConfig) {
-        let distanceY = getDy(dy, dragStepNum);
+  //     if (newConfig) {
+  //       let distanceY = getDy(dy, dragStepNum);
 
-        if (distanceY) {
-          originalLayoutConfig.h = originalLayoutConfig.h + distanceY;
-          let h = Math.abs(originalLayoutConfig.h);
-          let y = 0;
-          if (originalLayoutConfig.h > 0) {
-            y = newConfig.rect.y;
-          } else if (originalLayoutConfig.h < 0) {
-            // 向上扩展
-            y = originalLayoutConfig.y - h;
-          } else {
-            y = originalLayoutConfig.y;
-            h = dragStepNum;
-          }
-          let rect = {
-            ...newConfig.rect,
-            y: y,
-            h,
-          };
-          let [start, end] = [
-            getReturnTime(
-              getReturnTime(date[0]).time.add(
-                offsetToTimeValue(rect.y, timeInterval, cellHeight),
-                'second'
-              )
-            ),
-            getReturnTime(
-              getReturnTime(date[0]).time.add(
-                offsetToTimeValue(rect.y + h, timeInterval, cellHeight),
-                'second'
-              )
-            ),
-          ].sort((a, b) => {
-            return a.time.isAfter(b.time) ? 1 : -1;
-          });
-          setDragoverBubbleState({
-            rect,
-            data: {
-              title: newConfig.data.title,
-              start,
-              end,
-              _key: createUniqueId(),
-            },
-            type: 'add',
-          });
-        }
-      }
-    },
-    onUp() {
-      let newConfig = getDragoverState();
-      if (newConfig) {
-        changeData(newConfig.data);
-      }
-    },
-  });
-
-  /**
-   * @zh 渲染模版
-   */
-  function RenderTemplate({
-    touchState,
-    config,
-  }: {
-    touchState?: OperateType;
-    config: CalenderItem;
-  }) {
-    return (
-      <div
-        style={{
-          width: '100%',
-          height: '100%',
-          background: 'blue',
-          fontSize: '12px',
-          color: 'white',
-        }}
-      >
-        {`${config.title}-${format(config.start, 'HH:mm')}~${format(config.end, 'HH:mm')}--${touchState}`}
-      </div>
-    );
-  }
+  //       if (distanceY) {
+  //         originalLayoutConfig.h = originalLayoutConfig.h + distanceY;
+  //         let h = Math.abs(originalLayoutConfig.h);
+  //         let y = 0;
+  //         if (originalLayoutConfig.h > 0) {
+  //           y = newConfig.rect.y;
+  //         } else if (originalLayoutConfig.h < 0) {
+  //           // 向上扩展
+  //           y = originalLayoutConfig.y - h;
+  //         } else {
+  //           y = originalLayoutConfig.y;
+  //           h = dragStepNum;
+  //         }
+  //         let rect = {
+  //           ...newConfig.rect,
+  //           y: y,
+  //           h,
+  //         };
+  //         let [start, end] = [
+  //           getReturnTime(
+  //             getReturnTime(date[0]).time.add(
+  //               offsetToTimeValue(rect.y, timeInterval, cellHeight),
+  //               'second'
+  //             )
+  //           ),
+  //           getReturnTime(
+  //             getReturnTime(date[0]).time.add(
+  //               offsetToTimeValue(rect.y + h, timeInterval, cellHeight),
+  //               'second'
+  //             )
+  //           ),
+  //         ].sort((a, b) => {
+  //           return a.time.isAfter(b.time) ? 1 : -1;
+  //         });
+  //         setDragoverBubbleState({
+  //           rect,
+  //           data: {
+  //             title: newConfig.data.title,
+  //             start,
+  //             end,
+  //             _key: createUniqueId(),
+  //           },
+  //           type: 'add',
+  //         });
+  //       }
+  //     }
+  //   },
+  //   onUp() {
+  //     let newConfig = getDragoverState();
+  //     if (newConfig) {
+  //       changeData(newConfig.data);
+  //     }
+  //   },
+  // });
 
   /**
    * @zh 日程布局

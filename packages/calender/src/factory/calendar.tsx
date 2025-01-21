@@ -139,7 +139,6 @@ class Calender extends CalendarCore {
   // 更改视图
   changeView(type: ViewType) {
     this.viewType = type;
-    this.options.viewType = type;
 
     this.setLayoutConfig();
     this.render(type);
