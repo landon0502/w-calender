@@ -6,8 +6,13 @@ import type { Options, Target, Listeners, Interactable, EdgeOptions } from '@int
 import { unref } from '@/utils/common';
 import { isUndef } from '@/utils/is';
 export interface InteractEventOptions {
-  draggableEvents?: { autoScroll?: boolean; listeners: Listeners };
-  pointerEvents?: { listeners: Listeners };
+  draggableEvents?: {
+    autoScroll?: boolean;
+    listeners: Listeners;
+    origin?: string;
+    inertia?: boolean;
+  };
+  pointerEvents?: { listeners: Listeners; origin?: string };
   resizeEvents?: { edges?: EdgeOptions; listeners: Listeners };
 }
 export type UseInteractTarget = Target | RefObject<Target>;

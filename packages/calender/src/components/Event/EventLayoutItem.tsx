@@ -7,7 +7,7 @@ import useInteract from '@/hooks/useInteract';
 import { genStyles } from '../_utils';
 import { useXState } from '@/hooks';
 import { isAsyncFunction, isFunction, getBoundingClientRect } from '@/utils';
-
+import { store, commitKeys } from '@/contexts/calenderStore';
 /**
  * @zh 获取拖动触发元素信息
  */
@@ -61,6 +61,7 @@ export default function EventLayoutItem({
     {
       draggableEvents: {
         autoScroll: false,
+        origin: 'self',
         listeners: {
           start(event) {
             let rect = getEleLayout(event.target);
@@ -122,6 +123,12 @@ export default function EventLayoutItem({
         event.preventDefault();
         event.stopPropagation();
         onTap?.(event, data, { x, y, w, h });
+      });
+      ctx.on('down', function (event) {
+        store.commit(commitKeys.SET_FREEZE_CONTAINER_EVT, true);
+      });
+      ctx.on('up', function (event) {
+        store.commit(commitKeys.SET_FREEZE_CONTAINER_EVT, false);
       });
     }
   );

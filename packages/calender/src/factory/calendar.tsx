@@ -121,7 +121,12 @@ class Calender extends CalendarCore {
 
   // 初始化store
   initStore() {
-    setStore({ data: this.data, layoutConfig: this.layoutConfig, viewType: this.viewType });
+    setStore({
+      data: this.data,
+      layoutConfig: this.layoutConfig,
+      viewType: this.viewType,
+      freezeContainerEvent: false,
+    });
   }
 
   // 设置配置
