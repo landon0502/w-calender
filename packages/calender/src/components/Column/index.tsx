@@ -22,6 +22,8 @@ import useColumnLayout from './hooks/useColumnLayout';
 import { useElementBounding, usePointerMoveEvent, useBusListener } from '@/hooks';
 import EventLayoutItem from '@/components/Event/EventLayoutItem';
 import useDragoverBubble from '@/hooks/useDragoverBubble';
+import { store, commitKeys, useStore } from '@/contexts/calenderStore';
+import { produce, setAutoFreeze, Draft } from 'immer';
 
 export interface ColumnEvent {
   onMoveStart?(event: any, data: CalenderItem, rect: Rect): void;
@@ -96,7 +98,25 @@ export default function Column({
   const { setDragoverBubbleState, getDragoverState } = useDragoverBubble();
   let dragPosition: Rect = { x: 0, y: 0, w: 0, h: 0 };
   let relativeIndex = 0;
-  const { rect: containerRect, getRect: getContainerRect } = useElementBounding(layoutContainer);
+
+  const { getState } = useStore();
+  const { rect: containerRect, getRect: getContainerRect } = useElementBounding(
+    layoutContainer,
+    (res) => {
+      let layoutConfig = getState('layoutConfig');
+
+      let newLayoutConfig = produce(layoutConfig, (draftState: any) => {
+        let columns = draftState.columns;
+        let curColumn = columns.find(
+          (item: { columnIndex: number }) => item.columnIndex === columnIndex
+        );
+        curColumn.width = res.width;
+        return draftState;
+      });
+
+      store.commit(commitKeys.SET_LAYOUTCONFIG, newLayoutConfig);
+    }
+  );
 
   const { layoutData, getCalenderData } = useColumnLayout({
     data,

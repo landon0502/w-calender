@@ -144,7 +144,6 @@ class Calender extends CalendarCore {
   // 更改视图
   changeView(type: ViewType) {
     this.viewType = type;
-
     this.setLayoutConfig();
     this.render(type);
   }
@@ -159,10 +158,9 @@ class Calender extends CalendarCore {
       month: 7,
       M: 7,
     };
+
     let column = columnCount[this.viewType];
-    let columns = new Array(this.layoutConfig.column)
-      .fill({})
-      .map((_, index) => ({ columnIndex: index, width: 0 }));
+    let columns = new Array(column).fill({}).map((_, index) => ({ columnIndex: index, width: 0 }));
     this.layoutConfig = {
       ...this.layoutConfig,
       column,

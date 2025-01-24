@@ -102,3 +102,17 @@ export function moveThreshold() {
     return false;
   };
 }
+
+/**
+ * @zh 添加延时
+ */
+export function execWithDelay(callback: Function, delay: number) {
+  if (delay) {
+    let timer = setTimeout(() => {
+      callback();
+      clearTimeout(timer);
+    }, delay);
+  } else {
+    callback();
+  }
+}

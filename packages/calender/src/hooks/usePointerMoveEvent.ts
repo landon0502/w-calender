@@ -1,7 +1,7 @@
-import { useRef, RefObject } from 'preact/compat';
+import { useRef, RefObject, useMemo, useEffect } from 'preact/compat';
 import useInteract, { UseInteractTarget } from '@/hooks/useInteract';
 
-import { isUndef } from '@/utils';
+import { isUndef, execWithDelay } from '@/utils';
 import useXState from './useXState';
 
 export type PointerPosition = {
@@ -15,6 +15,7 @@ export type ScrollParent = Element | RefObject<Element>;
 export type UsePointerMoveEventOptions = {
   scrollParent?: ScrollParent;
   limitCurrentTarget?: boolean;
+  holdDelay?: number;
   onDown?: (e: { event: any; x: number; y: number }) => void;
   onMove?: (e: { event: any; x: number; y: number; dy: number; dx: number }) => void;
   onUp?: (e: { event: any; x: number; y: number }) => void;
@@ -22,7 +23,6 @@ export type UsePointerMoveEventOptions = {
 
 const defaultOptions = {
   limitCurrentTarget: true,
-
   onDown() {},
   onMove() {},
   onUp() {},
@@ -61,41 +61,57 @@ export function usePointerMoveDistance() {
 export default function usePointerMoveEvent(
   target: UseInteractTarget,
   options: UsePointerMoveEventOptions = defaultOptions,
-  freeze?: () => boolean
+  enable: boolean = true
 ) {
+  const [enableState, setEnable, getEnable] = useXState(enable);
   let eventOptions = {
     ...defaultOptions,
     ...options,
   };
-  let isTapContainerEle = useRef(false);
+  const isMove = useRef(false),
+    isDown = useRef(false);
   const { getDXY, clearDXY } = usePointerMoveDistance();
 
-  useInteract(target, void 0, void 0, function (ctx) {
+  useEffect(() => {
+    setEnable(() => enable);
+  }, [enable]);
+
+  const onUp = (event: any) => {
+    clearDXY();
+    isMove.current = false;
+    isDown.current = false;
+    if (!getEnable()) return;
+    const { y, x } = event.originalEvent;
+    eventOptions.onUp({ event, x, y });
+  };
+
+  useInteract(target, {}, { pointerEvents: { origin: 'self' } }, function (ctx) {
     ctx.on('down', function (event) {
-      if (freeze?.()) {
-        return;
-      }
-      const { x, y, originalEvent } = event;
-      eventOptions.onDown({ event, x, y });
+      execWithDelay(() => {
+        if (!getEnable()) return;
+        const { x, y } = event;
+        eventOptions.onDown({ event, x, y });
+        isDown.current = true;
+      }, options.holdDelay ?? 0);
     });
     ctx.on('move', function (event) {
-      if (freeze?.()) {
-        console.log(freeze?.());
-        return;
+      if (!getEnable()) return;
+      if (isDown.current) {
+        isMove.current = true;
       }
+
       const { x, y } = event.originalEvent;
       const { dx, dy } = getDXY(x, y);
       eventOptions.onMove({ event, x, y, dy: dy, dx: dx });
     });
     ctx.on('up', function (event) {
-      if (freeze?.()) {
-        return;
+      if (isMove.current) {
+        onUp(event);
+      } else {
+        execWithDelay(() => {
+          onUp(event);
+        }, options.holdDelay ?? 0);
       }
-      const { y, x } = event.originalEvent;
-      isTapContainerEle.current = false;
-      eventOptions.onUp({ event, x, y });
-
-      clearDXY();
     });
   });
 }

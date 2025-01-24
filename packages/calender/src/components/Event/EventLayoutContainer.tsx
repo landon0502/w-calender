@@ -1,5 +1,5 @@
 import { h } from 'preact';
-import { PropsWithChildren, useRef, useMemo } from 'preact/compat';
+import { PropsWithChildren, useRef, useMemo, useEffect } from 'preact/compat';
 import { useDragoverBubble, usePointerMoveEvent } from '@/hooks';
 import { moveThreshold } from '@/utils';
 import type { Rect } from '@/types/components';
@@ -33,12 +33,17 @@ export default function EventLayoutContainer(
 
   let originalLayoutConfig: Rect;
   let bubbleRect: Rect | null;
+  const enable = useRef(false);
+  const freezeContainerEventState = useMemo(() => {
+    return getState('freezeContainerEvent');
+  }, [getState('freezeContainerEvent')]);
 
   usePointerMoveEvent(
     container,
     {
+      holdDelay: 100,
       onDown({ event }) {
-        let { offsetY } = event.originalEvent;
+        let { offsetY, offsetX, y } = event.originalEvent;
         let top = getMoveEvtDownY(offsetY, props.cellHeight);
 
         bubbleRect = {
@@ -49,8 +54,10 @@ export default function EventLayoutContainer(
         };
         originalLayoutConfig = bubbleRect;
         props.onStart?.(bubbleRect);
+        enable.current = true;
       },
       onMove({ dy }) {
+        if (!enable.current) return;
         let distanceY = getDy(dy, dragStepNum);
 
         if (distanceY && bubbleRect) {
@@ -75,13 +82,14 @@ export default function EventLayoutContainer(
         }
       },
       onUp() {
-        if (bubbleRect) {
+        if (bubbleRect && enable.current) {
           props.onEnd?.(bubbleRect);
           bubbleRect = null;
         }
+        enable.current = false;
       },
     },
-    () => getState('freezeContainerEvent')
+    !freezeContainerEventState
   );
   return (
     <div ref={container} className={props.className}>

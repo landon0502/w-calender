@@ -75,8 +75,8 @@ const WeekView = (props: PropsWithElAttrs<WeekViewProps>) => {
   }, [store]);
 
   const layoutConfig = useMemo(() => {
-    return getState('layoutConfig') ?? [];
-  }, [store]);
+    return getState('layoutConfig') ?? {};
+  }, [getState('layoutConfig')]);
 
   // 数据更改
   async function onDataChange(event: { target: CalenderItem; data: CalenderItem[] }) {
@@ -106,14 +106,19 @@ const WeekView = (props: PropsWithElAttrs<WeekViewProps>) => {
       }
       timeIndicateLine={
         <TimeIndicateLine
-          top={calculateDistance(dayjs().startOf('day'), dayjs(), cellHeight, interval)}
+          top={calculateDistance(
+            dayjs().startOf('day'),
+            dayjs(),
+            layoutConfig.cellHeight,
+            layoutConfig.interval
+          )}
         />
       }
       timeIndicateBar={
         <TimeIndicateBar
           range={props.date}
-          interval={interval}
-          cellHeight={cellHeight}
+          interval={layoutConfig.interval}
+          cellHeight={layoutConfig.cellHeight}
           cellWidth={72}
         />
       }

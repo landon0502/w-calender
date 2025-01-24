@@ -42,6 +42,7 @@ const ViewContent = ({
           data={data}
           date={date}
           cellHeight={cellHeight}
+          timeInterval={interval}
           bordered={false}
           onChange={onChange}
         />
@@ -59,8 +60,9 @@ function DayView(props: DayViewProps) {
     return store?.data ?? [];
   }, [store]);
   const layoutConfig = useMemo(() => {
-    return getState('layoutConfig') ?? [];
-  }, [store]);
+    return getState('layoutConfig') ?? {};
+  }, [getState('layoutConfig')]);
+  console.log(layoutConfig);
   // 头部列表渲染
   const todayData = useMemo(() => {
     return (
@@ -91,6 +93,7 @@ function DayView(props: DayViewProps) {
           data={data}
           date={props.date}
           cellHeight={layoutConfig.cellHeight}
+          interval={layoutConfig.interval}
           gap={layoutConfig.gap}
           onChange={onDataChange}
         />
@@ -108,7 +111,7 @@ function DayView(props: DayViewProps) {
       timeIndicateBar={
         <TimeIndicateBar
           range={props.date}
-          interval={interval}
+          interval={layoutConfig.interval}
           cellHeight={layoutConfig.cellHeight}
           cellWidth={72}
         />

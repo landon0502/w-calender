@@ -12,7 +12,12 @@ export interface InteractEventOptions {
     origin?: string;
     inertia?: boolean;
   };
-  pointerEvents?: { listeners: Listeners; origin?: string };
+  pointerEvents?: {
+    holdDuration?: number;
+    ignoreFrom?: string;
+    allowFrom?: string;
+    origin?: string;
+  };
   resizeEvents?: { edges?: EdgeOptions; listeners: Listeners };
 }
 export type UseInteractTarget = Target | RefObject<Target>;
