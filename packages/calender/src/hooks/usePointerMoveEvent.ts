@@ -100,7 +100,7 @@ export default function usePointerMoveEvent(
         isMove.current = true;
       }
 
-      const { x, y } = event.originalEvent;
+      const { x, y } = event;
       const { dx, dy } = getDXY(x, y);
       eventOptions.onMove({ event, x, y, dy: dy, dx: dx });
     });

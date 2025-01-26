@@ -53,7 +53,7 @@ export function isEmpty(target: any) {
  * @zh 判断是否为useRef
  */
 export function isRef<T>(val: any): val is RefObject<T> {
-  if (typeof val !== 'object') {
+  if (typeof val !== 'object' || isUndef(val)) {
     return false;
   }
   return 'current' in val;

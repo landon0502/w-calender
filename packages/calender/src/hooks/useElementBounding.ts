@@ -6,7 +6,7 @@ import { unref } from '@/utils/common';
 import { isElement } from '@/utils/is';
 
 export default function useElementBounding(
-  el?: Element | RefObject<Element>,
+  el?: Element | RefObject<Element> | null,
   callback?: (e: ElementRect) => void
 ) {
   const defaultRect = {

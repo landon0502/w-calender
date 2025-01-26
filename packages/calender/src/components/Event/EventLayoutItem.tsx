@@ -126,7 +126,6 @@ export default function EventLayoutItem({
       });
       ctx.on('down', function (event) {
         store.commit(commitKeys.SET_FREEZE_CONTAINER_EVT, true);
-        console.log('event layout item');
       });
       ctx.on('up', function (event) {
         store.commit(commitKeys.SET_FREEZE_CONTAINER_EVT, false);

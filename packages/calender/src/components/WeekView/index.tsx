@@ -14,7 +14,7 @@ import { TimeIndicateLine, TimeIndicateBar } from '../TimeIndicateBar';
 import ViewContainer from '../ViewContainer';
 import { calculateDistance } from '../_utils';
 import { cellHeight, interval, gap } from '@/constant/_configurable';
-import EventLayoutContainer from '../Event/EventLayoutContainer';
+import EventColumnLayoutContainer from '../Event/EventColumnLayoutContainer';
 
 const ViewContent = ({
   weekDays,
@@ -32,7 +32,7 @@ const ViewContent = ({
   onChange: (event: { target: CalenderItem; data: CalenderItem[] }) => {};
 }) => {
   return (
-    <EventLayoutContainer
+    <EventColumnLayoutContainer
       className={cls(['week-view'])}
       cellHeight={cellHeight}
       interval={interval}
@@ -62,7 +62,7 @@ const ViewContent = ({
           );
         })}
       </div>
-    </EventLayoutContainer>
+    </EventColumnLayoutContainer>
   );
 };
 

@@ -12,7 +12,7 @@ import type { ReturnTimeValue } from '@/types/time';
 import ViewContainer from '../ViewContainer';
 import { calculateDistance } from '../_utils';
 import { cellHeight, interval, gap } from '@/constant/_configurable';
-import EventLayoutContainer from '../Event/EventLayoutContainer';
+import EventColumnLayoutContainer from '../Event/EventColumnLayoutContainer';
 
 const ViewContent = ({
   data,
@@ -23,7 +23,7 @@ const ViewContent = ({
   gap = 8,
 }: DayViewProps & { cellHeight?: number; interval?: number; gap?: number }) => {
   return (
-    <EventLayoutContainer
+    <EventColumnLayoutContainer
       className={cls(['week-view'])}
       cellHeight={cellHeight}
       interval={interval}
@@ -47,7 +47,7 @@ const ViewContent = ({
           onChange={onChange}
         />
       </div>
-    </EventLayoutContainer>
+    </EventColumnLayoutContainer>
   );
 };
 
