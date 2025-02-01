@@ -58,11 +58,18 @@ export function usePointerMoveDistance() {
   };
 }
 
+/**
+ * @zh 这里处理在元素中的鼠标信息
+ * @param target
+ * @param options
+ * @param enable
+ */
 export default function usePointerMoveEvent(
   target: UseInteractTarget,
   options: UsePointerMoveEventOptions = defaultOptions,
   enable: boolean = true
 ) {
+  const [positin, setPosition] = useXState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [enableState, setEnable, getEnable] = useXState(enable);
   let eventOptions = {
     ...defaultOptions,
@@ -83,6 +90,7 @@ export default function usePointerMoveEvent(
     if (!getEnable()) return;
     const { y, x } = event.originalEvent;
     eventOptions.onUp({ event, x, y });
+    setPosition({ x, y });
   };
 
   useInteract(target, {}, { pointerEvents: { origin: 'self' } }, function (ctx) {
@@ -90,6 +98,7 @@ export default function usePointerMoveEvent(
       execWithDelay(() => {
         if (!getEnable()) return;
         const { x, y } = event;
+        setPosition({ x, y });
         eventOptions.onDown({ event, x, y });
         isDown.current = true;
       }, options.holdDelay ?? 0);
@@ -102,6 +111,7 @@ export default function usePointerMoveEvent(
 
       const { x, y } = event;
       const { dx, dy } = getDXY(x, y);
+      setPosition({ x, y });
       eventOptions.onMove({ event, x, y, dy: dy, dx: dx });
     });
     ctx.on('up', function (event) {
@@ -114,4 +124,8 @@ export default function usePointerMoveEvent(
       }
     });
   });
+
+  return {
+    positin,
+  };
 }

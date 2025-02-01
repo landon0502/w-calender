@@ -1,5 +1,6 @@
 import { createStore } from '@/store';
 import type { CalenderItem, ViewType, LayoutConfig } from '@/types/options';
+
 export const commitKeys = {
   SET_DATA: 'SET_DATA',
   SET_LAYOUTCONFIG: 'SET_LAYOUTCONFIG',

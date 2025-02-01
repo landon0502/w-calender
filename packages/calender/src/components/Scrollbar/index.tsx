@@ -1,5 +1,5 @@
 import { cls } from '@/utils';
-import { ComponentChildren, h } from 'preact';
+import { ComponentChildren, h, RefObject } from 'preact';
 import { createContext, useCallback } from 'preact/compat';
 import { useXState } from '@/hooks';
 import './index.scss';
@@ -14,9 +14,12 @@ export interface ScrollbarProps {
     scroll: { scrollHeight: number; scrollLeft: number; scrollTop: number; scrollWidth: number };
   }) => void;
 }
-export const ScrollContext = createContext<HTMLElement | null>(null);
+export const ScrollContext = createContext<{
+  el: HTMLElement | null | RefObject<HTMLElement | null>;
+}>({ el: null });
 export default function (props: ScrollbarProps) {
-  const [scrollContainer, setScrollContainer] = useXState<HTMLElement | null>(null);
+  const [scrollContainer, setScrollContainer, getScrollContainer, scrollContainerRef] =
+    useXState<HTMLElement | null>(null);
 
   const onScroll = useCallback(
     (e: Event) => {
@@ -32,7 +35,11 @@ export default function (props: ScrollbarProps) {
   );
 
   return (
-    <ScrollContext.Provider value={scrollContainer}>
+    <ScrollContext.Provider
+      value={{
+        el: scrollContainerRef,
+      }}
+    >
       <div className={cls(['scrollbar', props.className])} style={props.style}>
         <div
           className={cls(['scrollbar-container', props.hideBar ? 'scrollbar-hide-bar' : void 0])}

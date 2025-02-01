@@ -1,5 +1,6 @@
 import { addUnit } from './common';
 import { isUndef, isElement } from './is';
+import { ElementRect } from './resizeObserver';
 /**
  * 获取px
  */
@@ -25,9 +26,12 @@ export function getElement(el: string | HTMLElement): HTMLElement | Element | nu
 /**
  * 获取元素尺寸
  */
-export function getBoundingClientRect(el: string | HTMLElement) {
+export function getBoundingClientRect(el: string | HTMLElement): ElementRect | null {
   const target = getElement(el);
-  return target?.getBoundingClientRect();
+  if (target) {
+    return target.getBoundingClientRect();
+  }
+  return null;
 }
 
 /**

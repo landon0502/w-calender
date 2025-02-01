@@ -1,11 +1,9 @@
 import { defaultWindow } from '../constant/_configurable';
 import { getBoundingClientRect } from './';
+import type { Optional } from '@/types/common';
 export const isSupportedResizeObserver = defaultWindow && 'ResizeObserver' in defaultWindow;
 
-export type ElementRect = Record<
-  'x' | 'y' | 'top' | 'bottom' | 'left' | 'right' | 'width' | 'height',
-  number
->;
+export type ElementRect = Optional<DOMRect, 'toJSON'>;
 
 export interface UseElementBoundingOptions {
   /**

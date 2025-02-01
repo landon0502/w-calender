@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from 'preact/compat';
+import { RefObject, useEffect, useRef, useState } from 'preact/compat';
 import { Dispatch, StateUpdater } from 'preact/hooks';
 
 type CustomDispath<T> = (state: StateUpdater<T>, callback?: Function) => void;
-function useXState<T>(initState: T | (() => T)): [T, CustomDispath<T>, () => T] {
+function useXState<T>(initState: T | (() => T)): [T, CustomDispath<T>, () => T, RefObject<T>] {
   const [state, setState] = useState(initState);
   const copyState = useRef(state);
   const isUpdate = useRef<Parameters<typeof setXState>[1] | null>();
@@ -25,7 +25,7 @@ function useXState<T>(initState: T | (() => T)): [T, CustomDispath<T>, () => T] 
     }
   });
 
-  return [state, setXState, getState];
+  return [state, setXState, getState, copyState];
 }
 
 export default useXState;
