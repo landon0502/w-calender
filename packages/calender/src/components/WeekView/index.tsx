@@ -68,8 +68,9 @@ const ViewContent = ({
 
 const WeekView = (props: PropsWithElAttrs<WeekViewProps>) => {
   const { store, getState } = useStore();
-  const [weekDays] = useXState(getWeekDays(dayjs(), 1));
-
+  const [weekDays] = useXState(
+    dayjs().day() === 0 ? getWeekDays(dayjs().subtract(1, 'day'), 1) : getWeekDays(dayjs(), 1)
+  );
   const data = useMemo(() => {
     return getState('data') ?? [];
   }, [store]);

@@ -17,3 +17,5 @@ export type PropsWithChildren<Props = {}> = Props & { children?: ComponentChildr
 export type GetDefaultOptions = <T extends object>(defaultOptions: Required<T>) => Required<T>;
 
 export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+
+export type MaybeElement = HTMLElement | SVGElement | undefined | null;
