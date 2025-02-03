@@ -12,6 +12,7 @@ import { moveThreshold, getBoundingClientRect, unref } from '@/utils';
 import type { Rect } from '@/types/components';
 import { useStore } from '@/contexts/calenderStore';
 import { ScrollContext } from '@/components/Scrollbar';
+import useMouseInElement from '@/hooks/useMouseInElement';
 /**
  * @zh 添加时间段
  * 这里需要做添加元素的resize操作
@@ -151,6 +152,7 @@ export default function EventColumnLayoutContainer(
     },
     !freezeContainerEventState
   );
+  useMouseInElement(container, {});
   return (
     <div ref={container} className={props.className}>
       <Bubble />

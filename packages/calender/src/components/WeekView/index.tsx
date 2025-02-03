@@ -13,7 +13,6 @@ import type { ReturnTimeValue } from '@/types/time';
 import { TimeIndicateLine, TimeIndicateBar } from '../TimeIndicateBar';
 import ViewContainer from '../ViewContainer';
 import { calculateDistance } from '../_utils';
-import { cellHeight, interval, gap } from '@/constant/_configurable';
 import EventColumnLayoutContainer from '../Event/EventColumnLayoutContainer';
 
 const ViewContent = ({

@@ -1,5 +1,5 @@
 import { RefObject, useRef, useEffect } from 'preact/compat';
-
+import { defaultDocument } from '@/constant/_configurable';
 import interact from 'interactjs';
 import type { Options, Target, Listeners, Interactable, EdgeOptions } from '@interactjs/types';
 
@@ -20,7 +20,7 @@ export interface InteractEventOptions {
   };
   resizeEvents?: { edges?: EdgeOptions; listeners: Listeners };
 }
-export type UseInteractTarget = Target | RefObject<Target>;
+export type UseInteractTarget = Target | RefObject<Target> | null;
 
 /**
  * @zh 手势hooks
@@ -47,9 +47,10 @@ export default function useInteract(
   }
 
   useEffect(() => {
-    let el = unref<Target>(target);
-    if (el) {
-      interactCtx.current = interact(el, options);
+    let el = unref<Target | null>(target);
+    let bindTarget = el ?? defaultDocument;
+    if (bindTarget) {
+      interactCtx.current = interact(bindTarget, options);
       if (eventOptions) {
         initEvent(interactCtx.current, eventOptions);
       }

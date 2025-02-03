@@ -4,9 +4,10 @@ import { elementResizeObserver, ElementRect } from '@/utils/resizeObserver';
 import { useXState } from './';
 import { unref } from '@/utils/common';
 import { isElement } from '@/utils/is';
+import { RefType } from '@/types/utils';
 
 export default function useElementBounding(
-  el?: Element | RefObject<Element> | null,
+  el?: RefType<Element | null>,
   callback?: (e: ElementRect) => void
 ) {
   const defaultRect = {
