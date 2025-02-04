@@ -48,7 +48,7 @@ export default function useInteract(
 
   useEffect(() => {
     let el = unref<Target | null>(target);
-    let bindTarget = el ?? defaultDocument;
+    let bindTarget = el;
     if (bindTarget) {
       interactCtx.current = interact(bindTarget, options);
       if (eventOptions) {

@@ -1,11 +1,11 @@
 import useInteract from './useInteract';
-import { RefObject, useRef, useEffect } from 'preact/compat';
+import { useEffect } from 'preact/compat';
 import { RefType } from '@/types/utils';
 import { ElementRect } from '@/utils/resizeObserver';
 import type { UseInteractTarget } from './useInteract';
 import useElementBounding from './useElementBounding';
 import useXState from './useXState';
-import { getBoundingClientRect } from '@/utils';
+import { getBoundingClientRect, unref } from '@/utils';
 import { produce } from 'immer';
 export type MouseInElementResult = {
   x: number;
@@ -20,11 +20,16 @@ export type MouseInElementResult = {
 };
 
 export default function useMouseInElement(
-  target: RefType<HTMLElement | Element | null>,
+  target: RefType<HTMLElement | Element | Document | null>,
   options: {
     type?: string;
+    handleOutside?: boolean;
+    eventTarget?: RefType<HTMLElement | Element | Document | null>;
   }
 ) {
+  const { handleOutside = true, eventTarget } = options;
+  const targetRef = unref(eventTarget) ?? unref(target);
+
   const type = options.type || 'page';
   const [mouseResult, setMouseResult, getMouseResult] = useXState<MouseInElementResult>({
     x: 0,
@@ -35,10 +40,10 @@ export default function useMouseInElement(
     elementPositionY: 0,
     elementWidth: 0,
     elementHeight: 0,
-    isOutside: false,
+    isOutside: true,
   });
 
-  useElementBounding(target, ({ left, top, width, height }) => {
+  useElementBounding(unref(target), ({ left, top, width, height }) => {
     const result = produce(mouseResult, (draftState) => {
       draftState.elementHeight = height;
       draftState.elementWidth = width;
@@ -48,21 +53,52 @@ export default function useMouseInElement(
     setMouseResult(result);
   });
 
-  useInteract(target as UseInteractTarget, {}, {}, (ctx) => {
-    ctx.on('down', function (event) {
-      const { left, top, width, height } = getBoundingClientRect(
-        event.interactable.target
-      ) as ElementRect;
-      console.log('down', event, left, top, width, height);
+  useEffect(() => {
+    setMouseResult(
+      produce(getMouseResult(), (draftState) => {
+        const elX = draftState.x - draftState.elementPositionX;
+        const elY = draftState.y - draftState.elementPositionY;
+        let el = unref(target);
+
+        if (el) {
+          const { width, height } = getBoundingClientRect(el as HTMLElement) as ElementRect;
+          draftState.isOutside =
+            width === 0 || height === 0 || elX < 0 || elY < 0 || elX > width || elY > height;
+
+          if (handleOutside || !draftState.isOutside) {
+            draftState.elementX = elX;
+            draftState.elementY = elY;
+          }
+        }
+      })
+    );
+  }, [target, mouseResult.x, mouseResult.y]);
+
+  useInteract(targetRef as UseInteractTarget, {}, {}, (ctx) => {
+    ctx.on('down', function ({ x, y }) {
+      setMouseResult(
+        produce(getMouseResult(), (drafState) => {
+          drafState.x = x;
+          drafState.y = y;
+        })
+      );
     });
-    ctx.on('move', function (event) {
-      console.log('move', event.x, event.y);
+    ctx.on('move', function ({ x, y }) {
+      setMouseResult(
+        produce(getMouseResult(), (drafState) => {
+          drafState.x = x;
+          drafState.y = y;
+        })
+      );
     });
-    ctx.on('up', function (event) {
-      console.log('up', event);
-    });
-    ctx.on('end', function (event) {
-      console.log('end', event);
+    ctx.on('up', function ({ x, y }) {
+      setMouseResult(
+        produce(getMouseResult(), (drafState) => {
+          drafState.x = x;
+          drafState.y = y;
+        })
+      );
+      console.log('up', getMouseResult());
     });
   });
   return {

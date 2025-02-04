@@ -7,7 +7,7 @@ import { isElement } from '@/utils/is';
 import { RefType } from '@/types/utils';
 
 export default function useElementBounding(
-  el?: RefType<Element | null>,
+  el?: RefType<Element | Document | null>,
   callback?: (e: ElementRect) => void
 ) {
   const defaultRect = {
