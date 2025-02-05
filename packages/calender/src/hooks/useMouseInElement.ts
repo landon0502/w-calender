@@ -3,9 +3,9 @@ import { useEffect } from 'preact/compat';
 import { RefType } from '@/types/utils';
 import { ElementRect } from '@/utils/resizeObserver';
 import type { UseInteractTarget } from './useInteract';
-import useElementBounding from './useElementBounding';
-import useXState from './useXState';
+import { PointerEvent } from '@interactjs/types';
 import { getBoundingClientRect, unref } from '@/utils';
+import { useElementBounding, useXState } from '@/hooks';
 import { produce } from 'immer';
 export type MouseInElementResult = {
   x: number;
@@ -19,19 +19,24 @@ export type MouseInElementResult = {
   isOutside: boolean;
 };
 
+export interface UseMouseInElementOptions {
+  type?: string;
+  handleOutside?: boolean;
+  eventTarget?: RefType<HTMLElement | Element | Document | null>;
+  onDown?: (event: PointerEvent, res: MouseInElementResult) => void;
+  onMove?: (event: PointerEvent, res: MouseInElementResult) => void;
+  onUp?: (event: PointerEvent, res: MouseInElementResult) => void;
+}
+
 export default function useMouseInElement(
   target: RefType<HTMLElement | Element | Document | null>,
-  options: {
-    type?: string;
-    handleOutside?: boolean;
-    eventTarget?: RefType<HTMLElement | Element | Document | null>;
-  }
+  options: UseMouseInElementOptions
 ) {
   const { handleOutside = true, eventTarget } = options;
   const targetRef = unref(eventTarget) ?? unref(target);
 
   const type = options.type || 'page';
-  const [mouseResult, setMouseResult, getMouseResult] = useXState<MouseInElementResult>({
+  const [result, setResult, getResult] = useXState<MouseInElementResult>({
     x: 0,
     y: 0,
     elementX: 0,
@@ -44,18 +49,19 @@ export default function useMouseInElement(
   });
 
   useElementBounding(unref(target), ({ left, top, width, height }) => {
-    const result = produce(mouseResult, (draftState) => {
-      draftState.elementHeight = height;
-      draftState.elementWidth = width;
-      draftState.elementPositionX = left + (type === 'page' ? window.pageXOffset : 0);
-      draftState.elementPositionY = top + (type === 'page' ? window.pageYOffset : 0);
-    });
-    setMouseResult(result);
+    setResult(
+      produce(getResult(), (draftState) => {
+        draftState.elementHeight = height;
+        draftState.elementWidth = width;
+        draftState.elementPositionX = left + (type === 'page' ? window.pageXOffset : 0);
+        draftState.elementPositionY = top + (type === 'page' ? window.pageYOffset : 0);
+      })
+    );
   });
 
   useEffect(() => {
-    setMouseResult(
-      produce(getMouseResult(), (draftState) => {
+    setResult(
+      produce(result, (draftState) => {
         const elX = draftState.x - draftState.elementPositionX;
         const elY = draftState.y - draftState.elementPositionY;
         let el = unref(target);
@@ -72,37 +78,33 @@ export default function useMouseInElement(
         }
       })
     );
-  }, [target, mouseResult.x, mouseResult.y]);
+  }, [target, result.x, result.y]);
+
+  function onChange(event: PointerEvent, type: 'onDown' | 'onMove' | 'onUp') {
+    setResult(
+      produce(getResult(), (draftState) => {
+        draftState.x = event.x;
+        draftState.y = event.y;
+      }),
+      function () {
+        options[type]?.(event, result);
+      }
+    );
+  }
 
   useInteract(targetRef as UseInteractTarget, {}, {}, (ctx) => {
-    ctx.on('down', function ({ x, y }) {
-      setMouseResult(
-        produce(getMouseResult(), (drafState) => {
-          drafState.x = x;
-          drafState.y = y;
-        })
-      );
+    ctx.on('down', function (event: PointerEvent) {
+      onChange(event, 'onDown');
     });
-    ctx.on('move', function ({ x, y }) {
-      setMouseResult(
-        produce(getMouseResult(), (drafState) => {
-          drafState.x = x;
-          drafState.y = y;
-        })
-      );
+    ctx.on('move', function (event: PointerEvent) {
+      onChange(event, 'onMove');
     });
-    ctx.on('up', function ({ x, y }) {
-      setMouseResult(
-        produce(getMouseResult(), (drafState) => {
-          drafState.x = x;
-          drafState.y = y;
-        })
-      );
-      console.log('up', getMouseResult());
+    ctx.on('up', function (event: PointerEvent) {
+      onChange(event, 'onUp');
     });
   });
   return {
-    mouseResult,
-    getMouseResult,
+    ...result,
+    getResult,
   };
 }
