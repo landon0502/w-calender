@@ -1,7 +1,7 @@
 import './style/index.scss';
-import { useMemo, useRef } from 'preact/compat';
+import { useMemo } from 'preact/compat';
 import { getWeekDays, cls, getReturnTime, isAsyncFunction, isFunction } from '@/utils';
-import { useXState, usePointerMoveEvent } from '@/hooks';
+import { useXState } from '@/hooks';
 import dayjs from 'dayjs';
 import Column from '../Column';
 import { useStore } from '@/contexts/calenderStore';

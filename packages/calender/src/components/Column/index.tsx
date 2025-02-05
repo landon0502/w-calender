@@ -426,6 +426,10 @@ export default function Column({
     );
   }
 
+  /**
+   * @zh 网格
+   */
+  function renderGridding() {}
   return (
     <div
       style={{

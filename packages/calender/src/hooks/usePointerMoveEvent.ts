@@ -1,8 +1,9 @@
-import { useRef, RefObject, useMemo, useEffect } from 'preact/compat';
+import { useRef, RefObject, useEffect } from 'preact/compat';
 import { RefType } from '@/types/utils';
 import useMouseInElement from './useMouseInElement';
 import { isUndef, execWithDelay } from '@/utils';
 import useXState from './useXState';
+import { PointerEvent } from '@interactjs/types';
 
 export type PointerPosition = {
   x: number;
@@ -83,43 +84,43 @@ export default function usePointerMoveEvent(
     setEnable(() => enable);
   }, [enable]);
 
-  const onUp = (event: any) => {
+  const onUp = (
+    event: PointerEvent,
+    { elementX, elementY }: { elementX: number; elementY: number }
+  ) => {
     clearDXY();
     isMove.current = false;
     isDown.current = false;
     if (!getEnable()) return;
-    const { y, x } = event.originalEvent;
-    eventOptions.onUp({ event, x, y });
-    setPosition({ x, y });
+    eventOptions.onUp({ event, x: elementX, y: elementY });
+    setPosition({ x: elementX, y: elementY });
   };
 
   useMouseInElement(target, {
-    onDown(event) {
+    onDown(event, { elementX, elementY }) {
       execWithDelay(() => {
         if (!getEnable()) return;
-        const { x, y } = event;
-        setPosition({ x, y });
-        eventOptions.onDown({ event, x, y });
+        setPosition({ x: elementX, y: elementY });
+        eventOptions.onDown({ event, x: elementX, y: elementY });
         isDown.current = true;
       }, options.holdDelay ?? 0);
     },
-    onMove(event) {
+    onMove(event, { elementX, elementY }) {
       if (!getEnable()) return;
       if (isDown.current) {
         isMove.current = true;
       }
 
-      const { x, y } = event;
-      const { dx, dy } = getDXY(x, y);
-      setPosition({ x, y });
-      eventOptions.onMove({ event, x, y, dy: dy, dx: dx });
+      const { dx, dy } = getDXY(elementX, elementY);
+      setPosition({ x: elementX, y: elementY });
+      eventOptions.onMove({ event, x: elementX, y: elementY, dy: dy, dx: dx });
     },
-    onUp(event) {
+    onUp(event, positin) {
       if (isMove.current) {
-        onUp(event);
+        onUp(event, positin);
       } else {
         execWithDelay(() => {
-          onUp(event);
+          onUp(event, positin);
         }, options.holdDelay ?? 0);
       }
     },

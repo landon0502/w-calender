@@ -1,18 +1,11 @@
 import { h } from 'preact';
-import {
-  PropsWithChildren,
-  useRef,
-  useMemo,
-  useContext,
-  useEffect,
-  useCallback,
-} from 'preact/compat';
+import { PropsWithChildren, useRef, useMemo, useContext } from 'preact/compat';
 import { useDragoverBubble, usePointerMoveEvent } from '@/hooks';
 import { moveThreshold, getBoundingClientRect, unref } from '@/utils';
 import type { Rect } from '@/types/components';
 import { useStore } from '@/contexts/calenderStore';
 import { ScrollContext } from '@/components/Scrollbar';
-import useMouseInElement from '@/hooks/useMouseInElement';
+import { PointerEvent } from '@interactjs/types';
 /**
  * @zh 添加时间段
  * 这里需要做添加元素的resize操作
@@ -91,68 +84,65 @@ export default function EventColumnLayoutContainer(
     container,
     {
       holdDelay: 100,
-      onDown: ({ event, x, y }: { event: any; x: number; y: number }) => {
+      onDown: ({ event, x, y }: { event: PointerEvent; x: number; y: number }) => {
+        console.log(event, x, y);
         // const eventBindTarget = event.interactable.target as HTMLElement;
-        let top = getMoveEvtDownY(y, props.cellHeight);
-
-        let bubbleRect = getBubbleLayout();
-
-        const scrollContainer = unref(scrollContainerConfig.el);
-
-        if (container.current && scrollContainer) {
-          console.log(layoutConfig);
-          getInContainerXYEvtValue(scrollContainer, container.current, {
-            x,
-            y,
-          });
-
-          bubbleRect = {
-            x: 0,
-            y: top,
-            w: 180,
-            h: dragStepNum,
-          };
-          originalLayoutConfig = bubbleRect;
-          props.onStart?.(bubbleRect);
-          enable.current = true;
-        }
+        // let top = getMoveEvtDownY(y, props.cellHeight);
+        // let bubbleRect = getBubbleLayout();
+        // const scrollContainer = unref(scrollContainerConfig.el);
+        // if (container.current && scrollContainer) {
+        //   console.log(layoutConfig);
+        //   getInContainerXYEvtValue(scrollContainer, container.current, {
+        //     x,
+        //     y,
+        //   });
+        //   bubbleRect = {
+        //     x: 0,
+        //     y: top,
+        //     w: 180,
+        //     h: dragStepNum,
+        //   };
+        //   originalLayoutConfig = bubbleRect;
+        //   props.onStart?.(bubbleRect);
+        //   enable.current = true;
+        // }
       },
-      onMove({ dy }) {
-        if (!enable.current) return;
-        let distanceY = getDy(dy, dragStepNum);
+      // onMove({ dy }) {
+      //   if (!enable.current) return;
+      //   let distanceY = getDy(dy, dragStepNum);
 
-        if (distanceY && bubbleRect) {
-          originalLayoutConfig.h = originalLayoutConfig.h + distanceY;
-          let h = Math.abs(originalLayoutConfig.h);
-          let y = 0;
-          if (originalLayoutConfig.h > 0) {
-            y = bubbleRect.y;
-          } else if (originalLayoutConfig.h < 0) {
-            // 向上扩展
-            y = originalLayoutConfig.y - h;
-          } else {
-            y = originalLayoutConfig.y;
-            h = dragStepNum;
-          }
-          bubbleRect = {
-            ...bubbleRect,
-            y: y,
-            h,
-          };
-          props.onMove?.(bubbleRect);
-        }
-      },
-      onUp() {
-        if (bubbleRect && enable.current) {
-          props.onEnd?.(bubbleRect);
-          bubbleRect = null;
-        }
-        enable.current = false;
-      },
+      //   if (distanceY && bubbleRect) {
+      //     originalLayoutConfig.h = originalLayoutConfig.h + distanceY;
+      //     let h = Math.abs(originalLayoutConfig.h);
+      //     let y = 0;
+      //     if (originalLayoutConfig.h > 0) {
+      //       y = bubbleRect.y;
+      //     } else if (originalLayoutConfig.h < 0) {
+      //       // 向上扩展
+      //       y = originalLayoutConfig.y - h;
+      //     } else {
+      //       y = originalLayoutConfig.y;
+      //       h = dragStepNum;
+      //     }
+      //     bubbleRect = {
+      //       ...bubbleRect,
+      //       y: y,
+      //       h,
+      //     };
+      //     props.onMove?.(bubbleRect);
+      //   }
+      // },
+      // onUp() {
+      //   if (bubbleRect && enable.current) {
+      //     props.onEnd?.(bubbleRect);
+      //     bubbleRect = null;
+      //   }
+      //   enable.current = false;
+      // },
     },
     !freezeContainerEventState
   );
-  useMouseInElement(container, {});
+
   return (
     <div ref={container} className={props.className}>
       <Bubble />

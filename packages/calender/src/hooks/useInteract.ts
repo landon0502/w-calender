@@ -1,8 +1,6 @@
 import { RefObject, useRef, useEffect } from 'preact/compat';
-import { defaultDocument } from '@/constant/_configurable';
 import interact from 'interactjs';
 import type { Options, Target, Listeners, Interactable, EdgeOptions } from '@interactjs/types';
-
 import { unref } from '@/utils/common';
 import { isUndef } from '@/utils/is';
 export interface InteractEventOptions {
