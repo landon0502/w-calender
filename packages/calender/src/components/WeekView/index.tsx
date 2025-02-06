@@ -57,6 +57,7 @@ const ViewContent = ({
               onChange={onChange}
               columnIndex={index}
               columnCount={weekDays.length}
+              style={{ width: '180px', flexShrink: 0 }}
             />
           );
         })}

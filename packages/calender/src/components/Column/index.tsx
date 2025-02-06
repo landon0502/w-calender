@@ -102,7 +102,7 @@ export default function Column({
   const { getState } = useStore();
   const { rect: containerRect, getRect: getContainerRect } = useElementBounding(
     layoutContainer,
-    (res) => {
+    (rect) => {
       let layoutConfig = getState('layoutConfig');
 
       let newLayoutConfig = produce(layoutConfig, (draftState: any) => {
@@ -110,7 +110,7 @@ export default function Column({
         let curColumn = columns.find(
           (item: { columnIndex: number }) => item.columnIndex === columnIndex
         );
-        curColumn.width = res.width;
+        curColumn.width = rect.width;
         return draftState;
       });
 

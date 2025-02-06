@@ -6,7 +6,7 @@ import type { GridBoxProps, OperateType } from '@wcalender/types/components';
 import useInteract from '@/hooks/useInteract';
 import { genStyles } from '../_utils';
 import { useXState } from '@/hooks';
-import { isAsyncFunction, isFunction, getBoundingClientRect } from '@/utils';
+import { isAsyncFunction, isFunction, getBoundingClientRect, ElementRect } from '@/utils';
 import { store, commitKeys } from '@/contexts/calenderStore';
 /**
  * @zh 获取拖动触发元素信息
@@ -54,7 +54,7 @@ export default function EventLayoutItem({
     }
   }
 
-  let parentElRect: DOMRect | undefined | null;
+  let parentElRect: ElementRect | undefined | null;
   useInteract(
     gridBox,
     void 0,

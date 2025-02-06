@@ -17,7 +17,7 @@ export type StoreOptions<State> = {
   actions?: Record<string, Dispatch<State>>;
 };
 
-export default class Store<T extends Record<string, any>> {
+export default class Store<T> {
   state: T = {} as T;
   private mutations?: Record<string, Commit<T>>;
   private actions?: Record<string, Dispatch<T>>;
@@ -89,7 +89,7 @@ export default class Store<T extends Record<string, any>> {
   /**
    * 创建实例
    */
-  static create<T extends Record<string, any>>(initialState: T, options?: StoreOptions<T>) {
+  static create<T>(initialState: T, options?: StoreOptions<T>) {
     return new Store(initialState, options);
   }
 }

@@ -1,5 +1,5 @@
 import { PropsWithChildren } from '@/types/common';
-import { createContext, createElement, useRef } from 'preact/compat';
+import { createContext, createElement } from 'preact/compat';
 import { useCallback, useContext, useEffect, useLayoutEffect, useMemo } from 'preact/hooks';
 import { useXState } from '@/hooks';
 import { isUndef } from '@/utils/is';
@@ -10,18 +10,13 @@ const useIsomorphicLayoutEffect = isSSR ? useEffect : useLayoutEffect;
 /**
  * @zh 数据共享
  */
-export function createStore<State extends Record<string, any>>(
-  initialState: State,
-  options?: StoreOptions<State>
-) {
+export function createStore<State>(initialState: State, options?: StoreOptions<State>) {
   const store = Store.create(initialState, options);
-  const StoreContext = createContext<State | undefined>(initialState);
+  const StoreContext = createContext<State>(initialState);
 
   // 共享顶级组件
   function StoreProvider({ children }: PropsWithChildren) {
-    const [state, setProviderState, getProvideState] = useXState<State | undefined>(
-      store.getState()
-    );
+    const [state, setProviderState, getProvideState] = useXState<State>(store.getState());
     let ob = useCallback((newState: State) => {
       setProviderState(() => newState);
     }, []);
@@ -43,18 +38,15 @@ export function createStore<State extends Record<string, any>>(
   // hooks
   function useStore() {
     const storeCtx = useContext(StoreContext);
-    const [state, setRefState, getRefState] = useXState<State | undefined>(storeCtx);
+    const [state, setRefState, getRefState] = useXState<State>(storeCtx);
 
     useIsomorphicLayoutEffect(() => {
       setRefState(storeCtx);
     }, [storeCtx]);
     // store 操作
-    function getState(key: string) {
+    function getState<K extends keyof State>(key: K): State[K] {
       let state = getRefState();
-      if (state) {
-        return state[key];
-      }
-      return null;
+      return state[key];
     }
     function setState(name: string, data: any) {
       let state = getRefState();

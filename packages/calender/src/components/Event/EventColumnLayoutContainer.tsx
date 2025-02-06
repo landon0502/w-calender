@@ -1,10 +1,9 @@
 import { h } from 'preact';
-import { PropsWithChildren, useRef, useMemo, useContext } from 'preact/compat';
+import { PropsWithChildren, useRef, useMemo } from 'preact/compat';
 import { useDragoverBubble, usePointerMoveEvent } from '@/hooks';
-import { moveThreshold, getBoundingClientRect, unref } from '@/utils';
+import { moveThreshold, isUndef } from '@/utils';
 import type { Rect } from '@/types/components';
 import { useStore } from '@/contexts/calenderStore';
-import { ScrollContext } from '@/components/Scrollbar';
 import { PointerEvent } from '@interactjs/types';
 /**
  * @zh 添加时间段
@@ -15,37 +14,7 @@ function getMoveEvtDownY(y: number, cellHeight: number) {
   return y - (y % (cellHeight / 2));
 }
 
-/**
- * 获取布局
- */
-function getBubbleLayout(): Rect {
-  return {
-    x: 0,
-    y: 0,
-    w: 0,
-    h: 0,
-  };
-}
-
 const getDy = moveThreshold();
-
-/**
- * @zh 获取有效的x,y数值
- */
-function getInContainerXYEvtValue(
-  scrollContainer: HTMLElement,
-  container: HTMLElement,
-  currentPosition: { x: number; y: number }
-) {
-  const scrollRect = getBoundingClientRect(scrollContainer);
-  const scrollTop = scrollContainer.scrollTop;
-  const scrollLeft = scrollContainer.scrollLeft;
-  const eventBindTargetRect = getBoundingClientRect(container);
-
-  let top = currentPosition.y + scrollTop - (scrollRect?.top ?? 0);
-  let left = currentPosition.x + scrollLeft - (scrollRect?.left ?? 0);
-  console.log(currentPosition, eventBindTargetRect, top, left);
-}
 
 export default function EventColumnLayoutContainer(
   props: PropsWithChildren<{
@@ -60,9 +29,7 @@ export default function EventColumnLayoutContainer(
 ) {
   const container = useRef<HTMLDivElement | null>(null);
 
-  // scroll container
-  const scrollContainerConfig = useContext(ScrollContext);
-
+  // 这里需要优化，如何将配置跨组件通信
   const { component: Bubble, setDragoverBubbleState } = useDragoverBubble();
   const { getState } = useStore();
   const dragStepNum = useMemo(() => {
@@ -76,69 +43,84 @@ export default function EventColumnLayoutContainer(
     return getState('freezeContainerEvent');
   }, [getState('freezeContainerEvent')]);
 
-  const layoutConfig = useMemo(() => {
-    return getState('layoutConfig');
-  }, [getState('layoutConfig')]);
+  function getCurrentColumnPosi(x: number) {
+    const layoutConfig = getState('layoutConfig');
+    const columns = layoutConfig.columns;
+    if (!columns) {
+      return;
+    }
+
+    let columnsLayout = [...columns]
+      .sort((a, b) => a.columnIndex - b.columnIndex)
+      .map(({ width, columnIndex }) => {
+        let foregoingCols = columns.slice(0, columnIndex);
+        let left = foregoingCols.reduce((prev, cur) => prev + cur.width, 0);
+        return {
+          left,
+          width,
+          columnIndex,
+        };
+      });
+    let cur = columnsLayout.find(({ left, columnIndex }) => {
+      return left < x && columnsLayout[columnIndex + 1].left > x;
+    });
+
+    return cur;
+  }
 
   usePointerMoveEvent(
     container,
     {
       holdDelay: 100,
       onDown: ({ event, x, y }: { event: PointerEvent; x: number; y: number }) => {
-        console.log(event, x, y);
-        // const eventBindTarget = event.interactable.target as HTMLElement;
-        // let top = getMoveEvtDownY(y, props.cellHeight);
-        // let bubbleRect = getBubbleLayout();
-        // const scrollContainer = unref(scrollContainerConfig.el);
-        // if (container.current && scrollContainer) {
-        //   console.log(layoutConfig);
-        //   getInContainerXYEvtValue(scrollContainer, container.current, {
-        //     x,
-        //     y,
-        //   });
-        //   bubbleRect = {
-        //     x: 0,
-        //     y: top,
-        //     w: 180,
-        //     h: dragStepNum,
-        //   };
-        //   originalLayoutConfig = bubbleRect;
-        //   props.onStart?.(bubbleRect);
-        //   enable.current = true;
-        // }
-      },
-      // onMove({ dy }) {
-      //   if (!enable.current) return;
-      //   let distanceY = getDy(dy, dragStepNum);
+        console.log(event, x, y, getState('layoutConfig'));
+        let pointerInCol = getCurrentColumnPosi(x);
+        if (isUndef(pointerInCol)) {
+          return;
+        }
+        let top = getMoveEvtDownY(y, props.cellHeight);
 
-      //   if (distanceY && bubbleRect) {
-      //     originalLayoutConfig.h = originalLayoutConfig.h + distanceY;
-      //     let h = Math.abs(originalLayoutConfig.h);
-      //     let y = 0;
-      //     if (originalLayoutConfig.h > 0) {
-      //       y = bubbleRect.y;
-      //     } else if (originalLayoutConfig.h < 0) {
-      //       // 向上扩展
-      //       y = originalLayoutConfig.y - h;
-      //     } else {
-      //       y = originalLayoutConfig.y;
-      //       h = dragStepNum;
-      //     }
-      //     bubbleRect = {
-      //       ...bubbleRect,
-      //       y: y,
-      //       h,
-      //     };
-      //     props.onMove?.(bubbleRect);
-      //   }
-      // },
-      // onUp() {
-      //   if (bubbleRect && enable.current) {
-      //     props.onEnd?.(bubbleRect);
-      //     bubbleRect = null;
-      //   }
-      //   enable.current = false;
-      // },
+        let bubbleRect = {
+          x: pointerInCol.left,
+          y: top,
+          w: pointerInCol.width,
+          h: dragStepNum,
+        };
+        originalLayoutConfig = bubbleRect;
+        props.onStart?.(bubbleRect);
+        enable.current = true;
+      },
+      onMove({ dy, x, y }) {
+        if (!enable.current) return;
+        let distanceY = getDy(dy, dragStepNum);
+        if (distanceY && bubbleRect) {
+          originalLayoutConfig.h = originalLayoutConfig.h + distanceY;
+          let h = Math.abs(originalLayoutConfig.h);
+          let y = 0;
+          if (originalLayoutConfig.h > 0) {
+            y = bubbleRect.y;
+          } else if (originalLayoutConfig.h < 0) {
+            // 向上扩展
+            y = originalLayoutConfig.y - h;
+          } else {
+            y = originalLayoutConfig.y;
+            h = dragStepNum;
+          }
+          bubbleRect = {
+            ...bubbleRect,
+            y: y,
+            h,
+          };
+          props.onMove?.(bubbleRect);
+        }
+      },
+      onUp() {
+        if (bubbleRect && enable.current) {
+          props.onEnd?.(bubbleRect);
+          bubbleRect = null;
+        }
+        enable.current = false;
+      },
     },
     !freezeContainerEventState
   );
