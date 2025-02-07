@@ -29,8 +29,7 @@ export default function EventColumnLayoutContainer(
 ) {
   const container = useRef<HTMLDivElement | null>(null);
 
-  // 这里需要优化，如何将配置跨组件通信
-  const { component: Bubble, setDragoverBubbleState } = useDragoverBubble();
+  const { component: Bubble } = useDragoverBubble();
   const { getState } = useStore();
 
   // 移动间隔
@@ -71,13 +70,13 @@ export default function EventColumnLayoutContainer(
   }
 
   /**
-   * 需要计算开始时间和结束时间
+   * @zh 需要计算开始时间和结束时间
    */
 
   usePointerMoveEvent(
     container,
     {
-      holdDelay: 100,
+      holdDelay: 100, // 事件处理延时（ms）
       onDown: ({ x, y }: { event: PointerEvent; x: number; y: number }) => {
         let pointerInCol = getCurrentColumnPosi(x);
         if (isUndef(pointerInCol)) {
@@ -105,7 +104,6 @@ export default function EventColumnLayoutContainer(
           if (originalLayoutConfig.h > 0) {
             y = bubbleRect.y;
           } else if (originalLayoutConfig.h < 0) {
-            // 向上扩展
             y = originalLayoutConfig.y - h;
           } else {
             y = originalLayoutConfig.y;

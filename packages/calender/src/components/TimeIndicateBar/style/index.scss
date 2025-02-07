@@ -52,7 +52,7 @@ $border: 1px solid $color-border-2;
     width: $indicate-dot-size;
     height: $indicate-dot-size;
     background: rgb($primary-6...);
-    left: - div($indicate-dot-size, 2);
+    left: calc(var(--dot-left) - div($indicate-dot-size, 2));
     top: - div($indicate-dot-size, 2);
     border-radius: 100%;
   }
