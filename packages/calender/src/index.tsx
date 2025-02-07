@@ -1,4 +1,4 @@
-import { DayView, WeekView, MonthView } from '@/components';
+import { DayView, WeekView, MonthView } from '@/views';
 
 import Calender, { Options, ScheduleData, ScheduleItem } from '@/factory/calendar';
 export { DayView, WeekView, MonthView };

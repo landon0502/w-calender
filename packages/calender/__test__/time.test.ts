@@ -9,6 +9,7 @@ import {
   isReturnTime,
   format,
   getWeekDays,
+  getDaysByTimes,
 } from '../src/utils';
 import dayjs from 'dayjs';
 
@@ -81,4 +82,9 @@ test('test getWeekDays timeUtils', () => {
   expect(curWeek[6].time.format('YYYY-MM-DD')).toBe(
     dayjs().endOf('week').add(1, 'day').format('YYYY-MM-DD')
   );
+});
+
+test('test getDaysByTimes timeUtils', () => {
+  let res = getDaysByTimes('2025-01-03', '2025-01-09');
+  expect(res.length).toBe(7);
 });

@@ -1,15 +1,16 @@
-import type { DateRange } from './schedule';
 import type { CalenderItem } from '@/types/options';
 import type { EventsProps } from './events';
+import type { TimeValue } from './time';
 import { ComponentChildren, h } from 'preact';
+
 export interface DayViewProps extends EventsProps {
   data: CalenderItem[];
-  date: DateRange;
+  date: TimeValue;
 }
 
 export interface WeekViewProps extends EventsProps {
   data: CalenderItem[];
-  date: DateRange;
+  date: TimeValue;
 }
 
 export interface HeaderProps {

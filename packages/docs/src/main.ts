@@ -8,14 +8,19 @@ function main() {
   const options: Options = {
     data: [
       {
-        start: dayjs().add(2, 'day').format('YYYY-MM-DD 00:00'),
-        end: dayjs().add(2, 'day').format('YYYY-MM-DD 4:00'),
+        start: dayjs().add(1, 'day').format('YYYY-MM-DD 00:00'),
+        end: dayjs().add(1, 'day').format('YYYY-MM-DD 4:00'),
         title: '这里是测试1',
       },
       {
         start: dayjs().format('YYYY-MM-DD 8:00'),
         end: dayjs().format('YYYY-MM-DD 11:00'),
         title: '这里是测试2',
+      },
+      {
+        start: dayjs().format('YYYY-MM-DD 8:00'),
+        end: dayjs().format('YYYY-MM-DD 11:00'),
+        title: '这里是测试---',
       },
       {
         start: dayjs().format('YYYY-MM-DD 00:00'),
@@ -54,7 +59,7 @@ function main() {
         title: '这里是测试9',
       },
     ],
-    date: dayjs(),
+    date: '2025-02-07',
     viewType: viewType.value,
     async onBeforeUpdate() {
       return true;

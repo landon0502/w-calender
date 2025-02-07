@@ -81,7 +81,7 @@ export function getTimes(
  */
 export function getTimeStartAndEnd(
   time: TimeValue,
-  type: UnitType
+  type: OpUnitType
 ): [ReturnTimeValue, ReturnTimeValue] | never {
   let timeValue = getReturnTime(time);
   if (!timeValue.time.isValid()) {
@@ -166,7 +166,9 @@ export function isTimeBetween(
   );
 }
 
-// 获取当前星期
+/**
+ * @zh 获取当前星期
+ */
 export function getWeekDays(time: TimeValue | ReturnTimeValue, dayStartOfWeek = 0) {
   const current = getReturnTime(time);
   const flatRows = [];
@@ -177,4 +179,24 @@ export function getWeekDays(time: TimeValue | ReturnTimeValue, dayStartOfWeek = 
     });
   }
   return flatRows;
+}
+
+/**
+ * @zh 获取开始时间到结束时间之间的day
+ */
+export function getDaysByTimes<T extends TimeValue | ReturnTimeValue = TimeValue | ReturnTimeValue>(
+  start: T,
+  end: T
+) {
+  const days = [];
+  const startTime = getReturnTime(start),
+    endTime = getReturnTime(end);
+  const range = [startTime, endTime].sort((a, b) => (a.time.isSameOrBefore(b.time) ? -1 : 1));
+
+  while (range[1].time.isSameOrAfter(range[0].time)) {
+    days.push(getReturnTime(range[0]));
+    range[0] = getReturnTime(range[0].time.startOf('day').add(1, 'day'));
+  }
+
+  return days;
 }

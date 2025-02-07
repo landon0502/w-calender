@@ -1,29 +1,18 @@
 import './style/index.scss';
 import { ComponentChildren } from 'preact';
 import { useMemo, useRef, forwardRef } from 'preact/compat';
-import {
-  createUniqueId,
-  moveThreshold,
-  setElementStyle,
-  getTransform,
-  numToPx,
-  getReturnTime,
-  format,
-  cls,
-  isEmpty,
-  isNumber,
-} from '@/utils';
+import { moveThreshold, numToPx, getReturnTime, format, cls, isEmpty, isNumber } from '@/utils';
 import { genTimeSlice, calculateRect, offsetToTimeValue, genStyles } from '../_utils';
 import type { CalenderItem } from '@/types/options';
 import type { DateRange } from '@/types/schedule';
 import type { Rect, OperateType } from '@/types/components';
 import type { PropsWithElAttrs } from '@/types/common';
 import useColumnLayout from './hooks/useColumnLayout';
-import { useElementBounding, usePointerMoveEvent, useBusListener } from '@/hooks';
+import { useElementBounding } from '@/hooks';
 import EventLayoutItem from '@/components/Event/EventLayoutItem';
 import useDragoverBubble from '@/hooks/useDragoverBubble';
 import { store, commitKeys, useStore } from '@/contexts/calenderStore';
-import { produce, setAutoFreeze, Draft } from 'immer';
+import { produce } from 'immer';
 
 export interface ColumnEvent {
   onMoveStart?(event: any, data: CalenderItem, rect: Rect): void;
@@ -49,9 +38,6 @@ export interface ColumnProps extends ColumnEvent {
   bordered?: boolean;
   split?: boolean;
 }
-
-type DragConfig = { rect: Rect; data: CalenderItem; type: OperateType } | null;
-const getDy = moveThreshold();
 
 /**
  * @zh 渲染模版
@@ -107,10 +93,10 @@ export default function Column({
 
       let newLayoutConfig = produce(layoutConfig, (draftState: any) => {
         let columns = draftState.columns;
-        let curColumn = columns.find(
+        let currentColumn = columns.find(
           (item: { columnIndex: number }) => item.columnIndex === columnIndex
         );
-        curColumn.width = rect.width;
+        currentColumn.width = rect.width;
         return draftState;
       });
 
@@ -151,8 +137,6 @@ export default function Column({
       dragPosition.y = size.height - dragPosition.h;
     }
 
-    let dragEl = document.querySelector(`.${cls('drag-block')}`);
-
     if (isNumber(event.dx) && multipleColumns) {
       let newIndex = relativeIndex + event.dx / getContainerRect().width;
       if (newIndex + columnIndex >= 0 && newIndex + columnIndex < columnCount) {
@@ -160,17 +144,6 @@ export default function Column({
       }
     }
 
-    if (dragEl) {
-      setElementStyle(
-        dragEl as HTMLElement,
-        getTransform({
-          width: '100%',
-          height: numToPx(dragPosition.h),
-          left: numToPx(0),
-          top: numToPx(dragPosition.y),
-        })
-      );
-    }
     handleUpdateData(event, data, 'move');
   }
 
@@ -188,14 +161,6 @@ export default function Column({
   }
 
   function onResize(event: any, data: CalenderItem, rect: Rect) {
-    let dragEl = document.querySelector(`.${cls('drag-block')}`);
-    if (dragEl) {
-      let h = event.rect.height;
-      setElementStyle(dragEl as HTMLElement, {
-        width: '100%',
-        height: numToPx(Math.max(h, dragStepNum)),
-      });
-    }
     handleUpdateData(event, data, 'resize');
   }
   /**
@@ -261,33 +226,6 @@ export default function Column({
   }
 
   const onTap = () => {};
-
-  /**
-   * @zh 拖拽样式
-   */
-  const OperateTime = forwardRef<
-    HTMLDivElement,
-    { layout: Rect; children?: ComponentChildren; type: OperateType }
-  >(({ layout, children, type }, ref) => {
-    return (
-      <div
-        className={cls(['operate-placelholder', `operate-placelholder-${type ?? 'normal'}`])}
-        style={genStyles(layout)}
-        ref={ref}
-      >
-        {children}
-      </div>
-    );
-  });
-
-  /**
-   * @zh 添加时间段
-   * 这里需要做添加元素的resize操作
-   * 自动平均对齐刻度
-   */
-  function getMoveEvtDownY(y: number) {
-    return y - (y % (cellHeight / 2));
-  }
 
   /**
    * @zh 鼠标移动事件处理

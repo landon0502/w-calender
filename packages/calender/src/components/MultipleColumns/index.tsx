@@ -1,30 +1,42 @@
 import './style/index.scss';
 import { useMemo } from 'preact/compat';
+import { cls, getReturnTime, isAsyncFunction, isFunction } from '@/utils';
 import Header from './Header';
+import dayjs from 'dayjs';
 import Column from '../Column';
-import { TimeIndicateLine, TimeIndicateBar } from '../TimeIndicateBar';
-import dayjs, { Dayjs } from 'dayjs';
 import { useStore } from '@/contexts/calenderStore';
-import { cls, isAsyncFunction, isFunction, isContainTimeRange } from '@/utils';
-import type { DayViewProps } from '@/types/components';
+import type { PropsWithElAttrs } from '@/types/common';
 import type { CalenderItem } from '@/types/options';
+import type { EventsProps } from '@/types/events';
 import type { ReturnTimeValue } from '@/types/time';
+import { TimeIndicateLine, TimeIndicateBar } from '../TimeIndicateBar';
 import ViewContainer from '../ViewContainer';
 import { calculateDistance } from '../_utils';
-import { cellHeight, interval, gap } from '@/constant/_configurable';
 import EventColumnLayoutContainer from '../Event/EventColumnLayoutContainer';
 
+export interface MultipleColumnsProps extends EventsProps {
+  data: CalenderItem[];
+  days: ReturnTimeValue[];
+}
+
 const ViewContent = ({
+  timeRangeDays,
   data,
   onChange,
   cellHeight = 42,
   interval = 30,
-  date,
   gap = 8,
-}: DayViewProps & { cellHeight?: number; interval?: number; gap?: number }) => {
+}: {
+  timeRangeDays: ReturnTimeValue[];
+  data: CalenderItem[];
+  cellHeight?: number;
+  interval?: number;
+  gap?: number;
+  onChange: (event: { target: CalenderItem; data: CalenderItem[] }) => {};
+}) => {
   return (
     <EventColumnLayoutContainer
-      className={cls(['week-view'])}
+      className={cls(['multiple-columns'])}
       cellHeight={cellHeight}
       interval={interval}
       onStart={(e) => {
@@ -37,41 +49,36 @@ const ViewContent = ({
         console.log(e);
       }}
     >
-      <div className={cls(['week-view-cols'])}>
-        <Column
-          data={data}
-          date={date}
-          cellHeight={cellHeight}
-          timeInterval={interval}
-          bordered={false}
-          onChange={onChange}
-        />
+      <div className={cls(['multiple-columns-content'])}>
+        {timeRangeDays.map((item, index) => {
+          return (
+            <Column
+              multipleColumns
+              data={data}
+              cellHeight={cellHeight}
+              timeInterval={interval}
+              date={[getReturnTime(item.time.startOf('D')), getReturnTime(item.time.endOf('D'))]}
+              onChange={onChange}
+              columnIndex={index}
+              columnCount={timeRangeDays.length}
+            />
+          );
+        })}
       </div>
     </EventColumnLayoutContainer>
   );
 };
 
-function DayView(props: DayViewProps) {
+const WeekView = (props: PropsWithElAttrs<MultipleColumnsProps>) => {
   const { store, getState } = useStore();
 
-  // 这里的数据需统一使用store存储
-  // const data = useRef(getState('data'));
   const data = useMemo(() => {
-    return store?.data ?? [];
+    return getState('data') ?? [];
   }, [store]);
+
   const layoutConfig = useMemo(() => {
     return getState('layoutConfig') ?? {};
   }, [getState('layoutConfig')]);
-  console.log(layoutConfig);
-  // 头部列表渲染
-  const todayData = useMemo(() => {
-    return (
-      data?.filter(
-        (item: { end: ReturnTimeValue; start: ReturnTimeValue }) =>
-          !isContainTimeRange([item.start, item.end], props.date, 'minute', '[)')
-      ) ?? []
-    );
-  }, [data]);
 
   // 数据更改
   async function onDataChange(event: { target: CalenderItem; data: CalenderItem[] }) {
@@ -83,19 +90,23 @@ function DayView(props: DayViewProps) {
       props.onChange?.(event);
     }
   }
+
+  const headerData = useMemo(() => {
+    return [];
+  }, [data]);
   return (
     <ViewContainer
-      className={cls('day')}
+      className={cls('multiple-columns')}
       scrollProps={{ hideBar: true }}
-      header={<Header data={todayData} />}
+      header={<Header data={headerData} />}
       content={
         <ViewContent
+          timeRangeDays={props.days}
           data={data}
-          date={props.date}
+          onChange={onDataChange}
           cellHeight={layoutConfig.cellHeight}
           interval={layoutConfig.interval}
           gap={layoutConfig.gap}
-          onChange={onDataChange}
         />
       }
       timeIndicateLine={
@@ -104,13 +115,13 @@ function DayView(props: DayViewProps) {
             dayjs().startOf('day'),
             dayjs(),
             layoutConfig.cellHeight,
-            interval
+            layoutConfig.interval
           )}
         />
       }
       timeIndicateBar={
         <TimeIndicateBar
-          range={props.date}
+          range={[dayjs().startOf('day'), dayjs().endOf('day')]}
           interval={layoutConfig.interval}
           cellHeight={layoutConfig.cellHeight}
           cellWidth={72}
@@ -118,6 +129,6 @@ function DayView(props: DayViewProps) {
       }
     />
   );
-}
+};
 
-export default DayView;
+export default WeekView;

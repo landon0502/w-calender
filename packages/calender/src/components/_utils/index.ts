@@ -41,6 +41,7 @@ export function calculateRect(
   containerWidth: number
 ) {
   const { start, end, colIndex } = item;
+
   let x = (colIndex / totalColumn) * containerWidth;
   let y = calculateDistance(start.time.startOf('day'), start.time, colHeight);
   let w = containerWidth / totalColumn;

@@ -32,6 +32,8 @@ export default function EventColumnLayoutContainer(
   // 这里需要优化，如何将配置跨组件通信
   const { component: Bubble, setDragoverBubbleState } = useDragoverBubble();
   const { getState } = useStore();
+
+  // 移动间隔
   const dragStepNum = useMemo(() => {
     return (props.cellHeight / props.interval) * 15;
   }, [props.cellHeight, props.interval]);
@@ -68,19 +70,22 @@ export default function EventColumnLayoutContainer(
     return cur;
   }
 
+  /**
+   * 需要计算开始时间和结束时间
+   */
+
   usePointerMoveEvent(
     container,
     {
       holdDelay: 100,
-      onDown: ({ event, x, y }: { event: PointerEvent; x: number; y: number }) => {
-        console.log(event, x, y, getState('layoutConfig'));
+      onDown: ({ x, y }: { event: PointerEvent; x: number; y: number }) => {
         let pointerInCol = getCurrentColumnPosi(x);
         if (isUndef(pointerInCol)) {
           return;
         }
         let top = getMoveEvtDownY(y, props.cellHeight);
 
-        let bubbleRect = {
+        bubbleRect = {
           x: pointerInCol.left,
           y: top,
           w: pointerInCol.width,
@@ -90,7 +95,7 @@ export default function EventColumnLayoutContainer(
         props.onStart?.(bubbleRect);
         enable.current = true;
       },
-      onMove({ dy, x, y }) {
+      onMove({ dy }) {
         if (!enable.current) return;
         let distanceY = getDy(dy, dragStepNum);
         if (distanceY && bubbleRect) {

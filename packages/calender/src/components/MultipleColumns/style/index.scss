@@ -1,9 +1,9 @@
 @use '@/style/mixins/mixins' as *;
 @use 'sass:math' as *;
 
-@include cls('week-view') {
+@include cls('multiple-columns') {
   position: relative;
-  &-cols {
+  &-content {
     display: flex;
     width: 100%;
   }

@@ -9,11 +9,11 @@ export function TodayScheduleRow() {
 
 export default function Header(props: HeaderProps) {
   return (
-    <div className={cls('day-header')}>
-      <div className={cls('day-header-date')}>
-        <span className={cls('day-header-date-text')}>GMT+8</span>
+    <div className={cls('multiple-columns-header')}>
+      <div className={cls('multiple-columns-header-date')}>
+        <span className={cls('multiple-columns-header-date-text')}>GMT+8</span>
       </div>
-      <Scrollbar className={cls('day-header-rows')} hideBar>
+      <Scrollbar className={cls('multiple-columns-header-rows')} hideBar>
         {props.data.map((item) => (
           <TodayScheduleRow />
         ))}

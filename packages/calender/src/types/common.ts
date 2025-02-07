@@ -1,7 +1,7 @@
 import { ComponentChildren, h } from 'preact';
 import type { ScheduleData } from './schedule';
 import type { Dayjs } from 'dayjs';
-export type Date = [string | Dayjs, string | Dayjs] | string | Dayjs;
+export type Date<T = string | Dayjs> = [T, T] | T;
 
 export interface ChCalenderOptions {
   data: ScheduleData;

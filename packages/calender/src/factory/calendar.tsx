@@ -1,8 +1,15 @@
 import { render, FunctionComponent } from 'preact/compat';
-import { DayView, WeekView, MonthView } from '@/components';
-import { getReturnTime, getTimeStartAndEnd } from '@/utils/time';
-import { createUniqueId } from '@/utils/common';
-import { isArray, isAsyncFunction, isFunction } from '@/utils/is';
+import { DayView, WeekView, MonthView } from '@/views/index';
+
+import {
+  isArray,
+  isAsyncFunction,
+  isFunction,
+  getDaysByTimes,
+  createUniqueId,
+  getReturnTime,
+  getTimeStartAndEnd,
+} from '@/utils';
 import type { UnitType } from 'dayjs';
 import type { DayViewProps } from '@/types/components';
 import type { Options, CalenderItem } from '@/types/options';
@@ -12,9 +19,10 @@ import type { ScheduleData, ScheduleItem, DateRange } from '@/types/schedule';
 import CalendarCore from './core';
 import { commitKeys } from '@/contexts/calenderStore';
 import { setStore, StoreProvider, store } from '@/contexts/calenderStore';
+import dayjs from 'dayjs';
 
 const defaultOptions: Required<Options> = {
-  date: '',
+  date: dayjs(),
   data: [],
   viewType: 'D',
   templates: {},
@@ -199,7 +207,8 @@ class Calender extends CalendarCore {
       <RenderContent
         viewType={type}
         data={this.data}
-        date={getDate(this.options.date as Date, 'D')}
+        // days={getDaysByTimes(...getDate(this.options.date as Date, 'D'))}
+        date={this.options.date}
         onChange={(e) => {
           this.onChange(e);
         }}
