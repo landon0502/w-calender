@@ -26,7 +26,7 @@ export default function ViewContainer(props: PropsWithChildren<ViewContainerProp
       </div>
       <div className={cls('layout-content')}>
         <Scrollbar
-          className={cls(['layout-content-bar', 'layout-scroll'])}
+          className={cls(['layout-scroll', 'layout-content-bar'])}
           hideBar
           linkageId={LAYOUT_SIDER_KEY}
           linkage={[LAYOUT_CONTENT_KEY]}
@@ -34,7 +34,7 @@ export default function ViewContainer(props: PropsWithChildren<ViewContainerProp
           {props.timeIndicateBar}
         </Scrollbar>
         <Scrollbar
-          className={cls(['layout-content-grid', 'layout-scroll'])}
+          className={cls(['layout-scroll', 'layout-content-grid'])}
           {...props.scrollProps}
           linkageId={LAYOUT_CONTENT_KEY}
           linkage={[LAYOUT_HEADER_KEY, LAYOUT_SIDER_KEY]}

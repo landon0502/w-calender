@@ -367,7 +367,9 @@ export default function Column({
   /**
    * @zh 网格
    */
-  function renderGridding() {}
+  function renderGridding() {
+    return <div></div>;
+  }
   return (
     <div
       style={{

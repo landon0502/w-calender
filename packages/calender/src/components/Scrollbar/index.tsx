@@ -1,5 +1,5 @@
 import { cls } from '@/utils';
-import { ComponentChildren, h, RefObject } from 'preact';
+import { ComponentChildren, h } from 'preact';
 import { createContext, useCallback } from 'preact/compat';
 import { useXState } from '@/hooks';
 import useScrollLinkage, { LinkageId } from './useScrollLinkage';
@@ -22,7 +22,7 @@ export const ScrollContext = createContext<{
   el: RefType<HTMLElement | null>;
 }>({ el: null });
 export default function (props: ScrollbarProps) {
-  const [scrollContainer, setScrollContainer, getScrollContainer, scrollContainerRef] =
+  const [scrollContainer, setScrollContainer, _, scrollContainerRef] =
     useXState<HTMLElement | null>(null);
   useScrollLinkage(scrollContainer, props.linkageId, props.linkage);
   const onScroll = useCallback(
