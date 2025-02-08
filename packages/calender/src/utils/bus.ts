@@ -78,7 +78,7 @@ export class Bus implements BusInterface {
     if (isUndef(callback)) {
       return !isEmpty(this.events[evt]);
     }
-    let events = this.events[evt];
+    let events = this.events[evt] ?? [];
     return events.some((item) => item === callback);
   }
   // 清除所有事件

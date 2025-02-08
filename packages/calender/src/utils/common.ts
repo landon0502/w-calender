@@ -116,3 +116,34 @@ export function execWithDelay(callback: Function, delay: number) {
     callback();
   }
 }
+
+/**
+ * @zh 防抖
+ */
+export function debounce(fn: (...args: any[]) => any, delay: number) {
+  let timer: number | null = null;
+  return function (this: any) {
+    if (!isUndef(timer)) clearTimeout(timer);
+    timer = setTimeout(fn.bind(this, ...arguments), delay);
+  };
+}
+/**
+ * 节流
+ * @param {function} fn
+ * @param {number} wait
+ * @returns {function}
+ */
+export function throttle(fn: (...args: any[]) => any, wait: number, immediately: boolean = false) {
+  let pre = Date.now();
+  return function (this: any) {
+    let now = Date.now();
+    if (immediately) {
+      fn.apply(this, [...arguments]);
+      immediately = false;
+    }
+    if (now - pre >= wait) {
+      fn.apply(this, [...arguments]);
+      pre = Date.now();
+    }
+  };
+}

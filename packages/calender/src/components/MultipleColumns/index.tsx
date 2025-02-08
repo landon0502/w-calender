@@ -11,7 +11,7 @@ import type { CalenderItem } from '@/types/options';
 import type { EventsProps } from '@/types/events';
 import type { ReturnTimeValue } from '@/types/time';
 import { TimeIndicateLine, TimeIndicateBar } from '../TimeIndicateBar';
-import ViewContainer from '../ViewContainer';
+import LayoutContainer from '../LayoutContainer';
 import Column from '../Column';
 import EventColumnLayoutContainer from '../Event/EventColumnLayoutContainer';
 import { Rect } from '@/types/components';
@@ -131,7 +131,7 @@ const WeekView = (props: PropsWithElAttrs<MultipleColumnsProps>) => {
     );
   }
   return (
-    <ViewContainer
+    <LayoutContainer
       className={cls('multiple-columns')}
       scrollProps={{ hideBar: true }}
       header={<Header data={headerData} />}
