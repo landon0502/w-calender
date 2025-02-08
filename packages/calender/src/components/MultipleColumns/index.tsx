@@ -40,7 +40,6 @@ const ViewContent = ({
 
   function handleRectInfo(e: Rect) {
     const startDate = timeRangeDays[0];
-    console.log(startDate);
     setDragoverBubbleState({
       rect: { ...e },
       data: {

@@ -141,6 +141,7 @@ export default function EventLayoutItem({
         ...style,
         opacity: editType ? { resize: 0, move: 0.7, add: 0 }[editType as OperateType] : 1,
         position: 'absolute',
+        overflow: 'hidden',
       }}
       ref={gridBox}
       onClick={() => {}}
