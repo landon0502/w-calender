@@ -11,6 +11,7 @@ $border: 1px solid $color-border-2;
   flex-shrink: 0;
   border: $border;
   border-bottom: 0;
+  box-sizing: border-box;
   &-date {
     width: $time-period-width;
     flex-shrink: 0;

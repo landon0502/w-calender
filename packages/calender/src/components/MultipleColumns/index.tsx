@@ -1,6 +1,6 @@
 import './style/index.scss';
 import { useMemo } from 'preact/compat';
-import { cls, getReturnTime, isAsyncFunction, isFunction } from '@/utils';
+import { cls, getReturnTime, isAsyncFunction, isFunction, numToPx } from '@/utils';
 import Header from './Header';
 import dayjs from 'dayjs';
 import { calculateDistance } from '../_utils';
@@ -19,23 +19,28 @@ import { Rect } from '@/types/components';
 export interface MultipleColumnsProps extends EventsProps {
   data: CalenderItem[];
   days: ReturnTimeValue[];
+  columnWidth?: number;
+}
+
+export interface ViewContentProps {
+  timeRangeDays: ReturnTimeValue[];
+  data: CalenderItem[];
+  cellHeight?: number;
+  interval?: number;
+  gap?: number;
+  columnWidth?: number;
+  onChange: (event: { target: CalenderItem; data: CalenderItem[] }) => {};
 }
 
 const ViewContent = ({
   timeRangeDays,
   data,
   onChange,
+  columnWidth,
   cellHeight = 42,
   interval = 30,
   gap = 8,
-}: {
-  timeRangeDays: ReturnTimeValue[];
-  data: CalenderItem[];
-  cellHeight?: number;
-  interval?: number;
-  gap?: number;
-  onChange: (event: { target: CalenderItem; data: CalenderItem[] }) => {};
-}) => {
+}: ViewContentProps) => {
   const { setDragoverBubbleState } = useDragoverBubble();
 
   function handleRectInfo(e: Rect) {
@@ -58,6 +63,8 @@ const ViewContent = ({
       className={cls(['multiple-columns'])}
       cellHeight={cellHeight}
       interval={interval}
+      column={timeRangeDays.length}
+      columnWidth={columnWidth}
       onStart={(e) => {
         handleRectInfo(e);
       }}
@@ -80,7 +87,7 @@ const ViewContent = ({
               onChange={onChange}
               columnIndex={index}
               columnCount={timeRangeDays.length}
-              style={{ minWidth: '180px', flexShrink: 1 }}
+              style={columnWidth ? { minWidth: numToPx(columnWidth), flexShrink: 1 } : {}}
             />
           );
         })}
@@ -143,6 +150,7 @@ const WeekView = (props: PropsWithElAttrs<MultipleColumnsProps>) => {
           cellHeight={layoutConfig.cellHeight}
           interval={layoutConfig.interval}
           gap={layoutConfig.gap}
+          columnWidth={props.columnWidth}
         />
       }
       timeIndicateLine={renderTimeIndicateLine()}

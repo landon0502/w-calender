@@ -1,7 +1,6 @@
 import './style/index.scss';
-import { ComponentChildren } from 'preact';
-import { useMemo, useRef, forwardRef } from 'preact/compat';
-import { moveThreshold, numToPx, getReturnTime, format, cls, isEmpty, isNumber } from '@/utils';
+import { useMemo, useRef } from 'preact/compat';
+import { numToPx, getReturnTime, format, cls, isEmpty, isNumber } from '@/utils';
 import { genTimeSlice, calculateRect, offsetToTimeValue, genStyles } from '../_utils';
 import type { CalenderItem } from '@/types/options';
 import type { DateRange } from '@/types/schedule';
@@ -11,8 +10,6 @@ import useColumnLayout from './hooks/useColumnLayout';
 import { useElementBounding } from '@/hooks';
 import EventLayoutItem from '@/components/Event/EventLayoutItem';
 import useDragoverBubble from '@/hooks/useDragoverBubble';
-import { store, commitKeys, useStore } from '@/contexts/calenderStore';
-import { produce } from 'immer';
 
 export interface ColumnEvent {
   onMoveStart?(event: any, data: CalenderItem, rect: Rect): void;
@@ -85,24 +82,7 @@ export default function Column({
   let dragPosition: Rect = { x: 0, y: 0, w: 0, h: 0 };
   let relativeIndex = 0;
 
-  const { getState } = useStore();
-  const { rect: containerRect, getRect: getContainerRect } = useElementBounding(
-    layoutContainer,
-    (rect) => {
-      let layoutConfig = getState('layoutConfig');
-
-      let newLayoutConfig = produce(layoutConfig, (draftState: any) => {
-        let columns = draftState.columns;
-        let currentColumn = columns.find(
-          (item: { columnIndex: number }) => item.columnIndex === columnIndex
-        );
-        currentColumn.width = rect.width;
-        return draftState;
-      });
-
-      store.commit(commitKeys.SET_LAYOUTCONFIG, newLayoutConfig);
-    }
-  );
+  const { rect: containerRect, getRect: getContainerRect } = useElementBounding(layoutContainer);
 
   const { layoutData, getCalenderData } = useColumnLayout({
     data,

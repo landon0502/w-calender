@@ -5,7 +5,6 @@ import {
   isArray,
   isAsyncFunction,
   isFunction,
-  getDaysByTimes,
   createUniqueId,
   getReturnTime,
   getTimeStartAndEnd,

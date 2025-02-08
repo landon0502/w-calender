@@ -1,7 +1,7 @@
 import { h } from 'preact';
 import { PropsWithChildren, useRef, useMemo } from 'preact/compat';
-import { useDragoverBubble, usePointerMoveEvent } from '@/hooks';
-import { moveThreshold, isUndef } from '@/utils';
+import { useDragoverBubble, usePointerMoveEvent, useElementBounding } from '@/hooks';
+import { moveThreshold } from '@/utils';
 import type { Rect } from '@/types/components';
 import { useStore } from '@/contexts/calenderStore';
 import { PointerEvent } from '@interactjs/types';
@@ -18,21 +18,31 @@ const getDy = moveThreshold();
 
 export default function EventColumnLayoutContainer(
   props: PropsWithChildren<{
-    className?: string;
-    style?: h.JSX.CSSProperties;
     cellHeight: number;
     interval: number;
+    column: number;
+    columnWidth?: number;
+    className?: string;
+    style?: h.JSX.CSSProperties;
     onStart?: (e: Rect) => void;
     onMove?: (e: Rect) => void;
     onEnd?: (e: Rect) => void;
   }>
 ) {
   const container = useRef<HTMLDivElement | null>(null);
-
+  const { getRect: getContainerRect } = useElementBounding(container);
   const { component: Bubble } = useDragoverBubble();
   const { getState } = useStore();
 
-  // 移动间隔
+  // column width
+  function getColumnWidth() {
+    if (props.columnWidth) {
+      return props.columnWidth;
+    }
+    return getContainerRect().width / props.column;
+  }
+
+  // Movement interval
   const dragStepNum = useMemo(() => {
     return (props.cellHeight / props.interval) * 15;
   }, [props.cellHeight, props.interval]);
@@ -44,31 +54,6 @@ export default function EventColumnLayoutContainer(
     return getState('freezeContainerEvent');
   }, [getState('freezeContainerEvent')]);
 
-  function getCurrentColumnPosi(x: number) {
-    const layoutConfig = getState('layoutConfig');
-    const columns = layoutConfig.columns;
-    if (!columns) {
-      return;
-    }
-
-    let columnsLayout = [...columns]
-      .sort((a, b) => a.columnIndex - b.columnIndex)
-      .map(({ width, columnIndex }) => {
-        let foregoingCols = columns.slice(0, columnIndex);
-        let left = foregoingCols.reduce((prev, cur) => prev + cur.width, 0);
-        return {
-          left,
-          width,
-          columnIndex,
-        };
-      });
-    let cur = columnsLayout.find(({ left, columnIndex }) => {
-      return left < x && columnsLayout[columnIndex + 1].left > x;
-    });
-
-    return cur;
-  }
-
   /**
    * @zh 需要计算开始时间和结束时间
    */
@@ -78,16 +63,18 @@ export default function EventColumnLayoutContainer(
     {
       holdDelay: 100, // 事件处理延时（ms）
       onDown: ({ x, y }: { event: PointerEvent; x: number; y: number }) => {
-        let pointerInCol = getCurrentColumnPosi(x);
-        if (isUndef(pointerInCol)) {
-          return;
+        let colWidth = getColumnWidth();
+
+        function getLeft() {
+          return Math.floor(x / colWidth) * colWidth;
         }
+
         let top = getMoveEvtDownY(y, props.cellHeight);
 
         bubbleRect = {
-          x: pointerInCol.left,
+          x: getLeft(),
           y: top,
-          w: pointerInCol.width,
+          w: colWidth,
           h: dragStepNum,
         };
         originalLayoutConfig = bubbleRect;
