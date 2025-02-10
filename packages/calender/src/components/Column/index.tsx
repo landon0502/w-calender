@@ -1,7 +1,7 @@
 import './style/index.scss';
 import { useMemo, useRef } from 'preact/compat';
 import { numToPx, getReturnTime, format, cls, isEmpty, isNumber } from '@/utils';
-import { genTimeSlice, calculateRect, offsetToTimeValue, genStyles } from '../_utils';
+import { genTimeSlice, calculateRect, offsetToTimeValue } from '../_utils';
 import type { CalenderItem } from '@/types/options';
 import type { DateRange } from '@/types/schedule';
 import type { Rect, OperateType } from '@/types/components';

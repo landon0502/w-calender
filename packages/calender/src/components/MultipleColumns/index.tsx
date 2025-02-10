@@ -1,20 +1,21 @@
 import './style/index.scss';
-import { useMemo } from 'preact/compat';
-import { cls, getReturnTime, isAsyncFunction, isFunction, numToPx } from '@/utils';
+import { useMemo, useEffect } from 'preact/compat';
+import { cls, createUniqueId, getReturnTime, isAsyncFunction, isFunction, numToPx } from '@/utils';
 import Header from './Header';
 import dayjs from 'dayjs';
-import { calculateDistance } from '../_utils';
-import { useDragoverBubble } from '@/hooks';
+import { calculateDistance, offsetToTimeValue } from '../_utils';
+import { useDragoverBubble, useXState } from '@/hooks';
 import { useStore } from '@/contexts/calenderStore';
 import type { PropsWithElAttrs } from '@/types/common';
 import type { CalenderItem } from '@/types/options';
 import type { EventsProps } from '@/types/events';
 import type { ReturnTimeValue } from '@/types/time';
+import type { DragConfig } from '@/hooks/useDragoverBubble';
 import { TimeIndicateLine, TimeIndicateBar } from '../TimeIndicateBar';
 import LayoutContainer from '../LayoutContainer';
 import Column from '../Column';
 import EventColumnLayoutContainer from '../Event/EventColumnLayoutContainer';
-import { Rect } from '@/types/components';
+import { LayoutMouseEvent } from '../Event/EventColumnLayoutContainer';
 
 export interface MultipleColumnsProps extends EventsProps {
   data: CalenderItem[];
@@ -42,37 +43,55 @@ const ViewContent = ({
   gap = 8,
 }: ViewContentProps) => {
   const { setDragoverBubbleState } = useDragoverBubble();
-
-  function handleRectInfo(e: Rect) {
-    const startDate = timeRangeDays[0];
-    setDragoverBubbleState({
-      rect: { ...e },
-      data: {
-        title: '',
-        start: getReturnTime(dayjs()),
-        end: getReturnTime(dayjs()),
-        _key: '__',
-        _raw: { start: '', end: '', title: 'test' },
-      },
-      type: 'add',
-    });
-  }
+  const [_, setColumnData, getColumnData] = useXState(data);
+  useEffect(() => setColumnData(data), [data]);
+  const handleRectInfo = (e: LayoutMouseEvent, type: 'start' | 'move' | 'end') => {
+    const dayStart = timeRangeDays[e.columnIndex];
+    const start = getReturnTime(
+        dayStart.time.add(offsetToTimeValue(e.y, interval, cellHeight), 'second')
+      ),
+      end = getReturnTime(
+        dayStart.time.add(offsetToTimeValue(e.y + e.h, interval, cellHeight), 'second')
+      ),
+      title = '',
+      config = {
+        rect: { ...e },
+        data: {
+          title,
+          start,
+          end,
+          _key: createUniqueId(),
+          _raw: {
+            start: start.time.format('YYYY-MM-DD HH:mm:ss'),
+            end: end.time.format('YYYY-MM-DD HH:mm:ss'),
+            title,
+          },
+        },
+        type: 'add',
+      };
+    setDragoverBubbleState(type === 'end' ? null : (config as DragConfig));
+    if (type === 'end') {
+      onChange({
+        target: config.data,
+        data: [...getColumnData(), config.data],
+      });
+    }
+  };
 
   return (
     <EventColumnLayoutContainer
-      className={cls(['multiple-columns'])}
+      className={cls(['multiple-columns', 'evnet-columns-container'])}
       cellHeight={cellHeight}
       interval={interval}
       column={timeRangeDays.length}
-      columnWidth={columnWidth}
       onStart={(e) => {
-        handleRectInfo(e);
+        handleRectInfo(e, 'start');
       }}
       onMove={(e) => {
-        handleRectInfo(e);
+        handleRectInfo(e, 'move');
       }}
       onEnd={(e) => {
-        setDragoverBubbleState(null);
+        handleRectInfo(e, 'end');
       }}
     >
       <div className={cls(['multiple-columns-content'])}>
@@ -88,6 +107,7 @@ const ViewContent = ({
               columnIndex={index}
               columnCount={timeRangeDays.length}
               style={columnWidth ? { minWidth: numToPx(columnWidth), flexShrink: 1 } : {}}
+              gap={gap}
             />
           );
         })}
@@ -125,17 +145,14 @@ const WeekView = (props: PropsWithElAttrs<MultipleColumnsProps>) => {
   function renderTimeIndicateLine() {
     let current = props.days.findIndex((item) => item.time.isSame(dayjs(), 'D'));
     let dotLeft = `calc(100% / ${props.days?.length ?? 1} * ${current})`;
-    return (
-      <TimeIndicateLine
-        left={dotLeft}
-        top={calculateDistance(
-          dayjs().startOf('day'),
-          dayjs(),
-          layoutConfig.cellHeight,
-          layoutConfig.interval
-        )}
-      />
+    let top = calculateDistance(
+      dayjs().startOf('day'),
+      dayjs(),
+      layoutConfig.cellHeight,
+      layoutConfig.interval
     );
+
+    return <TimeIndicateLine left={dotLeft} top={top} />;
   }
   return (
     <LayoutContainer

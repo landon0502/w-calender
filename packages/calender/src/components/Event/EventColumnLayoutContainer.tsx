@@ -16,17 +16,18 @@ function getMoveEvtDownY(y: number, cellHeight: number) {
 
 const getDy = moveThreshold();
 
+export type LayoutMouseEvent = Rect & { columnIndex: number };
+
 export default function EventColumnLayoutContainer(
   props: PropsWithChildren<{
     cellHeight: number;
     interval: number;
     column: number;
-    columnWidth?: number;
     className?: string;
     style?: h.JSX.CSSProperties;
-    onStart?: (e: Rect) => void;
-    onMove?: (e: Rect) => void;
-    onEnd?: (e: Rect) => void;
+    onStart?: (e: LayoutMouseEvent) => void;
+    onMove?: (e: LayoutMouseEvent) => void;
+    onEnd?: (e: LayoutMouseEvent) => void;
   }>
 ) {
   const container = useRef<HTMLDivElement | null>(null);
@@ -36,9 +37,6 @@ export default function EventColumnLayoutContainer(
 
   // column width
   function getColumnWidth() {
-    if (props.columnWidth) {
-      return props.columnWidth;
-    }
     return getContainerRect().width / props.column;
   }
 
@@ -47,8 +45,8 @@ export default function EventColumnLayoutContainer(
     return (props.cellHeight / props.interval) * 15;
   }, [props.cellHeight, props.interval]);
 
-  let originalLayoutConfig: Rect;
-  let bubbleRect: Rect | null;
+  let originalLayoutConfig: LayoutMouseEvent;
+  let bubbleRect: LayoutMouseEvent | null;
   const enable = useRef(false);
   const freezeContainerEventState = useMemo(() => {
     return getState('freezeContainerEvent');
@@ -64,18 +62,19 @@ export default function EventColumnLayoutContainer(
       holdDelay: 100, // 事件处理延时（ms）
       onDown: ({ x, y }: { event: PointerEvent; x: number; y: number }) => {
         let colWidth = getColumnWidth();
-
-        function getLeft() {
-          return Math.floor(x / colWidth) * colWidth;
+        function getColumnIndex() {
+          let colIndex = Math.floor(x / colWidth);
+          return colIndex;
         }
 
         let top = getMoveEvtDownY(y, props.cellHeight);
-
+        let columnIndex = getColumnIndex();
         bubbleRect = {
-          x: getLeft(),
+          x: columnIndex * colWidth,
           y: top,
           w: colWidth,
           h: dragStepNum,
+          columnIndex,
         };
         originalLayoutConfig = bubbleRect;
         props.onStart?.(bubbleRect);

@@ -17,7 +17,6 @@ export default function useLinkage(
           if (isUndef(isActive.current)) {
             isActive.current = false;
           }
-
           scrollTarget.scrollLeft = event.target.scrollLeft;
           scrollTarget.scrollTop = event.target.scrollTop;
         }

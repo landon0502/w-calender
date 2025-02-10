@@ -73,19 +73,6 @@ function RenderContent(props: DayProps | WeekProps | MonthProps) {
 }
 
 /**
- * @zh 处理时间
- */
-function getDate(date: Date, unit: UnitType): DateRange {
-  if (isArray(date)) {
-    let [start, end] = date;
-    let startTime = getReturnTime(start);
-    let endTime = getReturnTime(end);
-    return [startTime, endTime];
-  }
-  return getTimeStartAndEnd(date, unit);
-}
-
-/**
  * @zh 处理data数据，数据存在交叉时进行等比排布
  */
 function getData(data: ScheduleData): Array<CalenderItem> {
@@ -157,21 +144,8 @@ class Calender extends CalendarCore {
 
   // 初始化columns配置
   setLayoutConfig() {
-    let columnCount = {
-      day: 1,
-      D: 1,
-      week: 7,
-      W: 7,
-      month: 7,
-      M: 7,
-    };
-
-    let column = columnCount[this.viewType];
-    let columns = new Array(column).fill({}).map((_, index) => ({ columnIndex: index, width: 0 }));
     this.layoutConfig = {
       ...this.layoutConfig,
-      column,
-      columns,
     };
   }
 

@@ -22,7 +22,9 @@ export default function ViewContainer(props: PropsWithChildren<ViewContainerProp
   return (
     <div className={cls('layout')} style={props.style}>
       <div className={cls('layout-header')} style={props.headerStyle}>
-        {props.header}
+        <Scrollbar linkageId={LAYOUT_HEADER_KEY} linkage={[LAYOUT_CONTENT_KEY]}>
+          {props.header}
+        </Scrollbar>
       </div>
       <div className={cls('layout-content')}>
         <Scrollbar

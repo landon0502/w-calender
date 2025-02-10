@@ -24,10 +24,13 @@ $border: 1px solid $color-border-2;
       border-right: 0;
     }
     &-grid {
-      position: relative;
       flex: 1;
       border-left: 0;
       overflow: hidden;
+      &-columns {
+        min-width: fit-content;
+        position: relative;
+      }
     }
   }
 }
