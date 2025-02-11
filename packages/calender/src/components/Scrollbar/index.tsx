@@ -1,4 +1,4 @@
-import { cls } from '@/utils';
+import { cls, isEmpty } from '@/utils';
 import { ComponentChildren, h } from 'preact';
 import { createContext, useCallback } from 'preact/compat';
 import { useXState } from '@/hooks';
@@ -12,7 +12,8 @@ export interface ScrollbarProps {
   style?: h.JSX.CSSProperties;
   hideBar?: Boolean;
   linkageId?: LinkageId;
-  linkage?: Array<LinkageId>;
+  horizontalLinkage?: Array<LinkageId>;
+  verticalLinkage?: Array<LinkageId>;
   onScroll?: (e: {
     event?: Event;
     scroll: { scrollHeight: number; scrollLeft: number; scrollTop: number; scrollWidth: number };
@@ -24,7 +25,13 @@ export const ScrollContext = createContext<{
 export default function (props: ScrollbarProps) {
   const [scrollContainer, setScrollContainer, _, scrollContainerRef] =
     useXState<HTMLElement | null>(null);
-  useScrollLinkage(scrollContainer, props.linkageId, props.linkage);
+  if (!isEmpty(props.horizontalLinkage)) {
+    useScrollLinkage(scrollContainer, 'horizontal', props.linkageId, props.horizontalLinkage);
+  }
+  if (!isEmpty(props.verticalLinkage)) {
+    useScrollLinkage(scrollContainer, 'vertical', props.linkageId, props.verticalLinkage);
+  }
+
   const onScroll = useCallback(
     (e: Event) => {
       if (typeof props.onScroll === 'function') {

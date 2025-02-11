@@ -22,16 +22,14 @@ export default function ViewContainer(props: PropsWithChildren<ViewContainerProp
   return (
     <div className={cls('layout')} style={props.style}>
       <div className={cls('layout-header')} style={props.headerStyle}>
-        <Scrollbar linkageId={LAYOUT_HEADER_KEY} linkage={[LAYOUT_CONTENT_KEY]}>
-          {props.header}
-        </Scrollbar>
+        {props.header}
       </div>
       <div className={cls('layout-content')}>
         <Scrollbar
           className={cls(['layout-scroll', 'layout-content-bar'])}
           hideBar
           linkageId={LAYOUT_SIDER_KEY}
-          linkage={[LAYOUT_CONTENT_KEY]}
+          verticalLinkage={[LAYOUT_CONTENT_KEY]}
         >
           {props.timeIndicateBar}
         </Scrollbar>
@@ -39,7 +37,8 @@ export default function ViewContainer(props: PropsWithChildren<ViewContainerProp
           className={cls(['layout-scroll', 'layout-content-grid'])}
           {...props.scrollProps}
           linkageId={LAYOUT_CONTENT_KEY}
-          linkage={[LAYOUT_HEADER_KEY, LAYOUT_SIDER_KEY]}
+          horizontalLinkage={[LAYOUT_HEADER_KEY]}
+          verticalLinkage={[LAYOUT_SIDER_KEY]}
         >
           <div className={cls('layout-content-grid-columns')}>
             <div className={cls('layout-content-grid-columns-content')}>

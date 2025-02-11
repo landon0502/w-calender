@@ -1,7 +1,7 @@
 import './style/index.scss';
 import { useMemo, useEffect } from 'preact/compat';
 import { cls, createUniqueId, getReturnTime, isAsyncFunction, isFunction, numToPx } from '@/utils';
-import Header from './Header';
+import Header from '../Header';
 import dayjs from 'dayjs';
 import { calculateDistance, offsetToTimeValue } from '../_utils';
 import { useDragoverBubble, useXState } from '@/hooks';

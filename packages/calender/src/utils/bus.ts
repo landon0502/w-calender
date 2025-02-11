@@ -27,7 +27,10 @@ export class Bus implements BusInterface {
    */
   $on(evt: symbol, callback: EventCallback, autoTrigger = false) {
     if (!this.events[evt]) this.events[evt] = [];
-    this.events[evt].push(callback);
+    if (callback) {
+      this.events[evt].push(callback);
+    }
+
     if (Reflect.has(this.taskCallBackCache, evt)) {
       autoTrigger && this.$emit(evt, ...this.taskCallBackCache[evt]);
       delete this.taskCallBackCache[evt];

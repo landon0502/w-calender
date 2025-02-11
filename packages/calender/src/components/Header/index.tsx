@@ -1,6 +1,6 @@
 import { cls } from '@/utils/css';
 import Scrollbar from '../Scrollbar';
-import './style/header.scss';
+import './style/index.scss';
 import type { HeaderProps } from '@wcalender/types/components';
 import { LAYOUT_CONTENT_KEY, LAYOUT_HEADER_KEY } from '../LayoutContainer/linkageKeys';
 export function TodayScheduleRow() {
@@ -17,9 +17,10 @@ export default function Header(props: HeaderProps) {
         className={cls('multiple-columns-header-rows')}
         hideBar
         linkageId={LAYOUT_HEADER_KEY}
-        linkage={[LAYOUT_CONTENT_KEY]}
+        horizontalLinkage={[LAYOUT_CONTENT_KEY]}
       >
         <div style={{ width: '2000px', height: '50px' }}>
+          11
           {props.data.map((item) => (
             <TodayScheduleRow />
           ))}

@@ -28,6 +28,7 @@ $border: 1px solid $color-border-2;
     flex: 1;
     padding: 4px;
     box-sizing: border-box;
+    overflow: hidden;
     @include cls('today-schedule-item') {
       margin-top: 4px;
       &:first-of-type {
