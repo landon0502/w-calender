@@ -20,7 +20,6 @@ export default function Header(props: HeaderProps) {
         horizontalLinkage={[LAYOUT_CONTENT_KEY]}
       >
         <div style={{ width: '2000px', height: '50px' }}>
-          11
           {props.data.map((item) => (
             <TodayScheduleRow />
           ))}

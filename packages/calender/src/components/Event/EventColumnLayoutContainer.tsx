@@ -1,5 +1,5 @@
 import { h } from 'preact';
-import { PropsWithChildren, useRef, useMemo } from 'preact/compat';
+import { PropsWithChildren, useRef, useMemo, createContext } from 'preact/compat';
 import { useDragoverBubble, usePointerMoveEvent, useElementBounding } from '@/hooks';
 import { moveThreshold } from '@/utils';
 import type { Rect } from '@/types/components';
@@ -17,7 +17,11 @@ function getMoveEvtDownY(y: number, cellHeight: number) {
 const getDy = moveThreshold();
 
 export type LayoutMouseEvent = Rect & { columnIndex: number };
-
+export const EventColumnLayoutContext = createContext<{ getColumnWidth: () => number }>({
+  getColumnWidth() {
+    return 0;
+  },
+});
 export default function EventColumnLayoutContainer(
   props: PropsWithChildren<{
     cellHeight: number;
@@ -115,9 +119,11 @@ export default function EventColumnLayoutContainer(
   );
 
   return (
-    <div ref={container} className={props.className}>
-      <Bubble />
-      {props.children}
-    </div>
+    <EventColumnLayoutContext.Provider value={{ getColumnWidth }}>
+      <div ref={container} className={props.className}>
+        <Bubble />
+        {props.children}
+      </div>
+    </EventColumnLayoutContext.Provider>
   );
 }

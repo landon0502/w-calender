@@ -72,7 +72,7 @@ export default function EventLayoutItem({
           move(event) {
             // get rect of column container element
             const rect = parentElRect;
-
+            // console.log(event);
             let dx = getDx(event.dx, rect?.width ?? 1);
             let dy = getDy(event.dy, touchTriggerDistance.y);
             if (dy) {
@@ -92,6 +92,8 @@ export default function EventLayoutItem({
             onMoveEnd?.(event, data, rect);
 
             resetEditType();
+
+            store.commit(commitKeys.SET_FREEZE_CONTAINER_EVT, false);
           },
         },
       },
@@ -114,6 +116,7 @@ export default function EventLayoutItem({
             let rect = getEleLayout(event.target);
             onResizeEnd?.(event, data, rect);
             resetEditType();
+            store.commit(commitKeys.SET_FREEZE_CONTAINER_EVT, false);
           },
         },
       },
@@ -124,6 +127,8 @@ export default function EventLayoutItem({
         event.stopPropagation();
         onTap?.(event, data, { x, y, w, h });
       });
+
+      // set freeze state for the container
       ctx.on('down', function (event) {
         store.commit(commitKeys.SET_FREEZE_CONTAINER_EVT, true);
       });

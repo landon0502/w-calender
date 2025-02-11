@@ -1,5 +1,5 @@
 import './style/index.scss';
-import { useMemo, useRef } from 'preact/compat';
+import { useMemo, useRef, useContext } from 'preact/compat';
 import { numToPx, getReturnTime, format, cls, isEmpty, isNumber } from '@/utils';
 import { genTimeSlice, calculateRect, offsetToTimeValue } from '../_utils';
 import type { CalenderItem } from '@/types/options';
@@ -10,7 +10,7 @@ import useColumnLayout from './hooks/useColumnLayout';
 import { useElementBounding } from '@/hooks';
 import EventLayoutItem from '@/components/Event/EventLayoutItem';
 import useDragoverBubble from '@/hooks/useDragoverBubble';
-
+import { EventColumnLayoutContext } from '../Event/EventColumnLayoutContainer';
 export interface ColumnEvent {
   onMoveStart?(event: any, data: CalenderItem, rect: Rect): void;
   onMove?(event: any, data: CalenderItem, rect: Rect): void;
@@ -83,7 +83,7 @@ export default function Column({
   let relativeIndex = 0;
 
   const { rect: containerRect, getRect: getContainerRect } = useElementBounding(layoutContainer);
-
+  const { getColumnWidth } = useContext(EventColumnLayoutContext);
   const { layoutData, getCalenderData } = useColumnLayout({
     data,
     timeRange: date,
@@ -95,10 +95,11 @@ export default function Column({
 
   /**
    * @zh 开始移动
+   * @en move start
    */
   function onMoveStart(event: any, data: CalenderItem, rect: Rect) {
     dragPosition.y = rect.y;
-    dragPosition.h = rect.h;
+    (dragPosition.x = getColumnWidth() * columnIndex), (dragPosition.h = rect.h);
     setDragoverBubbleState({ rect: { ...dragPosition }, data, type: 'move' });
   }
 
@@ -117,6 +118,7 @@ export default function Column({
       dragPosition.y = size.height - dragPosition.h;
     }
 
+    // 这里需要优化，relativeIndex变更时机不对
     if (isNumber(event.dx) && multipleColumns) {
       let newIndex = relativeIndex + event.dx / getContainerRect().width;
       if (newIndex + columnIndex >= 0 && newIndex + columnIndex < columnCount) {
@@ -136,7 +138,11 @@ export default function Column({
    * @zh resize start
    */
   function onResizeStart(event: any, data: CalenderItem, rect: Rect) {
-    setDragoverBubbleState({ rect, data, type: 'resize' });
+    setDragoverBubbleState({
+      rect: { ...rect, x: getColumnWidth() * columnIndex },
+      data,
+      type: 'resize',
+    });
     dragPosition = { ...rect };
   }
 
@@ -174,7 +180,7 @@ export default function Column({
       rect: {
         y: dragPosition.y,
         w: getContainerRect().width,
-        x: `calc(${numToPx(getContainerRect().width * columnIndex)} + ${relativeIndex}px)`,
+        x: numToPx(getContainerRect().width * (columnIndex + relativeIndex)),
         h: event.rect.height,
       },
       data: currentDragData,
