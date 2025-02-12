@@ -1,4 +1,4 @@
-import { useRef, Children } from 'preact/compat';
+import { useRef, Children, useEffect } from 'preact/compat';
 import { cls } from '@/utils/css';
 import { getAttrsTransformTranslate } from '@/utils/dom';
 import { moveThreshold } from '@/utils/common';
@@ -6,7 +6,7 @@ import type { GridBoxProps, OperateType } from '@wcalender/types/components';
 import useInteract from '@/hooks/useInteract';
 import { genStyles } from '../_utils';
 import { useXState } from '@/hooks';
-import { isAsyncFunction, isFunction, getBoundingClientRect, ElementRect } from '@/utils';
+import { isAsyncFunction, isFunction } from '@/utils';
 import { store, commitKeys } from '@/contexts/calenderStore';
 /**
  * @zh 获取拖动触发元素信息
@@ -16,27 +16,45 @@ function getEleLayout(el: HTMLElement) {
   let { width, height } = el.getBoundingClientRect();
   return { ...posi, w: width, h: height };
 }
-const getDy = moveThreshold();
-const getDx = moveThreshold();
-export default function EventLayoutItem({
-  w,
-  h,
-  x,
-  y,
-  children,
-  className,
-  data,
-  style,
-  onMove,
-  onMoveStart,
-  onMoveEnd,
-  onResize,
-  onResizeStart,
-  onResizeEnd,
-  onTap,
-  onBeforeUpdate = () => true,
-  touchTriggerDistance = { x: 0, y: 0 },
-}: GridBoxProps) {
+
+export default function EventLayoutItem(props: GridBoxProps) {
+  const {
+    w,
+    h,
+    x,
+    y,
+    children,
+    className,
+    data,
+    style,
+    disabled = false,
+    moveThreshold = {
+      x(event) {
+        return event.dx;
+      },
+      y(event) {
+        return event.dy;
+      },
+    },
+    onMove,
+    onMoveStart,
+    onMoveEnd,
+    onResize,
+    onResizeStart,
+    onResizeEnd,
+    onTap,
+    onBeforeUpdate = () => true,
+  } = props;
+  const moveThresholdX =
+    moveThreshold.x ??
+    function (event) {
+      return event.dx;
+    };
+  const moveThresholdY =
+    moveThreshold.y ??
+    function (event) {
+      return event.dy;
+    };
   const gridBox = useRef<HTMLDivElement>(null);
   const [editType, setDragState] = useXState<OperateType | false>(false);
 
@@ -54,8 +72,7 @@ export default function EventLayoutItem({
     }
   }
 
-  let parentElRect: ElementRect | undefined | null;
-  useInteract(
+  const { enable, disable } = useInteract(
     gridBox,
     void 0,
     {
@@ -67,32 +84,25 @@ export default function EventLayoutItem({
             let rect = getEleLayout(event.target);
             onMoveStart?.(event, data, rect);
             setDragState('move');
-            parentElRect = getBoundingClientRect(event.target.parentElement);
           },
           move(event) {
             // get rect of column container element
-            const rect = parentElRect;
-            // console.log(event);
-            let dx = getDx(event.dx, rect?.width ?? 1);
-            let dy = getDy(event.dy, touchTriggerDistance.y);
+            let rect = getEleLayout(event.target);
+            let dx = moveThresholdX(event);
+            let dy = moveThresholdY(event);
             if (dy) {
-              let rect = getEleLayout(event.target);
               onMove?.({ ...event, dy: dy }, data, rect);
               dx = 0;
             }
             if (dx) {
-              let rect = getEleLayout(event.target);
               onMove?.({ ...event, dx: dx }, data, rect);
               dy = 0;
             }
           },
           end(event) {
             let rect = getEleLayout(event.target);
-            parentElRect = null;
             onMoveEnd?.(event, data, rect);
-
             resetEditType();
-
             store.commit(commitKeys.SET_FREEZE_CONTAINER_EVT, false);
           },
         },
@@ -106,7 +116,7 @@ export default function EventLayoutItem({
             setDragState('resize');
           },
           move(event) {
-            let dy = getDy(event.dy, touchTriggerDistance.y);
+            let dy = moveThreshold.y?.(event);
             if (dy) {
               let rect = getEleLayout(event.target);
               onResize?.({ ...event, dy: dy }, data, rect);
@@ -138,6 +148,10 @@ export default function EventLayoutItem({
     }
   );
 
+  useEffect(() => {
+    disabled ? disable() : enable();
+  }, [disabled]);
+
   return (
     <div
       className={`${className ?? ''} ${cls(['grid-box', 'grid-content'])}`}
@@ -153,7 +167,7 @@ export default function EventLayoutItem({
     >
       {Children.map(children, (child) => {
         if (typeof child === 'function') {
-          return child({ touchState: editType }); // 调用子元素作为一个函数，并传递值
+          return child({ touchState: editType });
         }
         return child;
       })}

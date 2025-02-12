@@ -5,10 +5,21 @@ import { moveThreshold } from '@/utils';
 import type { Rect } from '@/types/components';
 import { useStore } from '@/contexts/calenderStore';
 import { PointerEvent } from '@interactjs/types';
+
+export interface EventColumnLayoutContainerProps {
+  cellHeight: number;
+  interval: number;
+  column: number;
+  disabled?: boolean;
+  className?: string;
+  style?: h.JSX.CSSProperties;
+  onStart?: (e: LayoutMouseEvent) => void;
+  onMove?: (e: LayoutMouseEvent) => void;
+  onEnd?: (e: LayoutMouseEvent) => void;
+}
+
 /**
  * @zh 添加时间段
- * 这里需要做添加元素的resize操作
- * 自动平均对齐刻度
  */
 function getMoveEvtDownY(y: number, cellHeight: number) {
   return y - (y % (cellHeight / 2));
@@ -23,16 +34,7 @@ export const EventColumnLayoutContext = createContext<{ getColumnWidth: () => nu
   },
 });
 export default function EventColumnLayoutContainer(
-  props: PropsWithChildren<{
-    cellHeight: number;
-    interval: number;
-    column: number;
-    className?: string;
-    style?: h.JSX.CSSProperties;
-    onStart?: (e: LayoutMouseEvent) => void;
-    onMove?: (e: LayoutMouseEvent) => void;
-    onEnd?: (e: LayoutMouseEvent) => void;
-  }>
+  props: PropsWithChildren<EventColumnLayoutContainerProps>
 ) {
   const container = useRef<HTMLDivElement | null>(null);
   const { getRect: getContainerRect } = useElementBounding(container);
@@ -59,7 +61,6 @@ export default function EventColumnLayoutContainer(
   /**
    * @zh 需要计算开始时间和结束时间
    */
-
   usePointerMoveEvent(
     container,
     {
@@ -115,7 +116,7 @@ export default function EventColumnLayoutContainer(
         enable.current = false;
       },
     },
-    !freezeContainerEventState
+    !freezeContainerEventState && !props.disabled
   );
 
   return (

@@ -1,6 +1,6 @@
 import './style/index.scss';
 import { useMemo, useRef, useContext } from 'preact/compat';
-import { numToPx, getReturnTime, format, cls, isEmpty, isNumber } from '@/utils';
+import { numToPx, getReturnTime, format, cls, isEmpty, isNumber, moveThreshold } from '@/utils';
 import { genTimeSlice, calculateRect, offsetToTimeValue } from '../_utils';
 import type { CalenderItem } from '@/types/options';
 import type { DateRange } from '@/types/schedule';
@@ -11,6 +11,7 @@ import { useElementBounding } from '@/hooks';
 import EventLayoutItem from '@/components/Event/EventLayoutItem';
 import useDragoverBubble from '@/hooks/useDragoverBubble';
 import { EventColumnLayoutContext } from '../Event/EventColumnLayoutContainer';
+
 export interface ColumnEvent {
   onMoveStart?(event: any, data: CalenderItem, rect: Rect): void;
   onMove?(event: any, data: CalenderItem, rect: Rect): void;
@@ -36,30 +37,7 @@ export interface ColumnProps extends ColumnEvent {
   split?: boolean;
 }
 
-/**
- * @zh 渲染模版
- */
-function RenderTemplate({
-  touchState,
-  config,
-}: {
-  touchState?: OperateType;
-  config: CalenderItem;
-}) {
-  return (
-    <div
-      style={{
-        width: '100%',
-        height: '100%',
-        background: 'blue',
-        fontSize: '12px',
-        color: 'white',
-      }}
-    >
-      {`${config.title}-${format(config.start, 'HH:mm')}~${format(config.end, 'HH:mm')}--${touchState}`}
-    </div>
-  );
-}
+const getDy = moveThreshold();
 
 export default function Column({
   data,
@@ -75,13 +53,12 @@ export default function Column({
   style = {},
   onChange = () => {},
 }: PropsWithElAttrs<ColumnProps>) {
+  let dragPosition: Rect = { x: 0, y: 0, w: 0, h: 0 };
+  let relativeIndex = 0;
   const layoutContainer = useRef<HTMLDivElement>(null);
   const timeList = useMemo(() => genTimeSlice(date, timeInterval), [date]);
   const columnHeight = useMemo(() => timeList.length * cellHeight, [timeList]);
   const { setDragoverBubbleState, getDragoverState } = useDragoverBubble();
-  let dragPosition: Rect = { x: 0, y: 0, w: 0, h: 0 };
-  let relativeIndex = 0;
-
   const { rect: containerRect, getRect: getContainerRect } = useElementBounding(layoutContainer);
   const { getColumnWidth } = useContext(EventColumnLayoutContext);
   const { layoutData, getCalenderData } = useColumnLayout({
@@ -105,8 +82,10 @@ export default function Column({
 
   /**
    * @zh 移动中
+   * @en moved
    */
   function onMove(event: any, data: CalenderItem, rect: Rect) {
+    const columnWidth = getColumnWidth();
     if (isNumber(event.dy)) {
       dragPosition.y += event.dy;
     }
@@ -119,11 +98,13 @@ export default function Column({
     }
 
     // 这里需要优化，relativeIndex变更时机不对
-    if (isNumber(event.dx) && multipleColumns) {
-      let newIndex = relativeIndex + event.dx / getContainerRect().width;
-      if (newIndex + columnIndex >= 0 && newIndex + columnIndex < columnCount) {
-        relativeIndex = newIndex;
+    if (multipleColumns) {
+      const { x } = event.page;
+
+      if (relativeIndex < -columnIndex || relativeIndex >= columnCount) {
+        return;
       }
+      relativeIndex = Math.floor(x / columnWidth);
     }
 
     handleUpdateData(event, data, 'move');
@@ -214,6 +195,32 @@ export default function Column({
   const onTap = () => {};
 
   /**
+   * @zh 渲染模版
+   */
+  function renderTemplate({
+    touchState,
+    config,
+  }: {
+    touchState?: OperateType;
+    config: CalenderItem;
+  }) {
+    return (
+      <div
+        style={{
+          width: '100%',
+          height: '100%',
+          background: 'blue',
+          fontSize: '12px',
+          color: 'white',
+          userSelect: touchState ? 'auto' : 'none',
+        }}
+      >
+        {`${config.title}-${format(config.start, 'HH:mm')}~${format(config.end, 'HH:mm')}--${touchState}`}
+      </div>
+    );
+  }
+
+  /**
    * @zh 日程布局
    */
   function renderCalenderLayout() {
@@ -238,11 +245,15 @@ export default function Column({
           onResizeEnd={onResizeEnd}
           onResize={onResize}
           onTap={onTap}
-          touchTriggerDistance={{ y: dragStepNum, x: containerRect.width }}
+          moveThreshold={{
+            y(event) {
+              return getDy(event.dy, dragStepNum);
+            },
+          }}
         >
           {/* 自定义日程卡片，需支持自定义 */}
           {({ touchState }: { touchState: OperateType }) => {
-            return <RenderTemplate config={config} touchState={touchState} />;
+            return renderTemplate({ config, touchState });
           }}
         </EventLayoutItem>
       ))

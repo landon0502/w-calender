@@ -36,7 +36,7 @@ export interface GridBoxProps extends Rect {
   children?: ComponentChildren;
   data: CalenderItem;
   style?: h.JSX.CSSProperties;
-  touchTriggerDistance?: { x: number; y: number };
+  disabled?: boolean;
   onMoveStart?(event: any, data: CalenderItem, rect: Rect): void;
   onMove?(event: any, data: CalenderItem, rect: Rect): void;
   onMoveEnd?(event: any, data: CalenderItem, rect: Rect): void;
@@ -45,6 +45,10 @@ export interface GridBoxProps extends Rect {
   onResizeEnd?(event: any, data: CalenderItem, rect: Rect): void;
   onTap?(event: any, data: CalenderItem, rect: Rect): void;
   onBeforeUpdate?(): Promise<boolean> | boolean;
+  moveThreshold?: {
+    x?(event: any): number | false;
+    y?(event: any): number | false;
+  };
 }
 
 export type OperateType = 'resize' | 'move' | 'add';

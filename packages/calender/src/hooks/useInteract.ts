@@ -29,6 +29,7 @@ export default function useInteract(
   eventOptions?: InteractEventOptions,
   callback?: (ctx: Interactable) => void
 ) {
+  const enableState = useRef(true);
   let interactCtx = useRef<Interactable | null>(null);
 
   // 初始化事件
@@ -53,13 +54,40 @@ export default function useInteract(
         initEvent(interactCtx.current, eventOptions);
       }
       callback?.(interactCtx.current);
+      enableState.current ? enable() : disable();
     }
 
     return () => {
       interactCtx.current = null;
     };
   }, [target]);
+
+  function enable(types: Array<'draggable' | 'resize'> = ['draggable', 'resize']) {
+    enableState.current = true;
+    if (interactCtx.current) {
+      !isUndef(eventOptions?.draggableEvents) &&
+        types.includes('draggable') &&
+        interactCtx.current.draggable(true);
+      !isUndef(eventOptions?.resizeEvents) &&
+        types.includes('resize') &&
+        interactCtx.current.resizable(true);
+    }
+  }
+  function disable(types: Array<'draggable' | 'resize'> = ['draggable', 'resize']) {
+    enableState.current = false;
+    if (interactCtx.current) {
+      !isUndef(eventOptions?.draggableEvents) &&
+        types.includes('draggable') &&
+        interactCtx.current.draggable(false);
+      !isUndef(eventOptions?.resizeEvents) &&
+        types.includes('resize') &&
+        interactCtx.current.resizable(false);
+    }
+  }
+
   return {
     getContext: () => interactCtx.current,
+    disable,
+    enable,
   };
 }
