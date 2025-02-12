@@ -58,6 +58,11 @@ function main() {
         end: dayjs().format('YYYY-MM-DD 15:50'),
         title: '这里是测试9',
       },
+      {
+        start: dayjs().format('YYYY-MM-DD 14:50'),
+        end: dayjs().add(1, 'day').format('YYYY-MM-DD 15:50'),
+        title: '跨天测试数据',
+      },
     ],
     date: '2025-02-10',
     viewType: viewType.value,

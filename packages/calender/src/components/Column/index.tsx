@@ -11,6 +11,7 @@ import { useElementBounding } from '@/hooks';
 import EventLayoutItem from '@/components/Event/EventLayoutItem';
 import useDragoverBubble from '@/hooks/useDragoverBubble';
 import { EventColumnLayoutContext } from '../Event/EventColumnLayoutContainer';
+import dayjs from 'dayjs';
 
 const getDy = moveThreshold();
 
@@ -51,8 +52,9 @@ export default function Column({
    */
   function onMoveStart(event: any, data: CalenderItem, rect: Rect) {
     dragPosition.y = rect.y;
-    (dragPosition.x = getColumnWidth() * columnIndex), (dragPosition.h = rect.h);
-    setDragoverBubbleState({ rect: { ...dragPosition }, data, type: 'move' });
+    dragPosition.x = getColumnWidth() * columnIndex;
+    dragPosition.h = rect.h;
+    setDragoverBubbleState({ rect: { ...dragPosition, w: getColumnWidth() }, data, type: 'move' });
   }
 
   /**
@@ -95,7 +97,7 @@ export default function Column({
    */
   function onResizeStart(event: any, data: CalenderItem, rect: Rect) {
     setDragoverBubbleState({
-      rect: { ...rect, x: getColumnWidth() * columnIndex },
+      rect: { ...rect, w: getColumnWidth(), x: getColumnWidth() * columnIndex },
       data,
       type: 'resize',
     });
@@ -251,6 +253,7 @@ export default function Column({
       }}
       className={cls([
         'column',
+        getReturnTime(date[0]).time.isSame(dayjs(), 'day') ? 'today-active' : void 0,
         bordered ? 'column-border' : void 0,
         split ? 'column-split' : void 0,
       ])}

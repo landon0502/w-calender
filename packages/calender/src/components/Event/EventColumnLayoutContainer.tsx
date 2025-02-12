@@ -1,4 +1,3 @@
-import { h } from 'preact';
 import { PropsWithChildren, useRef, useMemo, createContext } from 'preact/compat';
 import { useDragoverBubble, usePointerMoveEvent, useElementBounding } from '@/hooks';
 import { moveThreshold } from '@/utils';
@@ -105,7 +104,7 @@ export default function EventColumnLayoutContainer(
     },
     !freezeContainerEventState && !props.disabled
   );
-
+  console.log('event column layout container repeat render, useMouseInElement 导致');
   return (
     <EventColumnLayoutContext.Provider value={{ getColumnWidth }}>
       <div ref={container} className={props.className}>

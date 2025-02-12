@@ -3,7 +3,7 @@ $time-period-width: 72px;
 $col-height: var(--col-h);
 $border: 1px solid $color-border-2;
 // 表格头部
-@include cls('multiple-columns-header') {
+@include cls('header') {
   width: 100%;
   min-height: $col-height;
   max-height: 100px;
@@ -34,6 +34,11 @@ $border: 1px solid $color-border-2;
       &:first-of-type {
         margin-top: 0;
       }
+    }
+
+    &-days {
+      min-width: fit-content;
+      display: flex;
     }
   }
 }
