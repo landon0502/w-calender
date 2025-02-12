@@ -1,7 +1,7 @@
 import { cls } from '@/utils/css';
 import Scrollbar from '../Scrollbar';
 import './style/index.scss';
-import type { HeaderProps } from '@wcalender/types/components';
+import type { HeaderProps } from './types';
 import { LAYOUT_CONTENT_KEY, LAYOUT_HEADER_KEY } from '../LayoutContainer/linkageKeys';
 export function TodayScheduleRow() {
   return <div className={cls('today-schedule-item')}></div>;

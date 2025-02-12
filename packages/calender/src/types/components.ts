@@ -1,6 +1,6 @@
 import type { CalenderItem } from '@/types/options';
 import type { EventsProps } from './events';
-import type { TimeValue } from './time';
+import type { TimeValue, ReturnTimeValue } from './time';
 import { ComponentChildren, h } from 'preact';
 
 export interface DayViewProps extends EventsProps {
@@ -11,10 +11,6 @@ export interface DayViewProps extends EventsProps {
 export interface WeekViewProps extends EventsProps {
   data: CalenderItem[];
   date: TimeValue;
-}
-
-export interface HeaderProps {
-  data: Array<CalenderItem>;
 }
 
 export interface ScheduleCardProps {

@@ -8,30 +8,13 @@ import { useDragoverBubble, useXState } from '@/hooks';
 import { useStore } from '@/contexts/calenderStore';
 import type { PropsWithElAttrs } from '@/types/common';
 import type { CalenderItem } from '@/types/options';
-import type { EventsProps } from '@/types/events';
-import type { ReturnTimeValue } from '@/types/time';
 import type { DragConfig } from '@/hooks/useDragoverBubble';
 import { TimeIndicateLine, TimeIndicateBar } from '../TimeIndicateBar';
 import LayoutContainer from '../LayoutContainer';
 import Column from '../Column';
 import EventColumnLayoutContainer from '../Event/EventColumnLayoutContainer';
-import { LayoutMouseEvent } from '../Event/EventColumnLayoutContainer';
-
-export interface MultipleColumnsProps extends EventsProps {
-  data: CalenderItem[];
-  days: ReturnTimeValue[];
-  columnWidth?: number;
-}
-
-export interface ViewContentProps {
-  timeRangeDays: ReturnTimeValue[];
-  data: CalenderItem[];
-  cellHeight?: number;
-  interval?: number;
-  gap?: number;
-  columnWidth?: number;
-  onChange: (event: { target: CalenderItem; data: CalenderItem[] }) => {};
-}
+import type { LayoutMouseEvent } from '../Event/types';
+import type { MultipleColumnsProps, ViewContentProps } from './types';
 
 const ViewContent = ({
   timeRangeDays,
@@ -158,7 +141,7 @@ const WeekView = (props: PropsWithElAttrs<MultipleColumnsProps>) => {
     <LayoutContainer
       className={cls('multiple-columns')}
       scrollProps={{ hideBar: true }}
-      header={<Header data={headerData} />}
+      header={<Header data={headerData} days={props.days} />}
       content={
         <ViewContent
           timeRangeDays={props.days}

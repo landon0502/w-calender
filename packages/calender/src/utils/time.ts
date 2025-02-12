@@ -1,5 +1,5 @@
 import dayjs, { Dayjs, OpUnitType, UnitType } from 'dayjs';
-import type { TimeValue, ReturnTimeValue, TimeList } from '@wcalender/types/time';
+import type { TimeValue, ReturnTimeValue, TimeList } from '@/types/time';
 import { isDate } from './is';
 
 import quarterOfYear from 'dayjs/plugin/quarterOfYear';

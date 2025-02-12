@@ -2,21 +2,9 @@ import { h } from 'preact';
 import { PropsWithChildren, useRef, useMemo, createContext } from 'preact/compat';
 import { useDragoverBubble, usePointerMoveEvent, useElementBounding } from '@/hooks';
 import { moveThreshold } from '@/utils';
-import type { Rect } from '@/types/components';
 import { useStore } from '@/contexts/calenderStore';
 import { PointerEvent } from '@interactjs/types';
-
-export interface EventColumnLayoutContainerProps {
-  cellHeight: number;
-  interval: number;
-  column: number;
-  disabled?: boolean;
-  className?: string;
-  style?: h.JSX.CSSProperties;
-  onStart?: (e: LayoutMouseEvent) => void;
-  onMove?: (e: LayoutMouseEvent) => void;
-  onEnd?: (e: LayoutMouseEvent) => void;
-}
+import type { EventColumnLayoutContainerProps, LayoutMouseEvent } from './types';
 
 /**
  * @zh 添加时间段
@@ -27,7 +15,6 @@ function getMoveEvtDownY(y: number, cellHeight: number) {
 
 const getDy = moveThreshold();
 
-export type LayoutMouseEvent = Rect & { columnIndex: number };
 export const EventColumnLayoutContext = createContext<{ getColumnWidth: () => number }>({
   getColumnWidth() {
     return 0;

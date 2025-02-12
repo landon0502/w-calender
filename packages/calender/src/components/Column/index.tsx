@@ -1,41 +1,16 @@
 import './style/index.scss';
+import type { ColumnProps } from './types';
+import type { CalenderItem } from '@/types/options';
+import type { Rect, OperateType } from '@/types/components';
+import type { PropsWithElAttrs } from '@/types/common';
 import { useMemo, useRef, useContext } from 'preact/compat';
 import { numToPx, getReturnTime, format, cls, isEmpty, isNumber, moveThreshold } from '@/utils';
 import { genTimeSlice, calculateRect, offsetToTimeValue } from '../_utils';
-import type { CalenderItem } from '@/types/options';
-import type { DateRange } from '@/types/schedule';
-import type { Rect, OperateType } from '@/types/components';
-import type { PropsWithElAttrs } from '@/types/common';
 import useColumnLayout from './hooks/useColumnLayout';
 import { useElementBounding } from '@/hooks';
 import EventLayoutItem from '@/components/Event/EventLayoutItem';
 import useDragoverBubble from '@/hooks/useDragoverBubble';
 import { EventColumnLayoutContext } from '../Event/EventColumnLayoutContainer';
-
-export interface ColumnEvent {
-  onMoveStart?(event: any, data: CalenderItem, rect: Rect): void;
-  onMove?(event: any, data: CalenderItem, rect: Rect): void;
-  onMoveEnd?(event: any, data: CalenderItem, rect: Rect): void;
-  onResizeStart?(event: any, data: CalenderItem, rect: Rect): void;
-  onResize?(event: any, data: CalenderItem, rect: Rect): void;
-  onResizeEnd?(event: any, data: CalenderItem, rect: Rect): void;
-  onTap?(event: any, data: CalenderItem, rect: Rect): void;
-  onChange?(event: { target: CalenderItem; data: CalenderItem[] }): void;
-}
-
-export interface ColumnProps extends ColumnEvent {
-  data: CalenderItem[];
-  date: DateRange;
-  multipleColumns?: Boolean;
-  columnIndex?: number;
-  columnCount?: number;
-  scrollTop?: number;
-  cellHeight?: number;
-  timeInterval?: number;
-  gap?: number;
-  bordered?: boolean;
-  split?: boolean;
-}
 
 const getDy = moveThreshold();
 
