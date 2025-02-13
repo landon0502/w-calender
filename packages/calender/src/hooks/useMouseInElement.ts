@@ -5,7 +5,7 @@ import { ElementRect } from '@/utils/resizeObserver';
 import type { UseInteractTarget } from './useInteract';
 import { PointerEvent } from '@interactjs/types';
 import { getBoundingClientRect, unref } from '@/utils';
-import { useElementBounding, useXState } from '@/hooks';
+import { useXState } from '@/hooks';
 import { produce } from 'immer';
 import useEventListener from './useEventListener';
 export type MouseInElementResult = {
@@ -98,12 +98,13 @@ export default function useMouseInElement(
   }, [target, result.x, result.y]);
 
   function onChange(event: PointerEvent, type: 'onDown' | 'onMove' | 'onUp') {
+    const position = extractor(event);
+    if (!position) {
+      return;
+    }
     setResult(
       produce(getResult(), (draftState) => {
-        const position = extractor(event);
-        if (position) {
-          [draftState.x, draftState.y] = position;
-        }
+        [draftState.x, draftState.y] = position;
       }),
       function (res) {
         options[type]?.(event, res);
@@ -129,7 +130,7 @@ export default function useMouseInElement(
     if (scroll && type === 'page')
       useEventListener(window, 'scroll', scrollHandler, listenerOptions);
   }
-  useInteract(targetRef as UseInteractTarget, {}, {}, (ctx) => {
+  const { enable, disable } = useInteract(targetRef as UseInteractTarget, {}, {}, (ctx) => {
     ctx.on('down', function (event: PointerEvent) {
       onChange(event, 'onDown');
     });
@@ -148,5 +149,7 @@ export default function useMouseInElement(
   return {
     ...result,
     getResult,
+    disable,
+    enable,
   };
 }

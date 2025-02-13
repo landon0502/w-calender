@@ -70,7 +70,7 @@ export default function usePointerMoveEvent(
   options: UsePointerMoveEventOptions = defaultOptions,
   enable: boolean = true
 ) {
-  const [positin, setPosition] = useXState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [position, setPosition] = useXState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [_, setEnable, getEnable] = useXState(enable);
   let eventOptions = {
     ...defaultOptions,
@@ -115,18 +115,18 @@ export default function usePointerMoveEvent(
       setPosition({ x: elementX, y: elementY });
       eventOptions.onMove({ event, x: elementX, y: elementY, dy: dy, dx: dx });
     },
-    onUp(event, positin) {
+    onUp(event, position) {
       if (isMove.current) {
-        onUp(event, positin);
+        onUp(event, position);
       } else {
         execWithDelay(() => {
-          onUp(event, positin);
+          onUp(event, position);
         }, options.holdDelay ?? 0);
       }
     },
   });
 
   return {
-    positin,
+    position,
   };
 }

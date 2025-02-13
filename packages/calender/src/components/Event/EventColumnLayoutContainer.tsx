@@ -104,7 +104,6 @@ export default function EventColumnLayoutContainer(
     },
     !freezeContainerEventState && !props.disabled
   );
-  console.log('event column layout container repeat render, useMouseInElement 导致');
   return (
     <EventColumnLayoutContext.Provider value={{ getColumnWidth }}>
       <div ref={container} className={props.className}>
