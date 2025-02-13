@@ -74,14 +74,14 @@ export default function Column({
       dragPosition.y = size.height - dragPosition.h;
     }
 
-    // 这里需要优化，relativeIndex变更时机不对
     if (multipleColumns) {
       const { x } = event.page;
-
-      if (relativeIndex < -columnIndex || relativeIndex >= columnCount) {
-        return;
-      }
       relativeIndex = Math.floor(x / columnWidth);
+      if (relativeIndex < -columnIndex) {
+        relativeIndex = -columnIndex;
+      } else if (relativeIndex + columnIndex > columnCount - 1) {
+        relativeIndex = columnCount - 1 - columnIndex;
+      }
     }
 
     handleUpdateData(event, data, 'move');
@@ -134,6 +134,7 @@ export default function Column({
         )
         .add(relativeIndex, 'day')
     );
+
     setDragoverBubbleState({
       rect: {
         y: dragPosition.y,
