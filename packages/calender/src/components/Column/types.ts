@@ -16,13 +16,10 @@ export interface ColumnEvent {
 export interface ColumnProps extends ColumnEvent {
   data: CalenderItem[];
   date: DateRange;
-  multipleColumns?: Boolean;
   columnIndex?: number;
   columnCount?: number;
   scrollTop?: number;
   cellHeight?: number;
   timeInterval?: number;
   gap?: number;
-  bordered?: boolean;
-  split?: boolean;
 }

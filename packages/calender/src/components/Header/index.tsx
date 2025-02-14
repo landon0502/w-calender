@@ -14,24 +14,23 @@ export function TodayScheduleRow() {
 
 export default function Header(props: HeaderProps) {
   function renderDays() {
-    return (
-      <div className={cls(['header-rows-days'])}>
-        {props.days?.map((item) => {
-          return (
-            <div
-              className={cls(['header-rows-days-item'])}
-              style={
-                props.columnWidth ? { minWidth: numToPx(props.columnWidth), flexShrink: 1 } : {}
-              }
-            >
-              {/* 这里需要模版配置 */}
-              {item.day}
-              {item.date}
-            </div>
-          );
-        })}
-      </div>
-    );
+    const dayCellStyle = props.columnWidth
+      ? { minWidth: numToPx(props.columnWidth), flexShrink: 1 }
+      : {};
+
+    function renderItem() {
+      return props.days?.map((item) => {
+        return (
+          <div className={cls(['header-rows-days-item'])} style={dayCellStyle}>
+            {/* 这里需要模版配置 */}
+            {item.day}
+            {item.date}
+          </div>
+        );
+      });
+    }
+
+    return <div className={cls(['header-rows-days'])}>{renderItem()}</div>;
   }
 
   function renderData() {

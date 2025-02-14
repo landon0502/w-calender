@@ -1,5 +1,5 @@
 @use '@/style/mixins/mixins' as *;
 @use 'sass:math' as *;
 @include cls('today-active') {
-  background-color: rgb($primary-3...);
+  background-color: rgb($primary-1...);
 }

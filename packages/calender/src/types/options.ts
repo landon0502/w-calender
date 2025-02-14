@@ -21,6 +21,7 @@ export interface LayoutConfig {
   cellHeight: number;
   column?: number;
   columns?: Array<{ width: number; columnIndex: number }>;
+  columnWidth?: number;
 }
 
 export interface WeekLayoutConfig {}

@@ -79,7 +79,7 @@
 }
 
 // 背景分割线
-@mixin backgroundSplitLine($color, $gap) {
-  background: linear-gradient(to bottom, $color 0px, $color 1px, #fff 1px, #fff 100%) repeat-y;
+@mixin backgroundSplitLine($color, $gap, $direction: bottom) {
+  background: linear-gradient(to $direction, $color 0px, $color 1px, #fff 1px, #fff 100%) repeat-y;
   background-size: 100% $gap;
 }

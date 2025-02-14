@@ -15,6 +15,7 @@ import Column from '../Column';
 import EventColumnLayoutContainer from '../Event/EventColumnLayoutContainer';
 import type { LayoutMouseEvent } from '../Event/types';
 import type { MultipleColumnsProps, ViewContentProps } from './types';
+import Gridding from './Gridding';
 
 const ViewContent = ({
   timeRangeDays,
@@ -77,11 +78,15 @@ const ViewContent = ({
         handleRectInfo(e, 'end');
       }}
     >
+      <Gridding
+        cellHeight={cellHeight}
+        columnWidth={columnWidth}
+        columnCount={timeRangeDays.length}
+      />
       <div className={cls(['multiple-columns-content'])}>
         {timeRangeDays.map((item, index) => {
           return (
             <Column
-              multipleColumns
               data={data}
               cellHeight={cellHeight}
               timeInterval={interval}
@@ -150,7 +155,7 @@ const WeekView = (props: PropsWithElAttrs<MultipleColumnsProps>) => {
           cellHeight={layoutConfig.cellHeight}
           interval={layoutConfig.interval}
           gap={layoutConfig.gap}
-          columnWidth={props.columnWidth}
+          columnWidth={layoutConfig.columnWidth}
         />
       }
       timeIndicateLine={renderTimeIndicateLine()}

@@ -23,9 +23,6 @@ export default function Column({
   gap = 0,
   columnIndex = 0,
   columnCount = 1,
-  bordered = true,
-  split = true,
-  multipleColumns = false,
   style = {},
   onChange = () => {},
 }: PropsWithElAttrs<ColumnProps>) {
@@ -73,15 +70,12 @@ export default function Column({
     if (dragPosition.y + dragPosition.h >= size.height) {
       dragPosition.y = size.height - dragPosition.h;
     }
-
-    if (multipleColumns) {
-      const { x } = event.page;
-      relativeIndex = Math.floor(x / columnWidth);
-      if (relativeIndex < -columnIndex) {
-        relativeIndex = -columnIndex;
-      } else if (relativeIndex + columnIndex > columnCount - 1) {
-        relativeIndex = columnCount - 1 - columnIndex;
-      }
+    const { x } = event.page;
+    relativeIndex = Math.floor(x / columnWidth);
+    if (relativeIndex < -columnIndex) {
+      relativeIndex = -columnIndex;
+    } else if (relativeIndex + columnIndex > columnCount - 1) {
+      relativeIndex = columnCount - 1 - columnIndex;
     }
 
     handleUpdateData(event, data, 'move');
@@ -238,16 +232,9 @@ export default function Column({
     );
   }
 
-  /**
-   * @zh 网格
-   */
-  function renderGridding() {
-    return <div></div>;
-  }
   return (
     <div
       style={{
-        '--col-h': cellHeight + 'px',
         width: '100%',
         height: numToPx(columnHeight),
         ...style,
@@ -255,8 +242,6 @@ export default function Column({
       className={cls([
         'column',
         getReturnTime(date[0]).time.isSame(dayjs(), 'day') ? 'today-active' : void 0,
-        bordered ? 'column-border' : void 0,
-        split ? 'column-split' : void 0,
       ])}
       ref={layoutContainer}
     >

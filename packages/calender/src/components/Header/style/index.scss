@@ -39,6 +39,9 @@ $border: 1px solid $color-border-2;
     &-days {
       min-width: fit-content;
       display: flex;
+      &-item {
+        flex: 1;
+      }
     }
   }
 }

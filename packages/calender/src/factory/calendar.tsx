@@ -29,6 +29,7 @@ const defaultOptions: Required<Options> = {
     cellHeight: 42,
     interval: 30,
     gap: 8,
+    columnWidth: 180,
   },
   onChange() {},
   onUpdate() {},
