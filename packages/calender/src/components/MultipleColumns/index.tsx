@@ -29,6 +29,7 @@ const ViewContent = ({
   const { setDragoverBubbleState } = useDragoverBubble();
   const [_, setColumnData, getColumnData] = useXState(data);
   useEffect(() => setColumnData(data), [data]);
+
   const handleRectInfo = (e: LayoutMouseEvent, type: 'start' | 'move' | 'end') => {
     const dayStart = timeRangeDays[e.columnIndex];
     const start = getReturnTime(
@@ -82,6 +83,7 @@ const ViewContent = ({
         cellHeight={cellHeight}
         columnWidth={columnWidth}
         columnCount={timeRangeDays.length}
+        rowCount={(24 * 60) / interval}
       />
       <div className={cls(['multiple-columns-content'])}>
         {timeRangeDays.map((item, index) => {
@@ -140,7 +142,7 @@ const WeekView = (props: PropsWithElAttrs<MultipleColumnsProps>) => {
       layoutConfig.interval
     );
 
-    return <TimeIndicateLine left={dotLeft} top={top} />;
+    return current > -1 && <TimeIndicateLine left={dotLeft} top={top} />;
   }
   return (
     <LayoutContainer

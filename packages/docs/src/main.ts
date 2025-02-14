@@ -64,7 +64,7 @@ function main() {
         title: '跨天测试数据',
       },
     ],
-    date: '2025-02-10',
+    date: '2025-02-14',
     viewType: viewType.value,
     async onBeforeUpdate() {
       return true;

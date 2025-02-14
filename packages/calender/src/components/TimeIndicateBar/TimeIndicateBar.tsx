@@ -20,7 +20,7 @@ export function TimeIndicateBar(props: TimeIndicateBarProps) {
         '--cell-width': numToPx(props.cellWidth),
       }}
     >
-      {props.data?.map((item, index) => {
+      {props.data?.map((item) => {
         return (
           <div className={cls('time-line-col')}>
             <span className={cls('time-line-col-label')}>{item.start.time.format('HH:mm')}</span>

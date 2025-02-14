@@ -8,23 +8,14 @@ $col-height: var(--col-h);
   bottom: 0;
 
   position: absolute;
-
-  background:
-    linear-gradient(
-        to bottom,
-        $color-border-2 0px,
-        $color-border-2 1px,
-        transparent 1px,
-        transparent 100%
-      )
-      0px 0px/100% $col-height repeat-y,
-    linear-gradient(
-        to right,
-        $color-border-2 0px,
-        $color-border-2 1px,
-        transparent 1px,
-        transparent 100%
-      )
-      0px 0px / calc(100% / 7) 100% repeat-x;
   pointer-events: none;
+
+  &-cell {
+    width: 100%;
+    border-top: 1px solid $color-border-2;
+    box-sizing: border-box;
+    &:first-of-type {
+      border-top: 0;
+    }
+  }
 }

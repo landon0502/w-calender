@@ -127,6 +127,7 @@ export function debounce(fn: (...args: any[]) => any, delay: number) {
     timer = setTimeout(fn.bind(this, ...arguments), delay);
   };
 }
+
 /**
  * 节流
  * @param {function} fn

@@ -241,6 +241,7 @@ export default function Column({
       }}
       className={cls([
         'column',
+        'column-border',
         getReturnTime(date[0]).time.isSame(dayjs(), 'day') ? 'today-active' : void 0,
       ])}
       ref={layoutContainer}
