@@ -5,16 +5,4 @@ $border: 1px solid $color-border-2;
 
 @include cls('column') {
   width: 100%;
-  &-col {
-    height: $col-height;
-    border-bottom: $border;
-    box-sizing: border-box;
-    &:last-of-type {
-      border-bottom: 0;
-    }
-  }
-
-  &-border {
-    border-left: $border;
-  }
 }

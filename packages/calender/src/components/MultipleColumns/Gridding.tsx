@@ -7,17 +7,28 @@ export default function Gridding(props: {
   rowCount: number;
   columnWidth?: number;
 }) {
-  function renderCells() {
-    let ls = new Array(props.rowCount).fill({});
-    let cellStyle = {
-      height: numToPx(props.cellHeight),
-      '--column-count': props.columnCount,
-    };
-    return ls.map((item) => <div className={cls('gridding-lines-cell')} style={cellStyle}></div>);
+  function renderHorizontalLines() {
+    let ls = new Array(props.rowCount - 1).fill({});
+    return ls.map((_, index) => (
+      <div
+        className={cls(['gridding-line', 'gridding-line-horizontal'])}
+        style={{ left: 0, right: 0, top: numToPx(props.cellHeight * (index + 1)) }}
+      ></div>
+    ));
+  }
+  function renderVerticalLines() {
+    let ls = new Array(props.columnCount - 1).fill({});
+    return ls.map((_, index) => (
+      <div
+        className={cls(['gridding-line', 'gridding-line-vertical'])}
+        style={{ top: 0, bottom: 0, left: `calc(100% / ${props.columnCount} * ${index + 1})` }}
+      ></div>
+    ));
   }
   return (
     <div className={cls('gridding-lines')} style={{ '--col-h': props.cellHeight + 'px' }}>
-      {renderCells()}
+      {renderHorizontalLines()}
+      {renderVerticalLines()}
     </div>
   );
 }

@@ -1,20 +1,11 @@
 import { render, FunctionComponent } from 'preact/compat';
 import { DayView, WeekView, MonthView } from '@/views/index';
 
-import {
-  isArray,
-  isAsyncFunction,
-  isFunction,
-  createUniqueId,
-  getReturnTime,
-  getTimeStartAndEnd,
-} from '@/utils';
-import type { UnitType } from 'dayjs';
+import { isAsyncFunction, isFunction, createUniqueId, getReturnTime } from '@/utils';
 import type { DayViewProps } from '@/types/components';
 import type { Options, CalenderItem } from '@/types/options';
-import type { Date } from '@/types/common';
 import type { ViewType, LayoutConfig } from '@/types/options';
-import type { ScheduleData, ScheduleItem, DateRange } from '@/types/schedule';
+import type { ScheduleData, ScheduleItem } from '@/types/schedule';
 import CalendarCore from './core';
 import { commitKeys } from '@/contexts/calenderStore';
 import { setStore, StoreProvider, store } from '@/contexts/calenderStore';
@@ -29,7 +20,7 @@ const defaultOptions: Required<Options> = {
     cellHeight: 42,
     interval: 30,
     gap: 8,
-    columnWidth: 180,
+    columnWidth: void 0,
   },
   onChange() {},
   onUpdate() {},

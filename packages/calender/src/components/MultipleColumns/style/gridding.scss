@@ -1,6 +1,5 @@
 @use '@/style/mixins/mixins' as *;
 @use 'sass:math' as *;
-$col-height: var(--col-h);
 @include cls('gridding-lines') {
   top: 0;
   left: 0px;
@@ -9,13 +8,13 @@ $col-height: var(--col-h);
 
   position: absolute;
   pointer-events: none;
-
-  &-cell {
-    width: 100%;
-    border-top: 1px solid $color-border-2;
-    box-sizing: border-box;
-    &:first-of-type {
-      border-top: 0;
-    }
+}
+@include cls('gridding-line') {
+  position: absolute;
+  &-vertical {
+    border-right: 1px solid $color-border-2;
+  }
+  &-horizontal {
+    border-bottom: 1px solid $color-border-2;
   }
 }
