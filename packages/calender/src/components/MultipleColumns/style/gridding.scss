@@ -11,6 +11,7 @@
 }
 @include cls('gridding-line') {
   position: absolute;
+  pointer-events: none;
   &-vertical {
     border-right: 1px solid $color-border-2;
   }

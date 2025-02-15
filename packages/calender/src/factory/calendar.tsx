@@ -22,6 +22,7 @@ const defaultOptions: Required<Options> = {
     gap: 8,
     columnWidth: void 0,
   },
+  local: 'zh',
   onChange() {},
   onUpdate() {},
   onMount() {},

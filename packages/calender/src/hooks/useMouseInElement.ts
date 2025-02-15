@@ -147,7 +147,7 @@ export default function useMouseInElement(
     });
   });
   return {
-    ...result,
+    position: result,
     getResult,
     disable,
     enable,

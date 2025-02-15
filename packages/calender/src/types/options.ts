@@ -35,6 +35,7 @@ export interface Options extends CalenderEvents {
   date: TimeValue;
   viewType: ViewType;
   templates?: Partial<Record<ViewType, Partial<Record<'drag' | 'add', Template>>>>; // 自定义模版
+  local?: string;
   onBeforeUpdate?: OnBeforeUpdate;
   layoutConfig: LayoutConfig;
 }
