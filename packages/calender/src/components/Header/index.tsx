@@ -4,12 +4,16 @@ import Scrollbar from '../Scrollbar';
 import { numToPx } from '@/utils';
 import type { HeaderProps } from './types';
 import { LAYOUT_CONTENT_KEY, LAYOUT_HEADER_KEY } from '../LayoutContainer/linkageKeys';
-
+import RenderTemplate from '@/components/RenderTemplate';
 export function TodayScheduleRow() {
   {
     /* 这里需要模版配置 */
   }
-  return <div className={cls('today-schedule-item')}></div>;
+  return (
+    <div className={cls('today-schedule-item')}>
+      <RenderTemplate template={() => <div>111</div>} />
+    </div>
+  );
 }
 
 export default function Header(props: HeaderProps) {
@@ -23,8 +27,7 @@ export default function Header(props: HeaderProps) {
         return (
           <div className={cls(['header-rows-days-item'])} style={dayCellStyle}>
             {/* 这里需要模版配置 */}
-            {item.day}
-            {item.date}
+            <RenderTemplate data={item} template={() => <div>这里是日期</div>} />
           </div>
         );
       });

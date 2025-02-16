@@ -86,3 +86,11 @@ export function isDate(val: any): val is Date {
 export function isNumber(val: any): val is number {
   return typeof val === 'number';
 }
+
+/**
+ * @zh 判断是否是字符串
+ * @en is string
+ */
+export function isString(val: any): val is string {
+  return typeof val === 'string';
+}

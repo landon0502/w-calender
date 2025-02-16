@@ -89,6 +89,8 @@ export function getTimeStartAndEnd(
   }
   let start = timeValue.time.startOf(type);
   let end = timeValue.time.endOf(type);
+  console.log(start.format('YYYY-MM-DD'));
+  console.log(end.format('YYYY-MM-DD'));
   return [getReturnTime(start), getReturnTime(end)];
 }
 
