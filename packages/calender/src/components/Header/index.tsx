@@ -5,18 +5,22 @@ import { numToPx } from '@/utils';
 import type { HeaderProps } from './types';
 import { LAYOUT_CONTENT_KEY, LAYOUT_HEADER_KEY } from '../LayoutContainer/linkageKeys';
 import RenderTemplate from '@/components/RenderTemplate';
+import { useI18n } from '@/lanuage';
+
 export function TodayScheduleRow() {
   {
     /* 这里需要模版配置 */
   }
+  const { t } = useI18n();
   return (
     <div className={cls('today-schedule-item')}>
-      <RenderTemplate template={() => <div>111</div>} />
+      <RenderTemplate template={() => <div>{t('W1')}</div>} />
     </div>
   );
 }
 
 export default function Header(props: HeaderProps) {
+  const { t } = useI18n();
   function renderDays() {
     const dayCellStyle = props.columnWidth
       ? { minWidth: numToPx(props.columnWidth), flexShrink: 1 }
@@ -27,7 +31,7 @@ export default function Header(props: HeaderProps) {
         return (
           <div className={cls(['header-rows-days-item'])} style={dayCellStyle}>
             {/* 这里需要模版配置 */}
-            <RenderTemplate data={item} template={() => <div>这里是日期</div>} />
+            <RenderTemplate data={item} template={() => <div>{t('W2')}</div>} />
           </div>
         );
       });

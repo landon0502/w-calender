@@ -1,14 +1,16 @@
-import { render, FunctionComponent } from 'preact/compat';
-import { DayView, WeekView, MonthView } from '@/views/index';
-
-import { isAsyncFunction, isFunction, createUniqueId, getReturnTime } from '@/utils';
 import type { DayViewProps } from '@/types/components';
 import type { Options, CalenderItem } from '@/types/options';
 import type { ViewType, LayoutConfig } from '@/types/options';
 import type { ScheduleData, ScheduleItem } from '@/types/schedule';
+import { render, FunctionComponent } from 'preact/compat';
+import { DayView, WeekView, MonthView } from '@/views/index';
+import { isAsyncFunction, isFunction, createUniqueId, getReturnTime } from '@/utils';
+
 import CalendarCore from './core';
-import { commitKeys } from '@/contexts/calenderStore';
-import { setStore, StoreProvider, store } from '@/contexts/calenderStore';
+import { setStore, StoreProvider, store, commitKeys } from '@/contexts/calenderStore';
+import locale_zh from '@/lanuage/locale/zh.json';
+
+import { setLanuageDict, setLanuageLocale, LanuageProvider } from '@/lanuage';
 import dayjs from 'dayjs';
 
 const defaultOptions: Required<Options> = {
@@ -22,6 +24,7 @@ const defaultOptions: Required<Options> = {
     gap: 8,
     columnWidth: void 0,
   },
+  lanuageDict: { zh: locale_zh },
   local: 'zh',
   onChange() {},
   onUpdate() {},
@@ -55,13 +58,15 @@ interface MonthProps extends DayViewProps {
 function RenderContent(props: DayProps | WeekProps | MonthProps) {
   const Component = views[props.viewType];
   return (
-    <StoreProvider>
-      <Component
-        date={props.date}
-        onChange={props.onChange}
-        onBeforeUpdate={props.onBeforeUpdate}
-      />
-    </StoreProvider>
+    <LanuageProvider>
+      <StoreProvider>
+        <Component
+          date={props.date}
+          onChange={props.onChange}
+          onBeforeUpdate={props.onBeforeUpdate}
+        />
+      </StoreProvider>
+    </LanuageProvider>
   );
 }
 
@@ -106,16 +111,6 @@ class Calender extends CalendarCore {
     this.data = getData(data);
   }
 
-  // 初始化store
-  initStore() {
-    setStore({
-      data: this.data,
-      layoutConfig: this.layoutConfig,
-      viewType: this.viewType,
-      freezeContainerEvent: false,
-    });
-  }
-
   // 设置配置
   setOptions(options: Partial<Options>) {
     this.options = { ...defaultOptions, ...options };
@@ -125,21 +120,24 @@ class Calender extends CalendarCore {
     this.layoutConfig = options.layoutConfig ?? defaultOptions.layoutConfig;
     this.changeView(this.viewType);
     this.formatData(this.options.data);
-    this.initStore();
+    setStore({
+      data: this.data,
+      layoutConfig: this.layoutConfig,
+      viewType: this.viewType,
+      freezeContainerEvent: false,
+    });
+    if (this.options.local) {
+      setLanuageLocale(this.options.local);
+    }
+    if (this.options.lanuageDict) {
+      setLanuageDict(this.options.lanuageDict);
+    }
   }
 
   // 更改视图
   changeView(type: ViewType) {
     this.viewType = type;
-    this.setLayoutConfig();
     this.render(type);
-  }
-
-  // 初始化columns配置
-  setLayoutConfig() {
-    this.layoutConfig = {
-      ...this.layoutConfig,
-    };
   }
 
   // 数据更新前触发
@@ -182,6 +180,9 @@ class Calender extends CalendarCore {
       />,
       this.el
     );
+    return () => {
+      render(null, this.el);
+    };
   }
 }
 

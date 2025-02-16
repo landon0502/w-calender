@@ -28,17 +28,17 @@ const { StoreProvider, useStore, setStore, getStore, store } = createStore<Calen
   },
   {
     mutations: {
-      [commitKeys.SET_DATA](state: CalenderStore, value: CalenderItem[]) {
+      [commitKeys.SET_DATA](state, value: CalenderItem[]) {
         state.data = value;
       },
-      [commitKeys.SET_LAYOUTCONFIG](state: CalenderStore, value: LayoutConfig) {
+      [commitKeys.SET_LAYOUTCONFIG](state, value: LayoutConfig) {
         state.layoutConfig = value;
       },
 
-      [commitKeys.SET_VIEWTYPE](state: CalenderStore, value: ViewType) {
+      [commitKeys.SET_VIEWTYPE](state, value: ViewType) {
         state.viewType = value;
       },
-      [commitKeys.SET_FREEZE_CONTAINER_EVT](state: CalenderStore, value: boolean) {
+      [commitKeys.SET_FREEZE_CONTAINER_EVT](state, value: boolean) {
         state.freezeContainerEvent = value;
       },
     },
