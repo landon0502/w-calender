@@ -5,9 +5,9 @@ import { ReturnTimeValue } from '@/types/time';
 import { OnBeforeUpdate } from './events';
 import type { TimeValue } from '@/types/time';
 import type { LanuageDict } from '@/contexts/lanuageStore';
-export type ViewType = 'day' | 'week' | 'month' | 'D' | 'W' | 'M';
+import { Template } from '@/templates/RenderTemplate';
 
-export type Template = string | VNode;
+export type ViewType = 'day' | 'week' | 'month' | 'D' | 'W' | 'M';
 
 export interface CalenderEvents {
   onChange?(event: { target: CalenderItem; data: CalenderItem[] }): void;
@@ -35,8 +35,8 @@ export interface Options extends CalenderEvents {
   data: ScheduleData;
   date: TimeValue;
   viewType: ViewType;
-  templates?: Partial<Record<ViewType, Partial<Record<'drag' | 'add', Template>>>>; // 自定义模版
-  local?: string;
+  templates?: Partial<Record<'day' | 'week' | 'month', Partial<Record<string, Template>>>>; // 自定义模版
+  locale?: string;
   lanuageDict?: LanuageDict;
   onBeforeUpdate?: OnBeforeUpdate;
   layoutConfig: LayoutConfig;

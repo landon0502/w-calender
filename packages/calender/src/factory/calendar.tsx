@@ -5,12 +5,12 @@ import type { ScheduleData, ScheduleItem } from '@/types/schedule';
 import { render, FunctionComponent } from 'preact/compat';
 import { DayView, WeekView, MonthView } from '@/views/index';
 import { isAsyncFunction, isFunction, createUniqueId, getReturnTime } from '@/utils';
-
 import CalendarCore from './core';
 import { setStore, StoreProvider, store, commitKeys } from '@/contexts/calenderStore';
+import { TemplateProvider, templateStore, templateCommitKeys } from '@/contexts/templateStore';
 import locale_zh from '@/lanuage/locale/zh.json';
-
 import { setLanuageDict, setLanuageLocale, LanuageProvider } from '@/lanuage';
+import defaultTemplates from '@/templates/default';
 import dayjs from 'dayjs';
 
 const defaultOptions: Required<Options> = {
@@ -25,7 +25,7 @@ const defaultOptions: Required<Options> = {
     columnWidth: void 0,
   },
   lanuageDict: { zh: locale_zh },
-  local: 'zh',
+  locale: 'zh',
   onChange() {},
   onUpdate() {},
   onMount() {},
@@ -58,15 +58,17 @@ interface MonthProps extends DayViewProps {
 function RenderContent(props: DayProps | WeekProps | MonthProps) {
   const Component = views[props.viewType];
   return (
-    <LanuageProvider>
-      <StoreProvider>
-        <Component
-          date={props.date}
-          onChange={props.onChange}
-          onBeforeUpdate={props.onBeforeUpdate}
-        />
-      </StoreProvider>
-    </LanuageProvider>
+    <TemplateProvider>
+      <LanuageProvider>
+        <StoreProvider>
+          <Component
+            date={props.date}
+            onChange={props.onChange}
+            onBeforeUpdate={props.onBeforeUpdate}
+          />
+        </StoreProvider>
+      </LanuageProvider>
+    </TemplateProvider>
   );
 }
 
@@ -126,12 +128,16 @@ class Calender extends CalendarCore {
       viewType: this.viewType,
       freezeContainerEvent: false,
     });
-    if (this.options.local) {
-      setLanuageLocale(this.options.local);
+    if (options.locale) {
+      setLanuageLocale(options.locale ?? defaultOptions.locale);
     }
     if (this.options.lanuageDict) {
-      setLanuageDict(this.options.lanuageDict);
+      setLanuageDict(options.lanuageDict ?? defaultOptions.lanuageDict);
     }
+    templateStore.commit(templateCommitKeys.SET_TEMPLATES, {
+      ...defaultTemplates,
+      ...(options.templates ?? {}),
+    });
   }
 
   // 更改视图

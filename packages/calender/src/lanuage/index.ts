@@ -3,6 +3,7 @@ import {
   lanuageStore,
   lanuageCommitKeys,
   LanuageProvider,
+  getLanuageStore,
 } from '@/contexts/lanuageStore';
 import type { LanuageDict } from '@/contexts/lanuageStore';
 function setLanuageLocale(locale: string) {
@@ -28,4 +29,12 @@ function useI18n() {
   return { t };
 }
 
-export { LanuageProvider, setLanuageDict, setLanuageLocaleDict, setLanuageLocale, useI18n };
+function t(code: string) {
+  let store = getLanuageStore();
+  let dict = store.dict;
+  let locale = store.locale;
+  const currentDict = dict[locale];
+  return currentDict?.[code];
+}
+
+export { LanuageProvider, setLanuageDict, setLanuageLocaleDict, setLanuageLocale, useI18n, t };

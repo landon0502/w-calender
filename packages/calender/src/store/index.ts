@@ -30,7 +30,7 @@ export function createStore<State>(initialState: State, options?: StoreOptions<S
     store.setState(data);
   }
 
-  // 获取store
+  // get store
   function getStore() {
     return store.getState();
   }
@@ -63,6 +63,7 @@ export function createStore<State>(initialState: State, options?: StoreOptions<S
       clear,
       removeItem,
       store: state,
+      StoreContext,
     };
   }
 
