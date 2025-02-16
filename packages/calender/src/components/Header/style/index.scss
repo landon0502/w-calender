@@ -26,7 +26,6 @@ $border: 1px solid $color-border-2;
   }
   &-rows {
     flex: 1;
-    padding: 4px;
     box-sizing: border-box;
     overflow: hidden;
     @include cls('today-schedule-item') {
@@ -37,10 +36,41 @@ $border: 1px solid $color-border-2;
     }
 
     &-days {
-      min-width: fit-content;
+      width: 100%;
       display: flex;
       &-item {
         flex: 1;
+        border-right: $border;
+        &:last-of-type {
+          border-right: 0;
+        }
+      }
+    }
+    &-data {
+      min-width: fit-content;
+      position: relative;
+    }
+    &-bars {
+      width: 100%;
+      position: absolute;
+      top: 0;
+      &-item {
+        height: 20px;
+        width: 200px;
+        background: red;
+        position: absolute;
+      }
+    }
+
+    &-presentation {
+      width: 100%;
+      display: flex;
+      &-gridcell {
+        flex: 1;
+        border-right: $border;
+        &:last-of-type {
+          border-right: 0;
+        }
       }
     }
   }

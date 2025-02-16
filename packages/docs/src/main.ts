@@ -63,8 +63,13 @@ function main() {
         end: dayjs().add(1, 'day').format('YYYY-MM-DD 15:50'),
         title: '跨天测试数据',
       },
+      {
+        start: dayjs().format('YYYY-MM-DD 16:50'),
+        end: dayjs().add(2, 'day').format('YYYY-MM-DD 15:50'),
+        title: '跨天测试数据2',
+      },
     ],
-    date: '2025-02-14',
+    date: dayjs().format('YYYY-MM-DD'),
     viewType: viewType.value,
     async onBeforeUpdate() {
       return true;

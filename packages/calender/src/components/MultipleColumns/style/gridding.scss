@@ -14,8 +14,10 @@
   pointer-events: none;
   &-vertical {
     border-right: 1px solid $color-border-2;
+    transform: translateX(-50%);
   }
   &-horizontal {
     border-bottom: 1px solid $color-border-2;
+    transform: translateY(-50%);
   }
 }

@@ -8,9 +8,9 @@ export default {
     const { data } = props;
     const dayMap = ['W7', 'W1', 'W2', 'W3', 'W4', 'W5', 'W6'];
     return (
-      <div className={cls('header-day-cell')}>
-        <span>{t(dayMap[data.date.time.day()])}</span>
-        <span>{data.date.time.date()}</span>
+      <div className={cls('header-cell')}>
+        <span className={cls('header-cell-day')}>{t(dayMap[data.date.time.day()])}</span>
+        <span className={cls('header-cell-date')}>{data.date.time.date()}</span>
       </div>
     );
   },

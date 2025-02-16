@@ -129,7 +129,9 @@ const WeekView = (props: PropsWithElAttrs<MultipleColumnsProps>) => {
   }
 
   const headerData = useMemo(() => {
-    return [];
+    return data.filter(({ start, end }) => {
+      return !start.time.isSame(end.time, 'D');
+    });
   }, [data]);
 
   function renderTimeIndicateLine() {
