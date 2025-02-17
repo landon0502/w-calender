@@ -76,6 +76,12 @@ export default function usePointerMoveEvent(
     ...defaultOptions,
     ...options,
   };
+  useEffect(() => {
+    eventOptions = {
+      ...defaultOptions,
+      ...options,
+    };
+  }, [options]);
   const isMove = useRef(false),
     isDown = useRef(false);
   const { getDXY, clearDXY } = usePointerMoveDistance();
