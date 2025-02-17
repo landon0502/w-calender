@@ -6,7 +6,6 @@ $border: 1px solid $color-border-2;
 @include cls('header') {
   width: 100%;
   min-height: $col-height;
-  max-height: 100px;
   display: flex;
   flex-shrink: 0;
   border: $border;
@@ -35,15 +34,32 @@ $border: 1px solid $color-border-2;
       }
     }
 
+    &-boder-gridcell {
+      position: relative;
+      &::after {
+        position: absolute;
+        display: block;
+        content: '';
+        top: 0;
+        left: 0;
+        width: 1px;
+        height: 100%;
+        background-color: $color-border-2;
+        transform: translateX(-50%);
+        pointer-events: none;
+      }
+      &:first-of-type {
+        &::after {
+          display: none;
+        }
+      }
+    }
+
     &-days {
       width: 100%;
       display: flex;
       &-item {
         flex: 1;
-        border-right: $border;
-        &:last-of-type {
-          border-right: 0;
-        }
       }
     }
     &-data {
@@ -52,25 +68,23 @@ $border: 1px solid $color-border-2;
     }
     &-bars {
       width: 100%;
-      position: absolute;
+      height: 100%;
+      position: relative;
       top: 0;
+      z-index: 9;
       &-item {
-        height: 20px;
-        width: 200px;
-        background: red;
+        background: rgb($primary-4...);
         position: absolute;
       }
     }
 
     &-presentation {
       width: 100%;
+      height: 100%;
       display: flex;
+      position: absolute;
       &-gridcell {
         flex: 1;
-        border-right: $border;
-        &:last-of-type {
-          border-right: 0;
-        }
       }
     }
   }

@@ -4,7 +4,7 @@ import type { ViewType, LayoutConfig } from '@/types/options';
 import type { ScheduleData, ScheduleItem } from '@/types/schedule';
 import { render, FunctionComponent } from 'preact/compat';
 import { DayView, WeekView, MonthView } from '@/views/index';
-import { isAsyncFunction, isFunction, createUniqueId, getReturnTime } from '@/utils';
+import { isAsyncFunction, isFunction, createUniqueId, getReturnTime, deepMerge } from '@/utils';
 import CalendarCore from './core';
 import { setStore, StoreProvider, store, commitKeys } from '@/contexts/calenderStore';
 import { TemplateProvider, templateStore, templateCommitKeys } from '@/contexts/templateStore';
@@ -13,18 +13,19 @@ import { setLanuageDict, setLanuageLocale, LanuageProvider } from '@/lanuage';
 import defaultTemplates from '@/templates/default';
 import dayjs from 'dayjs';
 
+const defaultLayoutConfig = {
+  cellHeight: 42,
+  interval: 30,
+  gap: 8,
+};
+const defaultLanuage = { zh: locale_zh };
 const defaultOptions: Required<Options> = {
   date: dayjs(),
   data: [],
   viewType: 'D',
   templates: {},
-  layoutConfig: {
-    cellHeight: 42,
-    interval: 30,
-    gap: 8,
-    columnWidth: void 0,
-  },
-  lanuageDict: { zh: locale_zh },
+  layoutConfig: defaultLayoutConfig,
+  lanuageDict: defaultLanuage,
   locale: 'zh',
   onChange() {},
   onUpdate() {},
@@ -100,7 +101,7 @@ class Calender extends CalendarCore {
   cellHeight: number = 42;
   interval: number = 30;
   gap: number = 8;
-  layoutConfig: LayoutConfig = defaultOptions.layoutConfig;
+  layoutConfig: LayoutConfig = defaultLayoutConfig;
 
   constructor(el: HTMLElement, options: Partial<Options>) {
     super();
@@ -119,7 +120,8 @@ class Calender extends CalendarCore {
     if (options.viewType) {
       this.viewType = options.viewType;
     }
-    this.layoutConfig = options.layoutConfig ?? defaultOptions.layoutConfig;
+
+    this.layoutConfig = deepMerge(defaultLayoutConfig, options.layoutConfig, true);
     this.changeView(this.viewType);
     this.formatData(this.options.data);
     setStore({
@@ -132,7 +134,7 @@ class Calender extends CalendarCore {
       setLanuageLocale(options.locale ?? defaultOptions.locale);
     }
     if (this.options.lanuageDict) {
-      setLanuageDict(options.lanuageDict ?? defaultOptions.lanuageDict);
+      setLanuageDict(deepMerge(defaultLanuage, options.lanuageDict));
     }
     templateStore.commit(templateCommitKeys.SET_TEMPLATES, {
       ...defaultTemplates,

@@ -150,7 +150,7 @@ const WeekView = (props: PropsWithElAttrs<MultipleColumnsProps>) => {
     <LayoutContainer
       className={cls('multiple-columns')}
       scrollProps={{ hideBar: true }}
-      header={<Header data={headerData} days={props.days} columnWidth={props.columnWidth} />}
+      header={<Header data={headerData} days={props.days} columnWidth={layoutConfig.columnWidth} />}
       content={
         <ViewContent
           timeRangeDays={props.days}

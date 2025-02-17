@@ -68,11 +68,24 @@ function main() {
         end: dayjs().add(2, 'day').format('YYYY-MM-DD 15:50'),
         title: '跨天测试数据2',
       },
+      {
+        start: dayjs().add(2, 'day').format('YYYY-MM-DD 16:50'),
+        end: dayjs().add(4, 'day').format('YYYY-MM-DD 15:50'),
+        title: '跨天测试数据4',
+      },
+      {
+        start: dayjs().add(0, 'day').format('YYYY-MM-DD 16:50'),
+        end: dayjs().add(3, 'day').format('YYYY-MM-DD 15:50'),
+        title: '跨天测试数据4',
+      },
     ],
     date: dayjs().format('YYYY-MM-DD'),
     viewType: viewType.value,
     async onBeforeUpdate() {
       return true;
+    },
+    layoutConfig: {
+      columnWidth: 180,
     },
   };
 

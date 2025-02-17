@@ -51,7 +51,7 @@ function getDataColIdx(
 /**
  * @zh 处理数据
  */
-function handleGridCols(layoutData: Array<CalenderItem>) {
+export function handleGridCols(layoutData: Array<CalenderItem>) {
   // 按时间进行排序
   let data = layoutData.sort((a, b) => {
     return dayjs(a.start.time).isBefore(b.start.time) ? -1 : 1;

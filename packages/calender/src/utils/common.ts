@@ -148,3 +148,34 @@ export function throttle(fn: (...args: any[]) => any, wait: number, immediately:
     }
   };
 }
+
+/**
+ * @zh 深度合并
+ * @param target
+ * @param source
+ * @returns
+ */
+export function deepMerge<T>(target: T, source: T | undefined, clone?: boolean): T {
+  if (clone) {
+    target = deepClone(target);
+  }
+  if (isUndef(source)) {
+    return target;
+  }
+  if (!target) {
+    return deepClone(source);
+  }
+  for (const key in source) {
+    if (source && source.hasOwnProperty(key)) {
+      if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+        if (target && typeof target === 'object' && !target[key]) {
+          Object.assign(target, { [key]: {} }); // 初始化目标对象的新属性为空对象，以避免丢失原有属性值。例如：{ a: 1 }合并{ b: {} } 应为 { a: 1, b: {} } 而不是 { b: {} }。
+        }
+        deepMerge(target[key], source[key]); // 递归合并对象属性。
+      } else if (target && typeof target === 'object') {
+        Object.assign(target, { [key]: source[key] }); // 直接赋值非对象属性。
+      }
+    }
+  }
+  return target;
+}

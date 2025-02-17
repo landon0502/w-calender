@@ -5,7 +5,6 @@ import type { ReturnTimeValue } from '@/types/time';
 export interface MultipleColumnsProps extends EventsProps {
   data: CalenderItem[];
   days: ReturnTimeValue[];
-  columnWidth?: number;
 }
 
 export interface ViewContentProps {

@@ -97,9 +97,9 @@ export default function usePointerMoveEvent(
   };
 
   useMouseInElement(target, {
-    onDown(event, { elementX, elementY }) {
+    onDown(event, { elementX, elementY, isOutside }) {
       execWithDelay(() => {
-        if (!getEnable()) return;
+        if (!getEnable() || isOutside) return;
         setPosition({ x: elementX, y: elementY });
         eventOptions.onDown({ event, x: elementX, y: elementY });
         isDown.current = true;
