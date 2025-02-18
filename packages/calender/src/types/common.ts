@@ -1,6 +1,9 @@
 import { ComponentChildren, h } from 'preact';
 import type { ScheduleData } from './schedule';
 import type { Dayjs } from 'dayjs';
+
+export type WithFunctionReturn<T, P = any> = T | ((params: P) => T);
+
 export type Date<T = string | Dayjs> = [T, T] | T;
 
 export interface ChCalenderOptions {

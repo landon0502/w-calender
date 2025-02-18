@@ -1,7 +1,7 @@
 import { h } from 'preact';
 import type { Rect } from '@wcalender/types/components';
 import type { DateRange } from '@/types/schedule';
-import { getTransform, numToPx, getTimes, getReturnTime } from '@/utils';
+import { getTransform, numToPx, getTimes, getReturnTime, isFunction } from '@/utils';
 import type { CalenderItem } from '@wcalender/types/options';
 import { Dayjs } from 'dayjs';
 /**
@@ -63,12 +63,18 @@ export function calculateDistance(
 }
 
 /**
- * 计算偏移量转换为时间
+ * @zh 计算偏移量转换为时间
  */
 export function offsetToTimeValue(offset: number, interval: number, cellHeight: number) {
   return (interval / cellHeight) * 60 * offset;
 }
 
 /**
- * 通过列colIndex, top: number, height, range: 当前时间范围，计算当前时间段
+ * @zh 获取值
  */
+export function getWithFunctionValue<T, P>(value: T, params?: P) {
+  if (isFunction(value)) {
+    return value(params);
+  }
+  return value;
+}

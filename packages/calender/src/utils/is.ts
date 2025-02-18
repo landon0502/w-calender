@@ -94,3 +94,10 @@ export function isNumber(val: any): val is number {
 export function isString(val: any): val is string {
   return typeof val === 'string';
 }
+
+/**
+ *判断对象是否是一个纯粹的对象
+ */
+export function isPlainObject(val: any): val is Object {
+  return typeof val === 'object' && judgType(val) === 'object';
+}

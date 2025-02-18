@@ -1,5 +1,5 @@
 import { RefObject } from 'preact';
-import { isUndef, isRef } from './is';
+import { isUndef, isRef, isPlainObject } from './is';
 import { isReturnTime } from './time';
 import dayjs from 'dayjs';
 /**
@@ -150,32 +150,38 @@ export function throttle(fn: (...args: any[]) => any, wait: number, immediately:
 }
 
 /**
- * @zh 深度合并
- * @param target
- * @param source
- * @returns
+ *深度合并两个对象的方法
  */
-export function deepMerge<T>(target: T, source: T | undefined, clone?: boolean): T {
-  if (clone) {
-    target = deepClone(target);
+export function deepMerge<T extends Record<string, any>>(target: T, ...args: (T | undefined)[]): T {
+  let len = args.length;
+  if (!isPlainObject(target)) {
+    target = {} as T;
   }
-  if (isUndef(source)) {
-    return target;
-  }
-  if (!target) {
-    return deepClone(source);
-  }
-  for (const key in source) {
-    if (source && source.hasOwnProperty(key)) {
-      if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
-        if (target && typeof target === 'object' && !target[key]) {
-          Object.assign(target, { [key]: {} }); // 初始化目标对象的新属性为空对象，以避免丢失原有属性值。例如：{ a: 1 }合并{ b: {} } 应为 { a: 1, b: {} } 而不是 { b: {} }。
+
+  function merge(target: T, source: T | undefined) {
+    if (isPlainObject(source)) {
+      for (let s in source) {
+        if (s === '__proto__' || target === source[s]) {
+          continue;
         }
-        deepMerge(target[key], source[key]); // 递归合并对象属性。
-      } else if (target && typeof target === 'object') {
-        Object.assign(target, { [key]: source[key] }); // 直接赋值非对象属性。
+        if (Array.isArray(source[s])) {
+          if (Array.isArray(target[s])) {
+            target[s] = target[s].concat(deepClone(source[s]));
+          } else {
+            target[s] = source[s];
+          }
+        } else if (isPlainObject(source[s])) {
+          target[s] = deepMerge(target[s], source[s]);
+        } else if (!isUndef(source[s])) {
+          target[s] = source[s];
+        }
       }
     }
+  }
+
+  for (let i = 0; i < len; i++) {
+    let source = args[i];
+    merge(target, source);
   }
   return target;
 }

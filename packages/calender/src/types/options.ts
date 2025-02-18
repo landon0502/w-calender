@@ -5,6 +5,7 @@ import { ReturnTimeValue } from '@/types/time';
 import { OnBeforeUpdate } from './events';
 import type { TimeValue } from '@/types/time';
 import type { LanuageDict } from '@/contexts/lanuageStore';
+import type { headerConfig } from '@/components/Header/types';
 import { Template } from '@/templates/RenderTemplate';
 
 export type ViewType = 'day' | 'week' | 'month' | 'D' | 'W' | 'M';
@@ -23,6 +24,7 @@ export interface LayoutConfig {
   column?: number;
   columns?: Array<{ width: number; columnIndex: number }>;
   columnWidth?: number;
+  header?: headerConfig;
 }
 
 export interface WeekLayoutConfig {}

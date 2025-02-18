@@ -86,6 +86,7 @@ function main() {
     },
     layoutConfig: {
       columnWidth: 180,
+      header: {},
     },
   };
 

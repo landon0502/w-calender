@@ -16,7 +16,7 @@ export function createStore<State>(initialState: State, options?: StoreOptions<S
 
   // 共享顶级组件
   function StoreProvider({ children }: PropsWithChildren) {
-    const [state, setProviderState, getProvideState] = useXState<State>(store.getState());
+    const [state, setProviderState] = useXState<State>(store.getState());
     let ob = useCallback((newState: State) => {
       setProviderState(() => newState);
     }, []);

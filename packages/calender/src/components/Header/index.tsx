@@ -1,15 +1,17 @@
 import './style/index.scss';
-import type { HeaderProps } from './types';
+import type { HeaderConfig, HeaderProps } from './types';
 import type { CalenderItem } from '@/types/options';
 import { cls } from '@/utils/css';
 import Scrollbar from '../Scrollbar';
-import { numToPx } from '@/utils';
+import { deepMerge, numToPx } from '@/utils';
+import { getWithFunctionValue } from '../_utils';
 import { LAYOUT_CONTENT_KEY, LAYOUT_HEADER_KEY } from '../LayoutContainer/linkageKeys';
 import RenderTemplate from '@/templates/RenderTemplate';
 import { useTemplateStore } from '@/contexts/templateStore';
 import { handleGridCols } from '../Column/hooks/useColumnLayout';
 import { useMemo } from 'preact/hooks';
-import { calculateDistance } from '../_utils';
+import { headerDefaultConfig } from './context';
+import { DAY_SECOND } from '@/constant/time';
 
 export default function Header(props: HeaderProps) {
   const { getState } = useTemplateStore();
@@ -18,17 +20,17 @@ export default function Header(props: HeaderProps) {
     : {};
   const data = useMemo(() => handleGridCols(props.data), [props.data]);
   const maxIndex = Math.max(...data.map((item) => item.totalColumn));
+  const headerConfig = deepMerge(headerDefaultConfig, props.headerConfig) as Required<HeaderConfig>;
   /**
    * @zh 计算y ,h坐标位置信息
    */
   function calculateRect(
     item: CalenderItem & {
       colIndex: number;
-    },
-    totalColumn: number
+    }
   ) {
-    const cellH = 20;
-    const totalSecond = (props.days?.length ?? 0) * 24 * 60 * 60; // s
+    const cellH = headerConfig.barHeight;
+    const totalSecond = (props.days?.length ?? 0) * DAY_SECOND; // s
     const { start, end, colIndex } = item;
     const currentSecond = end.time.diff(start.time, 'second');
     let x = (start.time.diff(props.days?.[0].time, 'second') / totalSecond) * 100 + '%';
@@ -58,44 +60,48 @@ export default function Header(props: HeaderProps) {
   }
 
   function renderData() {
-    const style = {};
+    const height = maxIndex * headerConfig.barHeight;
+    const style = {
+      height: numToPx(height),
+    };
+
+    const dayCols = props.days?.map(() => {
+      return (
+        <div
+          className={cls(['header-rows-presentation-gridcell', 'header-rows-boder-gridcell'])}
+          style={{ ...dayCellStyle, height: '100%' }}
+        ></div>
+      );
+    });
+
+    const bars = data.map((group) =>
+      group.data.map(({ colIndex, ...config }) => {
+        let rect = calculateRect({ ...config, colIndex });
+        let style = {
+          left: rect.x,
+          top: rect.y,
+          width: rect.w,
+          height: numToPx(rect.h),
+          ...getWithFunctionValue(headerConfig.style),
+        };
+        return (
+          <div className={cls('header-rows-bars-item')} style={style}>
+            <RenderTemplate
+              data={{
+                config,
+              }}
+              template={() => <div></div>}
+            />
+          </div>
+        );
+      })
+    );
+
     return (
       <>
-        <div className={cls(['header-rows-data'])} style={{ height: maxIndex * 20 + 'px' }}>
-          <div className={cls('header-rows-presentation')}>
-            {props.days?.map(() => {
-              return (
-                <div
-                  className={cls([
-                    'header-rows-presentation-gridcell',
-                    'header-rows-boder-gridcell',
-                  ])}
-                  style={{ ...dayCellStyle, height: '100%' }}
-                ></div>
-              );
-            })}
-          </div>
-
-          <div className={cls('header-rows-bars')}>
-            {data.map((group) =>
-              group.data.map(({ colIndex, ...config }) => {
-                let rect = calculateRect({ ...config, colIndex }, group.totalColumn);
-                return (
-                  <div
-                    className={cls('header-rows-bars-item')}
-                    style={{ left: rect.x, top: rect.y, width: rect.w, height: rect.h }}
-                  >
-                    <RenderTemplate
-                      data={{
-                        config,
-                      }}
-                      template={() => <div></div>}
-                    />
-                  </div>
-                );
-              })
-            )}
-          </div>
+        <div className={cls(['header-rows-data'])} style={style}>
+          <div className={cls('header-rows-presentation')}>{dayCols}</div>
+          <div className={cls('header-rows-bars')}>{bars}</div>
         </div>
       </>
     );
