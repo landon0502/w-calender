@@ -150,6 +150,7 @@ export default function Header(props: HeaderProps) {
         let rect = calculateRect({ ...config, colIndex });
         return (
           <EventLayoutItem
+            key={config._key}
             data={config}
             {...rect}
             className={cls('header-rows-bars-item')}
