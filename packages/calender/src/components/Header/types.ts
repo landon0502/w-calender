@@ -11,6 +11,6 @@ export interface HeaderConfig {
 export interface HeaderProps {
   data: Array<CalenderItem>;
   columnWidth?: number;
-  days?: ReturnTimeValue[];
+  days: ReturnTimeValue[];
   headerConfig?: HeaderConfig;
 }

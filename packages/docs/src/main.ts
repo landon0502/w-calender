@@ -69,7 +69,7 @@ function main() {
         title: '跨天测试数据2',
       },
       {
-        start: dayjs().add(2, 'day').format('YYYY-MM-DD 16:50'),
+        start: dayjs().add(1, 'day').format('YYYY-MM-DD 15:51'),
         end: dayjs().add(4, 'day').format('YYYY-MM-DD 15:50'),
         title: '跨天测试数据4',
       },

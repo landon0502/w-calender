@@ -1,9 +1,10 @@
 import { PropsWithChildren, useRef, useMemo, createContext } from 'preact/compat';
-import { useDragoverBubble, usePointerMoveEvent, useElementBounding } from '@/hooks';
+import { usePointerMoveEvent, useElementBounding } from '@/hooks';
+import { useDragoverBubble } from './context';
 import { moveThreshold } from '@/utils';
 import { useStore } from '@/contexts/calenderStore';
 import { PointerEvent } from '@interactjs/types';
-import type { EventColumnLayoutContainerProps, LayoutMouseEvent } from './types';
+import type { EventColumnLayoutContainerProps, LayoutMouseEvent } from '../types';
 
 /**
  * @zh 添加时间段

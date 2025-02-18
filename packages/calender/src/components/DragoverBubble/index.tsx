@@ -1,10 +1,10 @@
 import './style/index.scss';
 import { PropsWithChildren } from '@/types/common';
 import { forwardRef } from 'preact/compat';
-import type { Rect, OperateType } from '@/types/components';
+import type { Rect } from '@/types/components';
 import { genStyles } from '@/components/_utils';
 import { cls } from '@/utils';
-import type { DragConfig } from '@/hooks/useDragoverBubble';
+import type { DragConfig } from './types';
 /**
  * @zh 拖拽样式
  */

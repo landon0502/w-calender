@@ -4,11 +4,12 @@ import { cls, createUniqueId, getReturnTime, isAsyncFunction, isFunction, numToP
 import Header from '../Header';
 import dayjs from 'dayjs';
 import { calculateDistance, offsetToTimeValue } from '../_utils';
-import { useDragoverBubble, useXState } from '@/hooks';
+import { useXState } from '@/hooks';
+import { useDragoverBubble } from '../Event/EventColumnLayoutContainer/context';
 import { useStore } from '@/contexts/calenderStore';
 import type { PropsWithElAttrs } from '@/types/common';
 import type { CalenderItem } from '@/types/options';
-import type { DragConfig } from '@/hooks/useDragoverBubble';
+import type { DragConfig } from '../DragoverBubble/types';
 import { TimeIndicateLine, TimeIndicateBar } from '../TimeIndicateBar';
 import LayoutContainer from '../LayoutContainer';
 import Column from '../Column';
@@ -26,7 +27,7 @@ const ViewContent = ({
   interval = 30,
   gap = 8,
 }: ViewContentProps) => {
-  const { setDragoverBubbleState } = useDragoverBubble();
+  const { updateDragoverBubbleState } = useDragoverBubble();
   const [_, setColumnData, getColumnData] = useXState(data);
   useEffect(() => setColumnData(data), [data]);
 
@@ -54,7 +55,7 @@ const ViewContent = ({
         },
         type: 'add',
       };
-    setDragoverBubbleState(type === 'end' ? null : (config as DragConfig));
+    updateDragoverBubbleState(type === 'end' ? null : (config as DragConfig));
     if (type === 'end') {
       onChange({
         target: config.data,

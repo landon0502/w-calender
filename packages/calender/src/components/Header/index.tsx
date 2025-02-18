@@ -1,26 +1,36 @@
 import './style/index.scss';
 import type { HeaderConfig, HeaderProps } from './types';
 import type { CalenderItem } from '@/types/options';
+import type { Rect } from '@/types/components';
 import { cls } from '@/utils/css';
 import Scrollbar from '../Scrollbar';
-import { deepMerge, numToPx } from '@/utils';
+import { deepMerge, numToPx, isNumber, moveThreshold } from '@/utils';
 import { getWithFunctionValue } from '../_utils';
 import { LAYOUT_CONTENT_KEY, LAYOUT_HEADER_KEY } from '../LayoutContainer/linkageKeys';
 import RenderTemplate from '@/templates/RenderTemplate';
 import { useTemplateStore } from '@/contexts/templateStore';
 import { handleGridCols } from '../Column/hooks/useColumnLayout';
-import { useMemo } from 'preact/hooks';
+import { useMemo, useRef } from 'preact/hooks';
 import { headerDefaultConfig } from './context';
 import { DAY_SECOND } from '@/constant/time';
-
+import EventLayoutItem from '../Event/EventLayoutItem';
+import { useElementBounding } from '@/hooks';
+import { useDragoverBubble } from './context';
+const getDx = moveThreshold();
 export default function Header(props: HeaderProps) {
   const { getState } = useTemplateStore();
+  const containerRef = useRef<HTMLDivElement>(null);
   const dayCellStyle = props.columnWidth
     ? { minWidth: numToPx(props.columnWidth), flexShrink: 1 }
     : {};
+  const containerWidth = props.columnWidth
+    ? numToPx(props.days.length * props.columnWidth)
+    : '100%';
   const data = useMemo(() => handleGridCols(props.data), [props.data]);
-  const maxIndex = Math.max(...data.map((item) => item.totalColumn));
+  const totalRowCount = Math.max(...data.map((item) => item.totalColumn));
   const headerConfig = deepMerge(headerDefaultConfig, props.headerConfig) as Required<HeaderConfig>;
+  const { rect: containerRect, getRect: getContainerRect } = useElementBounding(containerRef);
+  const { component: Bubble, updateDragoverBubbleState } = useDragoverBubble();
   /**
    * @zh 计算y ,h坐标位置信息
    */
@@ -29,19 +39,20 @@ export default function Header(props: HeaderProps) {
       colIndex: number;
     }
   ) {
-    const cellH = headerConfig.barHeight;
-    const totalSecond = (props.days?.length ?? 0) * DAY_SECOND; // s
+    const { barHeight, gap } = headerConfig;
+    const totalSecond = props.days.length * DAY_SECOND; // s
     const { start, end, colIndex } = item;
     const currentSecond = end.time.diff(start.time, 'second');
-    let x = (start.time.diff(props.days?.[0].time, 'second') / totalSecond) * 100 + '%';
 
-    let y = colIndex * cellH;
-    let w = (currentSecond / totalSecond) * 100 + '%';
-    let h = cellH;
+    let x = (start.time.diff(props.days?.[0].time, 'second') / totalSecond) * containerRect.width;
+    let y = colIndex * (barHeight + gap);
+    let w = (currentSecond / totalSecond) * containerRect.width - gap;
+    let h = barHeight;
 
     return { x, y, w, h };
   }
 
+  // 渲染头部时间指示
   function renderDays() {
     function renderItem() {
       return props.days?.map((item) => {
@@ -55,12 +66,72 @@ export default function Header(props: HeaderProps) {
         );
       });
     }
-
     return <div className={cls(['header-rows-days'])}>{renderItem()}</div>;
   }
 
+  /**
+   * @zh 开始移动
+   * @en move start
+   */
+  let dragPosition: Rect = { x: 0, y: 0, w: 0, h: 0 };
+  function onMoveStart(event: any, data: CalenderItem, rect: Rect) {
+    dragPosition.w = rect.w;
+    dragPosition.y = rect.y;
+    dragPosition.x = rect.x;
+    dragPosition.h = headerConfig.barHeight;
+    updateDragoverBubbleState({
+      rect: { ...dragPosition },
+      data,
+      type: 'move',
+    });
+  }
+
+  /**
+   * @zh 移动中
+   * @en moved
+   */
+  function onMove(event: any, data: CalenderItem, rect: Rect) {
+    // const columnWidth = getColumnWidth();
+    if (isNumber(event.dx)) {
+      dragPosition.x += event.dx;
+    }
+    updateDragoverBubbleState({
+      rect: { ...dragPosition },
+      data,
+      type: 'move',
+    });
+    // if (dragPosition.y < 0) {
+    //   dragPosition.y = 0;
+    // }
+    // let size = getContainerRect();
+    // if (dragPosition.y + dragPosition.h >= size.height) {
+    //   dragPosition.y = size.height - dragPosition.h;
+    // }
+    // const { x } = event.page;
+    // updateDragoverBubbleState({
+    //   rect: { ...dragPosition },
+    //   data,
+    //   type: 'move',
+    // });
+    // relativeIndex = Math.floor(x / columnWidth);
+    // if (relativeIndex < -columnIndex) {
+    //   relativeIndex = -columnIndex;
+    // } else if (relativeIndex + columnIndex > columnCount - 1) {
+    //   relativeIndex = columnCount - 1 - columnIndex;
+    // }
+    // handleUpdateData(event, data, 'move');
+  }
+
+  function onMoveEnd() {
+    // let dragData = getDragoverState();
+    // relativeIndex = 0;
+    // changeData(dragData?.data as CalenderItem);
+    updateDragoverBubbleState(null);
+  }
+
+  // 渲染头部的时间栏
   function renderData() {
-    const height = maxIndex * headerConfig.barHeight;
+    const height = totalRowCount * headerConfig.barHeight + headerConfig.gap * totalRowCount - 1;
     const style = {
       height: numToPx(height),
     };
@@ -77,22 +148,30 @@ export default function Header(props: HeaderProps) {
     const bars = data.map((group) =>
       group.data.map(({ colIndex, ...config }) => {
         let rect = calculateRect({ ...config, colIndex });
-        let style = {
-          left: rect.x,
-          top: rect.y,
-          width: rect.w,
-          height: numToPx(rect.h),
-          ...getWithFunctionValue(headerConfig.style),
-        };
         return (
-          <div className={cls('header-rows-bars-item')} style={style}>
+          <EventLayoutItem
+            data={config}
+            {...rect}
+            className={cls('header-rows-bars-item')}
+            style={getWithFunctionValue(headerConfig.style)}
+            edges={{ top: false, left: false, bottom: false, right: true }}
+            onMoveStart={onMoveStart}
+            onMove={onMove}
+            onMoveEnd={onMoveEnd}
+            moveThreshold={{
+              x(event) {
+                let setp = getContainerRect().width / (props.days.length || 1) / 12;
+                return getDx(event.dx, setp);
+              },
+            }}
+          >
             <RenderTemplate
               data={{
                 config,
               }}
               template={() => <div></div>}
             />
-          </div>
+          </EventLayoutItem>
         );
       })
     );
@@ -100,6 +179,7 @@ export default function Header(props: HeaderProps) {
     return (
       <>
         <div className={cls(['header-rows-data'])} style={style}>
+          <Bubble />
           <div className={cls('header-rows-presentation')}>{dayCols}</div>
           <div className={cls('header-rows-bars')}>{bars}</div>
         </div>
@@ -116,8 +196,10 @@ export default function Header(props: HeaderProps) {
         linkageId={LAYOUT_HEADER_KEY}
         horizontalLinkage={[LAYOUT_CONTENT_KEY]}
       >
-        {renderDays()}
-        {renderData()}
+        <div style={{ width: containerWidth }} ref={containerRef}>
+          {renderDays()}
+          {renderData()}
+        </div>
       </Scrollbar>
     </div>
   );

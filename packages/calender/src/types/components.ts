@@ -45,6 +45,7 @@ export interface GridBoxProps extends Rect {
     x?(event: any): number | false;
     y?(event: any): number | false;
   };
+  edges?: Record<'top' | 'left' | 'right' | 'bottom', boolean>;
 }
 
 export type OperateType = 'resize' | 'move' | 'add';

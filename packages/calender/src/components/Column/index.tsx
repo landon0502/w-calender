@@ -9,7 +9,7 @@ import { genTimeSlice, calculateRect, offsetToTimeValue } from '../_utils';
 import useColumnLayout from './hooks/useColumnLayout';
 import { useElementBounding } from '@/hooks';
 import EventLayoutItem from '@/components/Event/EventLayoutItem';
-import useDragoverBubble from '@/hooks/useDragoverBubble';
+import { useDragoverBubble } from '../Event/EventColumnLayoutContainer/context';
 import { EventColumnLayoutContext } from '../Event/EventColumnLayoutContainer';
 import dayjs from 'dayjs';
 
@@ -31,7 +31,7 @@ export default function Column({
   const layoutContainer = useRef<HTMLDivElement>(null);
   const timeList = useMemo(() => genTimeSlice(date, timeInterval), [date]);
   const columnHeight = useMemo(() => timeList.length * cellHeight, [timeList]);
-  const { setDragoverBubbleState, getDragoverState } = useDragoverBubble();
+  const { updateDragoverBubbleState, getDragoverState } = useDragoverBubble();
   const { rect: containerRect, getRect: getContainerRect } = useElementBounding(layoutContainer);
   const { getColumnWidth } = useContext(EventColumnLayoutContext);
   const { layoutData, getCalenderData } = useColumnLayout({
@@ -51,7 +51,11 @@ export default function Column({
     dragPosition.y = rect.y;
     dragPosition.x = getColumnWidth() * columnIndex;
     dragPosition.h = rect.h;
-    setDragoverBubbleState({ rect: { ...dragPosition, w: getColumnWidth() }, data, type: 'move' });
+    updateDragoverBubbleState({
+      rect: { ...dragPosition, w: getColumnWidth() },
+      data,
+      type: 'move',
+    });
   }
 
   /**
@@ -90,7 +94,7 @@ export default function Column({
    * @zh resize start
    */
   function onResizeStart(event: any, data: CalenderItem, rect: Rect) {
-    setDragoverBubbleState({
+    updateDragoverBubbleState({
       rect: { ...rect, w: getColumnWidth(), x: getColumnWidth() * columnIndex },
       data,
       type: 'resize',
@@ -129,7 +133,7 @@ export default function Column({
         .add(relativeIndex, 'day')
     );
 
-    setDragoverBubbleState({
+    updateDragoverBubbleState({
       rect: {
         y: dragPosition.y,
         w: getContainerRect().width,
@@ -146,7 +150,7 @@ export default function Column({
    */
   async function changeData(data: CalenderItem) {
     await updateData(data);
-    setDragoverBubbleState(null);
+    updateDragoverBubbleState(null);
   }
 
   /**
@@ -210,6 +214,7 @@ export default function Column({
           )}
           key={config._key}
           data={config}
+          edges={{ top: false, left: false, bottom: true, right: false }}
           onMoveStart={onMoveStart}
           onMove={onMove}
           onMoveEnd={onMoveEnd}

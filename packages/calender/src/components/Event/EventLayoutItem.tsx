@@ -1,7 +1,6 @@
 import { useRef, Children, useEffect } from 'preact/compat';
 import { cls } from '@/utils/css';
 import { getAttrsTransformTranslate } from '@/utils/dom';
-import { moveThreshold } from '@/utils/common';
 import type { GridBoxProps, OperateType } from '@wcalender/types/components';
 import useInteract from '@/hooks/useInteract';
 import { genStyles } from '../_utils';
@@ -44,7 +43,9 @@ export default function EventLayoutItem(props: GridBoxProps) {
     onResizeEnd,
     onTap,
     onBeforeUpdate = () => true,
+    edges,
   } = props;
+
   const moveThresholdX =
     moveThreshold.x ??
     function (event) {
@@ -108,7 +109,7 @@ export default function EventLayoutItem(props: GridBoxProps) {
         },
       },
       resizeEvents: {
-        edges: { top: false, left: false, bottom: true, right: false },
+        edges,
         listeners: {
           start(event) {
             let rect = getEleLayout(event.target);
@@ -158,7 +159,7 @@ export default function EventLayoutItem(props: GridBoxProps) {
       style={{
         ...genStyles({ x, y, h: h, w: w }),
         ...style,
-        opacity: editType ? { resize: 0, move: 0.7, add: 0 }[editType as OperateType] : 1,
+        opacity: editType ? { resize: 0.6, move: 0.6, add: 0 }[editType as OperateType] : 1,
         position: 'absolute',
         overflow: 'hidden',
       }}
