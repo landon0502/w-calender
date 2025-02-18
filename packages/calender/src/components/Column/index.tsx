@@ -64,18 +64,20 @@ export default function Column({
    */
   function onMove(event: any, data: CalenderItem, rect: Rect) {
     const columnWidth = getColumnWidth();
+    const containerRect = getContainerRect();
     if (isNumber(event.dy)) {
       dragPosition.y += event.dy;
     }
     if (dragPosition.y < 0) {
       dragPosition.y = 0;
     }
-    let size = getContainerRect();
-    if (dragPosition.y + dragPosition.h >= size.height) {
-      dragPosition.y = size.height - dragPosition.h;
+
+    if (dragPosition.y + dragPosition.h >= containerRect.height) {
+      dragPosition.y = containerRect.height - dragPosition.h;
     }
     const { x } = event.page;
-    relativeIndex = Math.floor(x / columnWidth);
+
+    relativeIndex = Math.floor((x + rect.x) / columnWidth);
     if (relativeIndex < -columnIndex) {
       relativeIndex = -columnIndex;
     } else if (relativeIndex + columnIndex > columnCount - 1) {
