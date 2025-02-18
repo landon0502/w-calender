@@ -3,14 +3,14 @@ import type { ColumnProps } from './types';
 import type { CalenderItem } from '@/types/options';
 import type { Rect, OperateType } from '@/types/components';
 import type { PropsWithElAttrs } from '@/types/common';
-import { useMemo, useRef, useContext } from 'preact/compat';
+import { useMemo, useRef } from 'preact/compat';
 import { numToPx, getReturnTime, format, cls, isEmpty, isNumber, moveThreshold } from '@/utils';
 import { genTimeSlice, calculateRect, offsetToTimeValue } from '../_utils';
 import useColumnLayout from './hooks/useColumnLayout';
 import { useElementBounding } from '@/hooks';
 import EventLayoutItem from '@/components/Event/EventLayoutItem';
 import { useDragoverBubble } from '../Event/EventColumnLayoutContainer/context';
-import { EventColumnLayoutContext } from '../Event/EventColumnLayoutContainer';
+import { useGetEventColumnLayoutContext } from '../Event/EventColumnLayoutContainer';
 import dayjs from 'dayjs';
 
 const getDy = moveThreshold();
@@ -33,7 +33,7 @@ export default function Column({
   const columnHeight = useMemo(() => timeList.length * cellHeight, [timeList]);
   const { updateDragoverBubbleState, getDragoverState } = useDragoverBubble();
   const { rect: containerRect, getRect: getContainerRect } = useElementBounding(layoutContainer);
-  const { getColumnWidth } = useContext(EventColumnLayoutContext);
+  const { getColumnWidth } = useGetEventColumnLayoutContext();
   const { layoutData, getCalenderData } = useColumnLayout({
     data,
     timeRange: date,

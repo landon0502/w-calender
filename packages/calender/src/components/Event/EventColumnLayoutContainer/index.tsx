@@ -1,4 +1,4 @@
-import { PropsWithChildren, useRef, useMemo, createContext } from 'preact/compat';
+import { PropsWithChildren, useRef, useMemo, createContext, useContext } from 'preact/compat';
 import { usePointerMoveEvent, useElementBounding } from '@/hooks';
 import { useDragoverBubble } from './context';
 import { moveThreshold } from '@/utils';
@@ -20,6 +20,8 @@ export const EventColumnLayoutContext = createContext<{ getColumnWidth: () => nu
     return 0;
   },
 });
+
+export const useGetEventColumnLayoutContext = () => useContext(EventColumnLayoutContext);
 export default function EventColumnLayoutContainer(
   props: PropsWithChildren<EventColumnLayoutContainerProps>
 ) {

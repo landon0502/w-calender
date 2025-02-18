@@ -13,7 +13,7 @@ const useIsomorphicLayoutEffect = isSSR ? useEffect : useLayoutEffect;
 export function createStore<State>(initialState: State, options?: StoreOptions<State>) {
   const store = Store.create(initialState, options);
   const StoreContext = createContext<State>(initialState);
-
+  const useGetStoreContext = () => useContext(StoreContext);
   // 共享顶级组件
   function StoreProvider({ children }: PropsWithChildren) {
     const [state, setProviderState] = useXState<State>(store.getState());
@@ -37,7 +37,7 @@ export function createStore<State>(initialState: State, options?: StoreOptions<S
 
   // hooks
   function useStore() {
-    const storeCtx = useContext(StoreContext);
+    const storeCtx = useGetStoreContext();
     const [state, setRefState, getRefState] = useXState<State>(storeCtx);
 
     useIsomorphicLayoutEffect(() => {
@@ -72,7 +72,7 @@ export function createStore<State>(initialState: State, options?: StoreOptions<S
    * See more: https://github.com/pmndrs/zustand/blob/master/readme.md#transient-updates-for-often-occuring-state-changes
    */
   const useInternalStore = () => {
-    const storeCtx = useContext(StoreContext);
+    const storeCtx = useGetStoreContext();
 
     if (isUndef(storeCtx)) {
       throw new Error('StoreProvider is not found');
