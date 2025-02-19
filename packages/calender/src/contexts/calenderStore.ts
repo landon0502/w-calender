@@ -5,7 +5,6 @@ export const commitKeys = {
   SET_DATA: 'SET_DATA',
   SET_LAYOUTCONFIG: 'SET_LAYOUTCONFIG',
   SET_VIEWTYPE: 'SET_VIEWTYPE',
-  SET_FREEZE_CONTAINER_EVT: 'SET_FREEZE_CONTAINER_EVT',
 };
 export const actionKeys = {};
 
@@ -13,7 +12,6 @@ type CalenderStore = {
   data: CalenderItem[];
   layoutConfig: LayoutConfig;
   viewType: ViewType;
-  freezeContainerEvent: boolean;
 };
 const { StoreProvider, useStore, setStore, getStore, store } = createStore<CalenderStore>(
   {
@@ -24,7 +22,6 @@ const { StoreProvider, useStore, setStore, getStore, store } = createStore<Calen
       gap: 8,
     },
     viewType: 'D',
-    freezeContainerEvent: false,
   },
   {
     mutations: {
@@ -37,9 +34,6 @@ const { StoreProvider, useStore, setStore, getStore, store } = createStore<Calen
 
       [commitKeys.SET_VIEWTYPE](state, value: ViewType) {
         state.viewType = value;
-      },
-      [commitKeys.SET_FREEZE_CONTAINER_EVT](state, value: boolean) {
-        state.freezeContainerEvent = value;
       },
     },
     actions: {},

@@ -2,10 +2,9 @@ import { PropsWithChildren, useRef, useMemo, createContext, useContext } from 'p
 import { usePointerMoveEvent, useElementBounding } from '@/hooks';
 import { useDragoverBubble } from './context';
 import { moveThreshold } from '@/utils';
-import { useStore } from '@/contexts/calenderStore';
 import { PointerEvent } from '@interactjs/types';
 import type { EventColumnLayoutContainerProps, LayoutMouseEvent } from '../types';
-
+import { calenderLayoutItemClassName } from '../../Column/contexts';
 /**
  * @zh 添加时间段
  */
@@ -28,7 +27,6 @@ export default function EventColumnLayoutContainer(
   const container = useRef<HTMLDivElement | null>(null);
   const { getRect: getContainerRect } = useElementBounding(container);
   const { component: Bubble } = useDragoverBubble();
-  const { getState } = useStore();
 
   // column width
   function getColumnWidth() {
@@ -43,9 +41,6 @@ export default function EventColumnLayoutContainer(
   let originalLayoutConfig: LayoutMouseEvent;
   let bubbleRect: LayoutMouseEvent | null;
   const enable = useRef(false);
-  const freezeContainerEventState = useMemo(() => {
-    return getState('freezeContainerEvent');
-  }, [getState('freezeContainerEvent')]);
 
   /**
    * @zh 需要计算开始时间和结束时间
@@ -53,7 +48,7 @@ export default function EventColumnLayoutContainer(
   usePointerMoveEvent(
     container,
     {
-      holdDelay: 300, // 事件处理延时（ms）
+      exculdes: [`.${calenderLayoutItemClassName}`],
       onDown: ({ x, y, event }: { event: PointerEvent; x: number; y: number }) => {
         let colWidth = getColumnWidth();
         function getColumnIndex() {
@@ -105,7 +100,7 @@ export default function EventColumnLayoutContainer(
         enable.current = false;
       },
     },
-    !freezeContainerEventState && !props.disabled
+    !props.disabled
   );
   return (
     <EventColumnLayoutContext.Provider value={{ getColumnWidth }}>

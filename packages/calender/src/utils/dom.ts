@@ -105,3 +105,13 @@ export function getAttrsTransformTranslate(el: HTMLElement): { x: number; y: num
   let transform = el.style.transform ?? '';
   return parseTranslateXY(transform);
 }
+
+/**
+ * @zh 是否包含元素
+ */
+export function isContainElement<T extends Element = Element>(parent: T, el: T) {
+  if (parent === el) {
+    return true;
+  }
+  return parent.contains(el);
+}

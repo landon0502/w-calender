@@ -104,7 +104,6 @@ export default function EventLayoutItem(props: GridBoxProps) {
             let rect = getEleLayout(event.target);
             onMoveEnd?.(event, data, rect);
             resetEditType();
-            store.commit(commitKeys.SET_FREEZE_CONTAINER_EVT, false);
           },
         },
       },
@@ -132,7 +131,6 @@ export default function EventLayoutItem(props: GridBoxProps) {
             let rect = getEleLayout(event.target);
             onResizeEnd?.(event, data, rect);
             resetEditType();
-            store.commit(commitKeys.SET_FREEZE_CONTAINER_EVT, false);
           },
         },
       },
@@ -142,14 +140,6 @@ export default function EventLayoutItem(props: GridBoxProps) {
         event.preventDefault();
         event.stopPropagation();
         onTap?.(event, data, { x, y, w, h });
-      });
-
-      // set freeze state for the container
-      ctx.on('down', function (event) {
-        store.commit(commitKeys.SET_FREEZE_CONTAINER_EVT, true);
-      });
-      ctx.on('up', function (event) {
-        store.commit(commitKeys.SET_FREEZE_CONTAINER_EVT, false);
       });
     }
   );

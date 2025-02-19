@@ -104,32 +104,6 @@ export function moveThreshold() {
 }
 
 /**
- * @zh 添加延时
- */
-export function execWithDelay(callback: Function, delay: number) {
-  let timer: number | undefined;
-
-  function clearDelay() {
-    clearTimeout(timer);
-    timer = void 0;
-  }
-  if (delay) {
-    timer = setTimeout(() => {
-      callback();
-      clearDelay();
-    }, delay) as unknown as number;
-  } else {
-    callback();
-  }
-  return {
-    clear: clearDelay,
-    getTimer() {
-      return timer;
-    },
-  };
-}
-
-/**
  * @zh 防抖
  */
 export function debounce(fn: (...args: any[]) => any, delay: number) {

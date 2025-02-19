@@ -12,6 +12,7 @@ import EventLayoutItem from '@/components/Event/EventLayoutItem';
 import { useDragoverBubble } from '../Event/EventColumnLayoutContainer/context';
 import { useGetEventColumnLayoutContext } from '../Event/EventColumnLayoutContainer';
 import dayjs from 'dayjs';
+import { calenderLayoutItemClassName } from './contexts';
 
 const getDy = moveThreshold();
 
@@ -193,7 +194,11 @@ export default function Column({
           userSelect: touchState ? 'auto' : 'none',
         }}
       >
-        {`${config.title}-${format(config.start, 'HH:mm')}~${format(config.end, 'HH:mm')}--${touchState}`}
+        <div style={{ height: '50%' }}>
+          <div style={{ height: '50%', background: 'red' }}>
+            {`${config.title}-${format(config.start, 'HH:mm')}~${format(config.end, 'HH:mm')}--${touchState}`}
+          </div>
+        </div>
       </div>
     );
   }
@@ -229,6 +234,7 @@ export default function Column({
               return getDy(event.dy, dragStepNum);
             },
           }}
+          className={calenderLayoutItemClassName}
         >
           {/* 自定义日程卡片，需支持自定义 */}
           {({ touchState }: { touchState: OperateType }) => {

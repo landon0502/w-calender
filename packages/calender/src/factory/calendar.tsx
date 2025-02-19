@@ -121,14 +121,13 @@ class Calender extends CalendarCore {
       this.viewType = options.viewType;
     }
 
-    this.layoutConfig = deepMerge(defaultLayoutConfig, options.layoutConfig, true);
+    this.layoutConfig = deepMerge(defaultLayoutConfig, options.layoutConfig);
     this.changeView(this.viewType);
     this.formatData(this.options.data);
     setStore({
       data: this.data,
       layoutConfig: this.layoutConfig,
       viewType: this.viewType,
-      freezeContainerEvent: false,
     });
     if (options.locale) {
       setLanuageLocale(options.locale ?? defaultOptions.locale);

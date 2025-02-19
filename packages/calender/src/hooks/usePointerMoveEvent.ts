@@ -1,7 +1,7 @@
 import { useRef, RefObject, useEffect } from 'preact/compat';
 import { RefType } from '@/types/utils';
 import useMouseInElement from './useMouseInElement';
-import { isUndef, execWithDelay } from '@/utils';
+import { isElement, isString, isUndef, isContainElement } from '@/utils';
 import useXState from './useXState';
 import { PointerEvent } from '@interactjs/types';
 
@@ -16,7 +16,7 @@ export type ScrollParent = Element | RefObject<Element>;
 export type UsePointerMoveEventOptions = {
   scrollParent?: ScrollParent;
   limitCurrentTarget?: boolean;
-  holdDelay?: number;
+  exculdes?: Array<string | Element | HTMLElement>;
   onDown?: (e: { event: any; x: number; y: number }) => void;
   onMove?: (e: { event: any; x: number; y: number; dy: number; dx: number }) => void;
   onUp?: (e: { event: any; x: number; y: number }) => void;
@@ -106,48 +106,46 @@ export default function usePointerMoveEvent(
     setPosition({ x: elementX, y: elementY });
   };
 
-  let downDelayResult: ReturnType<typeof execWithDelay> = {
-    getTimer() {
-      return void 0;
-    },
-    clear() {},
-  };
+  function isAllowMouseEvent(event: PointerEvent) {
+    let exculdes = options.exculdes ?? [];
 
+    let els: Array<Element | HTMLElement> = [];
+    exculdes.forEach((item) => {
+      if (isElement(item)) {
+        els.push(item);
+      }
+      if (isString(item)) {
+        let elements = document.querySelectorAll(item);
+        if (elements.length > 0) {
+          els.push(...Array.from(elements));
+        }
+      }
+    });
+
+    let isExculde = els.some((el) => isContainElement(el, event.target as Element));
+
+    return getEnable() && !isExculde;
+  }
+
+  // 需要添加exclude
   useMouseInElement(target, {
     onDown(event, { elementX, elementY, isOutside }) {
-      downDelayResult = execWithDelay(() => {
-        if (!getEnable() || isOutside) return;
-        setPosition({ x: elementX, y: elementY });
-        eventOptions.onDown({ event, x: elementX, y: elementY });
-      }, options.holdDelay ?? 0);
+      if (!isAllowMouseEvent(event) || isOutside) return;
+      setPosition({ x: elementX, y: elementY });
+      eventOptions.onDown({ event, x: elementX, y: elementY });
       isDown.current = true;
     },
     onMove(event, { elementX, elementY }) {
-      if (!isUndef(downDelayResult.getTimer())) {
-        downDelayResult.clear();
-      }
-      if (!getEnable()) return;
+      if (!isAllowMouseEvent(event)) return;
       if (isDown.current) {
         isMove.current = true;
       }
-
       const { dx, dy } = getDXY(elementX, elementY);
       setPosition({ x: elementX, y: elementY });
       eventOptions.onMove({ event, x: elementX, y: elementY, dy: dy, dx: dx });
     },
     onUp(event, position) {
-      if (!isUndef(downDelayResult.getTimer())) {
-        cleanStatus();
-        downDelayResult.clear();
-        return;
-      }
-      if (isMove.current) {
-        onUp(event, position);
-      } else {
-        execWithDelay(() => {
-          onUp(event, position);
-        }, options.holdDelay ?? 0);
-      }
+      onUp(event, position);
     },
   });
 
