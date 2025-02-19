@@ -1,11 +1,11 @@
 import './style/index.scss';
 import type { HeaderConfig, HeaderProps } from './types';
 import type { CalenderItem } from '@/types/options';
-import type { Rect } from '@/types/components';
+import type { Rect, OperateType } from '@/types/components';
 import { cls } from '@/utils/css';
 import Scrollbar from '../Scrollbar';
-import { deepMerge, numToPx, isNumber, moveThreshold } from '@/utils';
-import { getWithFunctionValue } from '../_utils';
+import { deepMerge, numToPx, isNumber, moveThreshold, getReturnTime } from '@/utils';
+import { getWithFunctionValue, offsetToTimeValue } from '../_utils';
 import { LAYOUT_CONTENT_KEY, LAYOUT_HEADER_KEY } from '../LayoutContainer/linkageKeys';
 import RenderTemplate from '@/templates/RenderTemplate';
 import { useTemplateStore } from '@/contexts/templateStore';
@@ -16,6 +16,8 @@ import { DAY_SECOND } from '@/constant/time';
 import EventLayoutItem from '../Event/EventLayoutItem';
 import { useElementBounding } from '@/hooks';
 import { useDragoverBubble } from './context';
+import { DAY_MINUTE } from '@/constant/time';
+
 const getDx = moveThreshold();
 export default function Header(props: HeaderProps) {
   const { getState } = useTemplateStore();
@@ -26,11 +28,20 @@ export default function Header(props: HeaderProps) {
   const containerWidth = props.columnWidth
     ? numToPx(props.days.length * props.columnWidth)
     : '100%';
-  const data = useMemo(() => handleGridCols(props.data), [props.data]);
+  const data = useMemo(() => {
+    let headerData = props.data.filter(({ start, end }) => {
+      return !start.time.isSame(end.time, 'D');
+    });
+    return handleGridCols(headerData);
+  }, [props.data]);
   const totalRowCount = Math.max(...data.map((item) => item.totalColumn));
   const headerConfig = deepMerge(headerDefaultConfig, props.headerConfig) as Required<HeaderConfig>;
   const { rect: containerRect, getRect: getContainerRect } = useElementBounding(containerRef);
-  const { component: Bubble, updateDragoverBubbleState } = useDragoverBubble();
+  const { component: Bubble, updateDragoverBubbleState, getDragoverState } = useDragoverBubble();
+
+  // drag time interval
+  const timeInterval = 4;
+
   /**
    * @zh 计算y ,h坐标位置信息
    */
@@ -91,42 +102,93 @@ export default function Header(props: HeaderProps) {
    * @en moved
    */
   function onMove(event: any, data: CalenderItem, rect: Rect) {
-    // const columnWidth = getColumnWidth();
     if (isNumber(event.dx)) {
       dragPosition.x += event.dx;
     }
-    updateDragoverBubbleState({
-      rect: { ...dragPosition },
-      data,
-      type: 'move',
-    });
-    // if (dragPosition.y < 0) {
-    //   dragPosition.y = 0;
-    // }
-    // let size = getContainerRect();
-    // if (dragPosition.y + dragPosition.h >= size.height) {
-    //   dragPosition.y = size.height - dragPosition.h;
-    // }
-    // const { x } = event.page;
-    // updateDragoverBubbleState({
-    //   rect: { ...dragPosition },
-    //   data,
-    //   type: 'move',
-    // });
-    // relativeIndex = Math.floor(x / columnWidth);
-    // if (relativeIndex < -columnIndex) {
-    //   relativeIndex = -columnIndex;
-    // } else if (relativeIndex + columnIndex > columnCount - 1) {
-    //   relativeIndex = columnCount - 1 - columnIndex;
-    // }
-    // handleUpdateData(event, data, 'move');
+    handleUpdateData(event, data, 'move');
   }
 
   function onMoveEnd() {
-    // let dragData = getDragoverState();
-    // relativeIndex = 0;
-    // changeData(dragData?.data as CalenderItem);
+    let dragData = getDragoverState();
+    changeData(dragData?.data as CalenderItem);
     updateDragoverBubbleState(null);
+  }
+
+  /**
+   * @zh 处理数据
+   */
+  function handleUpdateData(event: any, data: CalenderItem, type: OperateType) {
+    const columnWidth = getContainerRect().width / (props.days.length || 1);
+    let newWidth = event.rect.width;
+    let currentDragData = { ...data };
+    let start = props.days[0];
+    currentDragData.start = getReturnTime(
+      getReturnTime(start).time.add(
+        offsetToTimeValue(dragPosition.x as number, DAY_MINUTE, columnWidth),
+        'second'
+      )
+    );
+
+    let endPosi = (dragPosition.x as number) + newWidth;
+    currentDragData.end = getReturnTime(
+      getReturnTime(start).time.add(offsetToTimeValue(endPosi, DAY_MINUTE, columnWidth), 'second')
+    );
+
+    updateDragoverBubbleState({
+      rect: {
+        y: dragPosition.y,
+        w: newWidth,
+        x: dragPosition.x,
+        h: dragPosition.h,
+      },
+      data: currentDragData,
+      type: type,
+    });
+  }
+
+  /**
+   * @zh resize start
+   */
+  function onResizeStart(event: any, data: CalenderItem, rect: Rect) {
+    updateDragoverBubbleState({
+      rect: { ...rect, h: headerConfig.barHeight },
+      data,
+      type: 'resize',
+    });
+    dragPosition = { ...rect };
+  }
+
+  function onResize(event: any, data: CalenderItem) {
+    handleUpdateData(event, data, 'resize');
+  }
+  /**
+   * @zh 容器大小变更事件
+   */
+  function onResizeEnd(event: any, data: CalenderItem) {
+    let dragData = getDragoverState();
+    changeData(dragData?.data as CalenderItem);
+  }
+
+  /**
+   * @zh 数据更新事件
+   */
+  async function changeData(data: CalenderItem) {
+    await updateData(data);
+    updateDragoverBubbleState(null);
+  }
+  /**
+   * @zh 更新数据
+   */
+  async function updateData(target: CalenderItem) {
+    let data = [...props.data];
+    let index = data.findIndex((item) => item._key === target._key);
+    if (index > -1) {
+      data[index] = target;
+    } else {
+      data = [...data, target];
+    }
+    let result = { target: target, data };
+    props.onChange?.(result);
   }
 
   // 渲染头部的时间栏
@@ -159,10 +221,18 @@ export default function Header(props: HeaderProps) {
             onMoveStart={onMoveStart}
             onMove={onMove}
             onMoveEnd={onMoveEnd}
+            onResizeStart={onResizeStart}
+            onResizeEnd={onResizeEnd}
+            onResize={onResize}
             moveThreshold={{
               x(event) {
-                let setp = getContainerRect().width / (props.days.length || 1) / 12;
-                return getDx(event.dx, setp);
+                return getDx(
+                  event.dx,
+                  (getContainerRect().width / (props.days.length || 1) / 24) * timeInterval
+                );
+              },
+              y() {
+                return false;
               },
             }}
           >

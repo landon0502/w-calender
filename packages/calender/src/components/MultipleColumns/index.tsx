@@ -118,6 +118,10 @@ const WeekView = (props: PropsWithElAttrs<MultipleColumnsProps>) => {
     return getState('layoutConfig') ?? {};
   }, [getState('layoutConfig')]);
 
+  async function onHeaderChange(event: { target: CalenderItem; data: CalenderItem[] }) {
+    onDataChange(event);
+  }
+
   // 数据更改
   async function onDataChange(event: { target: CalenderItem; data: CalenderItem[] }) {
     let allow = true;
@@ -153,10 +157,11 @@ const WeekView = (props: PropsWithElAttrs<MultipleColumnsProps>) => {
       scrollProps={{ hideBar: true }}
       header={
         <Header
-          data={headerData}
+          data={data}
           days={props.days}
           columnWidth={layoutConfig.columnWidth}
           headerConfig={layoutConfig.header}
+          onChange={onHeaderChange}
         />
       }
       content={

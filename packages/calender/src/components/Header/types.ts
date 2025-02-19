@@ -13,4 +13,5 @@ export interface HeaderProps {
   columnWidth?: number;
   days: ReturnTimeValue[];
   headerConfig?: HeaderConfig;
+  onChange?(event: { target: CalenderItem; data: CalenderItem[] }): void;
 }

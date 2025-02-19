@@ -90,28 +90,42 @@ export default function usePointerMoveEvent(
     setEnable(() => enable);
   }, [enable]);
 
+  function cleanStatus() {
+    clearDXY();
+    isMove.current = false;
+    isDown.current = false;
+  }
+
   const onUp = (
     event: PointerEvent,
     { elementX, elementY }: { elementX: number; elementY: number }
   ) => {
-    clearDXY();
-    isMove.current = false;
-    isDown.current = false;
+    cleanStatus();
     if (!getEnable()) return;
     eventOptions.onUp({ event, x: elementX, y: elementY });
     setPosition({ x: elementX, y: elementY });
   };
 
+  let downDelayResult: ReturnType<typeof execWithDelay> = {
+    getTimer() {
+      return void 0;
+    },
+    clear() {},
+  };
+
   useMouseInElement(target, {
     onDown(event, { elementX, elementY, isOutside }) {
-      execWithDelay(() => {
+      downDelayResult = execWithDelay(() => {
         if (!getEnable() || isOutside) return;
         setPosition({ x: elementX, y: elementY });
         eventOptions.onDown({ event, x: elementX, y: elementY });
-        isDown.current = true;
       }, options.holdDelay ?? 0);
+      isDown.current = true;
     },
     onMove(event, { elementX, elementY }) {
+      if (!isUndef(downDelayResult.getTimer())) {
+        downDelayResult.clear();
+      }
       if (!getEnable()) return;
       if (isDown.current) {
         isMove.current = true;
@@ -122,6 +136,11 @@ export default function usePointerMoveEvent(
       eventOptions.onMove({ event, x: elementX, y: elementY, dy: dy, dx: dx });
     },
     onUp(event, position) {
+      if (!isUndef(downDelayResult.getTimer())) {
+        cleanStatus();
+        downDelayResult.clear();
+        return;
+      }
       if (isMove.current) {
         onUp(event, position);
       } else {

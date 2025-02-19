@@ -107,14 +107,26 @@ export function moveThreshold() {
  * @zh 添加延时
  */
 export function execWithDelay(callback: Function, delay: number) {
+  let timer: number | undefined;
+
+  function clearDelay() {
+    clearTimeout(timer);
+    timer = void 0;
+  }
   if (delay) {
-    let timer = setTimeout(() => {
+    timer = setTimeout(() => {
       callback();
-      clearTimeout(timer);
-    }, delay);
+      clearDelay();
+    }, delay) as unknown as number;
   } else {
     callback();
   }
+  return {
+    clear: clearDelay,
+    getTimer() {
+      return timer;
+    },
+  };
 }
 
 /**

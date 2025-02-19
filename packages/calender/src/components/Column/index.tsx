@@ -110,7 +110,7 @@ export default function Column({
   /**
    * @zh 容器大小变更事件
    */
-  function onResizeEnd(event: any, data: CalenderItem) {
+  function onResizeEnd() {
     let dragData = getDragoverState();
     changeData(dragData?.data as CalenderItem);
   }

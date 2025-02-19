@@ -53,8 +53,8 @@ export default function EventColumnLayoutContainer(
   usePointerMoveEvent(
     container,
     {
-      holdDelay: 100, // 事件处理延时（ms）
-      onDown: ({ x, y }: { event: PointerEvent; x: number; y: number }) => {
+      holdDelay: 300, // 事件处理延时（ms）
+      onDown: ({ x, y, event }: { event: PointerEvent; x: number; y: number }) => {
         let colWidth = getColumnWidth();
         function getColumnIndex() {
           let colIndex = Math.floor(x / colWidth);

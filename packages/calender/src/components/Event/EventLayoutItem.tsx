@@ -122,6 +122,11 @@ export default function EventLayoutItem(props: GridBoxProps) {
               let rect = getEleLayout(event.target);
               onResize?.({ ...event, dy: dy }, data, rect);
             }
+            let dx = moveThreshold.x?.(event);
+            if (dx) {
+              let rect = getEleLayout(event.target);
+              onResize?.({ ...event, dx: dx }, data, rect);
+            }
           },
           end(event) {
             let rect = getEleLayout(event.target);
