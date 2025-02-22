@@ -49,6 +49,7 @@ export default function EventColumnLayoutContainer(
     container,
     {
       exculdes: [`.${calenderLayoutItemClassName}`],
+      onBeforeCallHook() {},
       onDown: ({ x, y, event }: { event: PointerEvent; x: number; y: number }) => {
         let colWidth = getColumnWidth();
         function getColumnIndex() {

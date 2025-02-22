@@ -13,13 +13,27 @@ export type PointerPosition = {
 };
 export type ScrollParent = Element | RefObject<Element>;
 
+export type OnDownCallback = (e: { event: any; x: number; y: number }) => void;
+export type OnMoveCallback = (e: {
+  event: any;
+  x: number;
+  y: number;
+  dy: number;
+  dx: number;
+}) => void;
+export type OnUpCallback = (e: { event: any; x: number; y: number }) => void;
 export type UsePointerMoveEventOptions = {
   scrollParent?: ScrollParent;
   limitCurrentTarget?: boolean;
   exculdes?: Array<string | Element | HTMLElement>;
-  onDown?: (e: { event: any; x: number; y: number }) => void;
-  onMove?: (e: { event: any; x: number; y: number; dy: number; dx: number }) => void;
-  onUp?: (e: { event: any; x: number; y: number }) => void;
+  onBeforeCallHook?: (
+    type: 'down' | 'move' | 'up',
+    event: PointerEvent,
+    callbacks: Pick<UsePointerMoveEventOptions, 'onDown' | 'onMove' | 'onUp'>
+  ) => void;
+  onDown?: OnDownCallback;
+  onMove?: OnMoveCallback;
+  onUp?: OnUpCallback;
 };
 
 const defaultOptions = {
@@ -27,6 +41,7 @@ const defaultOptions = {
   onDown() {},
   onMove() {},
   onUp() {},
+  onBeforeCallHook() {},
 };
 
 export function usePointerMoveDistance() {
@@ -59,6 +74,12 @@ export function usePointerMoveDistance() {
   };
 }
 
+function useBeforeCallHook(options: UsePointerMoveEventOptions) {
+  return {
+    call(type: string) {},
+  };
+}
+
 /**
  * @en Mouse events are handled in the element
  */
@@ -81,7 +102,7 @@ export default function usePointerMoveEvent(
   }, [options]);
 
   const { getDXY, clearDXY } = usePointerMoveDistance();
-
+  const { call } = useBeforeCallHook(eventOptions);
   useEffect(() => {
     setEnable(() => enable);
   }, [enable]);
