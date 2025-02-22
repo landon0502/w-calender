@@ -18,7 +18,7 @@ import type { LayoutMouseEvent } from '../Event/types';
 import type { MultipleColumnsProps, ViewContentProps } from './types';
 import Gridding from './Gridding';
 
-const ViewContent = ({
+function ViewContent({
   timeRangeDays,
   data,
   onChange,
@@ -26,7 +26,7 @@ const ViewContent = ({
   cellHeight = 42,
   interval = 30,
   gap = 8,
-}: ViewContentProps) => {
+}: ViewContentProps) {
   const { updateDragoverBubbleState } = useDragoverBubble();
   const [_, setColumnData, getColumnData] = useXState(data);
   useEffect(() => setColumnData(data), [data]);
@@ -105,14 +105,14 @@ const ViewContent = ({
       </div>
     </EventColumnLayoutContainer>
   );
-};
+}
 
 const WeekView = (props: PropsWithElAttrs<MultipleColumnsProps>) => {
   const { store, getState } = useStore();
 
   const data = useMemo(() => {
     return getState('data') ?? [];
-  }, [store]);
+  }, [store.data]);
 
   const layoutConfig = useMemo(() => {
     return getState('layoutConfig') ?? {};
@@ -133,12 +133,6 @@ const WeekView = (props: PropsWithElAttrs<MultipleColumnsProps>) => {
     }
   }
 
-  const headerData = useMemo(() => {
-    return data.filter(({ start, end }) => {
-      return !start.time.isSame(end.time, 'D');
-    });
-  }, [data]);
-
   function renderTimeIndicateLine() {
     let current = props.days.findIndex((item) => item.time.isSame(dayjs(), 'D'));
     let dotLeft = `calc(100% / ${props.days?.length ?? 1} * ${current})`;
@@ -157,8 +151,8 @@ const WeekView = (props: PropsWithElAttrs<MultipleColumnsProps>) => {
       scrollProps={{ hideBar: true }}
       header={
         <Header
-          data={data}
           days={props.days}
+          data={data}
           columnWidth={layoutConfig.columnWidth}
           headerConfig={layoutConfig.header}
           onChange={onHeaderChange}
@@ -168,11 +162,11 @@ const WeekView = (props: PropsWithElAttrs<MultipleColumnsProps>) => {
         <ViewContent
           timeRangeDays={props.days}
           data={data}
-          onChange={onDataChange}
           cellHeight={layoutConfig.cellHeight}
           interval={layoutConfig.interval}
           gap={layoutConfig.gap}
           columnWidth={layoutConfig.columnWidth}
+          onChange={onDataChange}
         />
       }
       timeIndicateLine={renderTimeIndicateLine()}

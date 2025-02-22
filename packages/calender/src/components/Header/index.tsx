@@ -10,24 +10,42 @@ import { LAYOUT_CONTENT_KEY, LAYOUT_HEADER_KEY } from '../LayoutContainer/linkag
 import RenderTemplate from '@/templates/RenderTemplate';
 import { useTemplateStore } from '@/contexts/templateStore';
 import { handleGridCols } from '../Column/hooks/useColumnLayout';
-import { useMemo, useRef } from 'preact/hooks';
+import { useMemo, useRef, useEffect } from 'preact/compat';
 import { headerDefaultConfig } from './context';
 import { DAY_SECOND } from '@/constant/time';
 import EventLayoutItem from '../Event/EventLayoutItem';
-import { useElementBounding } from '@/hooks';
+import { useElementBounding, useXState } from '@/hooks';
 import { useDragoverBubble } from './context';
 import { DAY_MINUTE } from '@/constant/time';
 
 const getDx = moveThreshold();
 export default function Header(props: HeaderProps) {
+  /**
+   * Get template configure
+   */
   const { getState } = useTemplateStore();
+  /**
+   * Container element ref
+   */
   const containerRef = useRef<HTMLDivElement>(null);
+
+  /**
+   * The width style of the Header component
+   */
   const dayCellStyle = props.columnWidth
     ? { minWidth: numToPx(props.columnWidth), flexShrink: 1 }
     : {};
+
+  /**
+   * The width of the column
+   */
   const containerWidth = props.columnWidth
     ? numToPx(props.days.length * props.columnWidth)
     : '100%';
+
+  /**
+   * Must render the data
+   */
   const data = useMemo(() => {
     let headerData = props.data.filter(({ start, end }) => {
       return !start.time.isSame(end.time, 'D');
@@ -36,6 +54,10 @@ export default function Header(props: HeaderProps) {
   }, [props.data]);
   const totalRowCount = Math.max(...data.map((item) => item.totalColumn));
   const headerConfig = deepMerge(headerDefaultConfig, props.headerConfig) as Required<HeaderConfig>;
+
+  const [_, setColumnData, getColumnData] = useXState(props.data);
+  useEffect(() => setColumnData(props.data), [props.data]);
+
   const { rect: containerRect, getRect: getContainerRect } = useElementBounding(containerRef);
   const { component: Bubble, updateDragoverBubbleState, getDragoverState } = useDragoverBubble();
 
@@ -180,18 +202,19 @@ export default function Header(props: HeaderProps) {
    * @zh 更新数据
    */
   async function updateData(target: CalenderItem) {
-    let data = [...props.data];
+    let data = [...getColumnData()];
+
     let index = data.findIndex((item) => item._key === target._key);
     if (index > -1) {
       data[index] = target;
     } else {
       data = [...data, target];
     }
-    let result = { target: target, data };
-    props.onChange?.(result);
+
+    props.onChange?.({ target: target, data });
   }
 
-  // 渲染头部的时间栏
+  // render header time bar
   function renderData() {
     const height = totalRowCount * headerConfig.barHeight + headerConfig.gap * totalRowCount - 1;
     const style = {
@@ -240,7 +263,7 @@ export default function Header(props: HeaderProps) {
               data={{
                 config,
               }}
-              template={() => <div></div>}
+              template={({ data }) => <div>{data?.config.title}</div>}
             />
           </EventLayoutItem>
         );
@@ -267,7 +290,7 @@ export default function Header(props: HeaderProps) {
         linkageId={LAYOUT_HEADER_KEY}
         horizontalLinkage={[LAYOUT_CONTENT_KEY]}
       >
-        <div style={{ width: containerWidth }} ref={containerRef}>
+        <div style={{ width: containerWidth, minWidth: '100%' }} ref={containerRef}>
           {renderDays()}
           {renderData()}
         </div>

@@ -60,10 +60,7 @@ export function usePointerMoveDistance() {
 }
 
 /**
- * @zh 这里处理在元素中的鼠标信息
- * @param target
- * @param options
- * @param enable
+ * @en Mouse events are handled in the element
  */
 export default function usePointerMoveEvent(
   target: RefType<HTMLElement | Element | Document | null>,
@@ -82,30 +79,16 @@ export default function usePointerMoveEvent(
       ...options,
     };
   }, [options]);
-  const isMove = useRef(false),
-    isDown = useRef(false);
+
   const { getDXY, clearDXY } = usePointerMoveDistance();
 
   useEffect(() => {
     setEnable(() => enable);
   }, [enable]);
 
-  function cleanStatus() {
-    clearDXY();
-    isMove.current = false;
-    isDown.current = false;
-  }
-
-  const onUp = (
-    event: PointerEvent,
-    { elementX, elementY }: { elementX: number; elementY: number }
-  ) => {
-    cleanStatus();
-    if (!getEnable()) return;
-    eventOptions.onUp({ event, x: elementX, y: elementY });
-    setPosition({ x: elementX, y: elementY });
-  };
-
+  /**
+   * @en Determine if a mouse event is available
+   */
   function isAllowMouseEvent(event: PointerEvent) {
     let exculdes = options.exculdes ?? [];
 
@@ -127,25 +110,24 @@ export default function usePointerMoveEvent(
     return getEnable() && !isExculde;
   }
 
-  // 需要添加exclude
   useMouseInElement(target, {
     onDown(event, { elementX, elementY, isOutside }) {
       if (!isAllowMouseEvent(event) || isOutside) return;
       setPosition({ x: elementX, y: elementY });
       eventOptions.onDown({ event, x: elementX, y: elementY });
-      isDown.current = true;
     },
     onMove(event, { elementX, elementY }) {
       if (!isAllowMouseEvent(event)) return;
-      if (isDown.current) {
-        isMove.current = true;
-      }
+
       const { dx, dy } = getDXY(elementX, elementY);
       setPosition({ x: elementX, y: elementY });
       eventOptions.onMove({ event, x: elementX, y: elementY, dy: dy, dx: dx });
     },
-    onUp(event, position) {
-      onUp(event, position);
+    onUp(event, { elementX, elementY }: { elementX: number; elementY: number }) {
+      clearDXY();
+      if (!getEnable()) return;
+      eventOptions.onUp({ event, x: elementX, y: elementY });
+      setPosition({ x: elementX, y: elementY });
     },
   });
 

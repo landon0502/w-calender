@@ -85,7 +85,7 @@ function main() {
       return true;
     },
     layoutConfig: {
-      columnWidth: 180,
+      columnWidth: 120,
       header: {},
     },
   };
