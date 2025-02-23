@@ -2,9 +2,9 @@ import { PropsWithChildren, useRef, useMemo, createContext, useContext } from 'p
 import { usePointerMoveEvent, useElementBounding } from '@/hooks';
 import { useDragoverBubble } from './context';
 import { moveThreshold } from '@/utils';
-import { PointerEvent } from '@interactjs/types';
 import type { EventColumnLayoutContainerProps, LayoutMouseEvent } from '../types';
 import { calenderLayoutItemClassName } from '../../Column/contexts';
+
 /**
  * @zh 添加时间段
  */
@@ -21,6 +21,9 @@ export const EventColumnLayoutContext = createContext<{ getColumnWidth: () => nu
 });
 
 export const useGetEventColumnLayoutContext = () => useContext(EventColumnLayoutContext);
+
+let bubbleRect: LayoutMouseEvent | null;
+let originalLayoutConfig: LayoutMouseEvent;
 export default function EventColumnLayoutContainer(
   props: PropsWithChildren<EventColumnLayoutContainerProps>
 ) {
@@ -38,39 +41,37 @@ export default function EventColumnLayoutContainer(
     return (props.cellHeight / props.interval) * 15;
   }, [props.cellHeight, props.interval]);
 
-  let originalLayoutConfig: LayoutMouseEvent;
-  let bubbleRect: LayoutMouseEvent | null;
   const enable = useRef(false);
 
   /**
-   * @zh 需要计算开始时间和结束时间
+   * @en Computed the start time and end time
    */
+  function onDown({ x, y }: { x: number; y: number }) {
+    let colWidth = getColumnWidth();
+    function getColumnIndex() {
+      let colIndex = Math.floor(x / colWidth);
+      return colIndex;
+    }
+
+    let top = getMoveEvtDownY(y, props.cellHeight);
+    let columnIndex = getColumnIndex();
+    originalLayoutConfig = bubbleRect = {
+      x: columnIndex * colWidth,
+      y: top,
+      w: colWidth,
+      h: dragStepNum,
+      columnIndex,
+    };
+    props.onStart?.(bubbleRect);
+    enable.current = true;
+  }
+
   usePointerMoveEvent(
     container,
     {
       exculdes: [`.${calenderLayoutItemClassName}`],
-      onBeforeCallHook() {},
-      onDown: ({ x, y, event }: { event: PointerEvent; x: number; y: number }) => {
-        let colWidth = getColumnWidth();
-        function getColumnIndex() {
-          let colIndex = Math.floor(x / colWidth);
-          return colIndex;
-        }
-
-        let top = getMoveEvtDownY(y, props.cellHeight);
-        let columnIndex = getColumnIndex();
-        bubbleRect = {
-          x: columnIndex * colWidth,
-          y: top,
-          w: colWidth,
-          h: dragStepNum,
-          columnIndex,
-        };
-        originalLayoutConfig = bubbleRect;
-        props.onStart?.(bubbleRect);
-        enable.current = true;
-      },
-      onMove({ dy }) {
+      onDown,
+      onMove({ dy, x, y }) {
         if (!enable.current) return;
         let distanceY = getDy(dy, dragStepNum);
         if (distanceY && bubbleRect) {
@@ -93,7 +94,7 @@ export default function EventColumnLayoutContainer(
           props.onMove?.(bubbleRect);
         }
       },
-      onUp() {
+      onUp({ x, y }) {
         if (bubbleRect && enable.current) {
           props.onEnd?.(bubbleRect);
           bubbleRect = null;

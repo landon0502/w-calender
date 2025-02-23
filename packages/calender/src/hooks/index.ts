@@ -5,7 +5,8 @@ import useInteract from './useInteract';
 import usePointerMoveEvent from './usePointerMoveEvent';
 import useEventListener from './useEventListener';
 import useScroll from './useScroll';
-
+import useMemoizedFn from './useMemoizedFn';
+import useTimeout from './useTimeout';
 export {
   useBusListener,
   useElementBounding,
@@ -14,4 +15,6 @@ export {
   usePointerMoveEvent,
   useEventListener,
   useScroll,
+  useMemoizedFn,
+  useTimeout,
 };
