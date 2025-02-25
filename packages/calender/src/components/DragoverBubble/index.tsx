@@ -6,7 +6,7 @@ import { genStyles } from '@/components/_utils';
 import { cls } from '@/utils';
 import type { DragConfig } from './types';
 /**
- * @zh 拖拽样式
+ * @en drag style
  */
 const OperateTime = forwardRef<HTMLDivElement, PropsWithChildren<{ layout: Rect }>>(
   ({ layout, children }, ref) => {
