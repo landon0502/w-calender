@@ -74,7 +74,8 @@ function RenderContent(props: DayProps | WeekProps | MonthProps) {
 }
 
 /**
- * @zh 处理data数据，数据存在交叉时进行等比排布
+ * @zh 处理数据，数据存在交叉时进行等比排布
+ * @en Process data, and arrange it proportionally when there is an intersection of data
  */
 function getData(data: ScheduleData): Array<CalenderItem> {
   return data.map((item) => {
@@ -109,12 +110,12 @@ class Calender extends CalendarCore {
     this.setOptions(options);
   }
 
-  // 处理数据格式
+  // format data
   private formatData(data: ScheduleData) {
     this.data = getData(data);
   }
 
-  // 设置配置
+  // set config
   setOptions(options: Partial<Options>) {
     this.options = { ...defaultOptions, ...options };
     if (options.viewType) {
@@ -141,13 +142,13 @@ class Calender extends CalendarCore {
     });
   }
 
-  // 更改视图
+  // change view
   changeView(type: ViewType) {
     this.viewType = type;
     this.render(type);
   }
 
-  // 数据更新前触发
+  // Triggered before data update
   onBeforeUpdate = async (event?: { target: CalenderItem; data: CalenderItem[] }) => {
     if (isFunction(this.options?.onBeforeUpdate) || isAsyncFunction(this.options?.onBeforeUpdate)) {
       return await this.options?.onBeforeUpdate(event);
@@ -156,14 +157,14 @@ class Calender extends CalendarCore {
   };
 
   /**
-   * 组件类钩子函数
+   * lifecycle hook
    */
   onMount() {
-    // 组件加载
+    // Component mount
     this.options.onMount?.();
   }
   onUnmount() {
-    // 组件卸载
+    // Component unmount
     this.options.onUnmount?.();
   }
   onChange = (event: { target: CalenderItem; data: CalenderItem[] }) => {
@@ -172,7 +173,7 @@ class Calender extends CalendarCore {
     store.commit(commitKeys.SET_DATA, event.data);
   };
 
-  // 渲染组件
+  // Component render
   render(type: ViewType) {
     render(
       <RenderContent
